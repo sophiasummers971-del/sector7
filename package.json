@@ -1,0 +1,8 @@
+{
+  "name": "sector7",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node server.js", "test": "node --test --test-concurrency=1 test/prototype.test.js test/ui-evidence.test.js", "test:browser": "node test/browser-check.js" },
+  "engines": { "node": ">=24" }
+}
