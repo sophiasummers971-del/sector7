@@ -12,5 +12,12 @@ jobs:
         with:
           node-version: 24
       - run: npm ci --ignore-scripts
-      - run: npm test
+      - run: npm run security:check
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sector7-security-preflight
+          path: artifacts/security-preflight/report.*
+          if-no-files-found: error
+          retention-days: 14
       - run: git diff --check

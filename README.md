@@ -2,6 +2,12 @@
 
 **Security baseline:** see [SECURITY.md](SECURITY.md). All API calls now require an owner key. The server is loopback-only; the earlier plain-HTTP LAN setup is disabled. Repository access remains denied.
 
+Run `npm run security:check` for the repeatable local preflight, or add
+`-- --browser` with host-provided browser paths for rendered regressions.
+Reports are written under `artifacts/security-preflight/`. Add
+`-- --require-repository-ready` for a strict release gate; it intentionally blocks
+this local-only build until live connector commissioning is implemented and verified.
+
 ## Mission control
 
 The new home screen is a responsive command centre: mission template, worker map,

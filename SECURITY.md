@@ -136,6 +136,36 @@ remain required. Browser emulation is not a physical-device audit or formal proo
 Run `npm ci --ignore-scripts`, then `npm test`. Optional browser commands are in
 COMMAND.md. No live repository job was run during this hardening.
 
+## Repeatable preflight
+
+`npm run security:check` runs the deny-policy/resource ceiling checks, pinned
+dependency baseline, full functional/security/PostgreSQL suite and before/after
+SHA-256 source inventory. The suite includes fixed-worker injection probes with a
+temporary canary file and a loopback network trap, forged capability inputs,
+changed request replay, tampered events and dirty-checkpoint recovery.
+
+Add `-- --browser` with SECTOR7_BROWSER and SECTOR7_PLAYWRIGHT to require both
+rendered browser suites. Missing explicit browser tooling then fails the check.
+Without the flag, the report records browser coverage as NOT_RUN. Test children
+receive a small environment allowlist without credentials/preload options; each
+has output and execution bounds, with subprocess-group cleanup on Unix. Reports
+contain counters/categories and source hashes, never raw child output or secrets.
+The local suite refuses a PASS if any required check is missing, duplicated,
+failed, skipped or timed out. Windows process-tree cleanup is implemented but has
+not been exercised in this Linux verification environment.
+
+JSON and Markdown reports are written atomically under project artifacts. Their
+source manifest binds the result to the reviewed source files. This is a content
+fingerprint, not a signed execution attestation or proof of every possible defect.
+Dependencies are pinned; a current vulnerability-advisory audit is explicitly
+NOT_RUN_OFFLINE rather than being claimed clean.
+
+Normal exit 0 means PASS_LOCAL_ONLY. `--require-repository-ready` intentionally
+returns nonzero with a BLOCKED release verdict: the live connector and hosted
+identity/RLS commissioning are not implemented. Local tests cannot turn that gate
+green. CI runs the local preflight and uploads its report, with browser coverage
+explicitly unverified there unless the browser mode is configured.
+
 Primary design references:
 - https://nodejs.org/docs/latest-v24.x/api/worker_threads.html
 - https://www.postgresql.org/docs/17/ddl-rowsecurity.html
