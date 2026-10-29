@@ -1,0 +1,11 @@
+node_modules/
+data/
+.test-data-*/
+*.log
+.env
+.env.*
+!.env.example
+.browser-check-*/
+artifacts/
+.cache/
+coverage/
