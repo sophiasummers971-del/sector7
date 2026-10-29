@@ -1,5 +1,10 @@
 # Sector 7
 
+New worker-coordination milestone: see [SCOUT.md](SCOUT.md). Run `npm run scout:demo`
+(`npm.cmd` on Windows) for a saved, offline rehearsal with two local worker slots.
+The four repository samples are fictional. This does not yet connect to the canvas,
+GitHub or an AI model. `npm test` includes the coordinator regression tests.
+
 Owner-reported verification (2026-10-18): Jade reports that approval controls and restart behaviour were exercised successfully on both the Honor Magic 6 Lite and Surface. This is owner-reported device verification, not independently observed by Codex.
 
 Jade's phone-first workflow coordinator. This local prototype edits and executes one linear chain: one Start → local Ping or text-processing nodes, with optional Approval pauses → one Result. Plain HTML/CSS/JavaScript, one Node built-in HTTP server, no dependencies or external integrations.

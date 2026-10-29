@@ -1,0 +1,10 @@
+{
+  "operationKey": "offline-scout-demo-v1",
+  "terms": ["workflow", "local", "queue"],
+  "repositories": [
+    {"id": "fictional/workflow-queue", "readme": "FICTIONAL SAMPLE. A local workflow queue for coordinating small tasks."},
+    {"id": "fictional/photo-viewer", "readme": "FICTIONAL SAMPLE. An image gallery with albums and slideshows."},
+    {"id": "fictional/local-notes", "readme": "FICTIONAL SAMPLE. Local notes with Markdown export."},
+    {"id": "fictional/cloud-workflow", "readme": "FICTIONAL SAMPLE. Hosted workflow editor with cloud storage."}
+  ]
+}
