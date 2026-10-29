@@ -1,19 +1,33 @@
+
+// Owner credentials stay in this tab, never in persisted run data or query strings.
+let ownerAccess = '';
+try {
+  const incoming = new URLSearchParams(location.hash.slice(1)).get('access');
+  if (incoming && /^[A-Za-z0-9_-]{40,128}$/.test(incoming)) {
+    ownerAccess = incoming; sessionStorage.setItem('sector7-owner-access', incoming);
+    history.replaceState(null, '', location.pathname + location.search);
+  } else ownerAccess = sessionStorage.getItem('sector7-owner-access') || '';
+} catch {}
 const $ = id => document.getElementById(id);
-const terminal = new Set(['completed', 'failed', 'cancelled', 'interrupted']);
+const terminal = new Set(['completed', 'failed', 'cancelled', 'interrupted', 'timed_out']);
 let run = null, request = null, unresolved = false, busy = false, replaying = false, replayTimer = null, replaySequence = 0;
+let safety = { paused: false, open: false };
 const store = value => { try { localStorage.setItem('sector7-command-request', JSON.stringify(value)); } catch {} };
 try { request = JSON.parse(localStorage.getItem('sector7-command-request') || 'null'); } catch {}
 if (!request || typeof request.operationKey !== 'string' || !Array.isArray(request.terms)) request = null;
 const node = (tag, text, cls) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; if (cls) n.className = cls; return n; };
 function notice(text, error = false) { $('notice').textContent = text; $('notice').classList.toggle('error', error); }
 async function api(url, options = {}) {
-  const response = await fetch(url, { ...options, signal: AbortSignal.timeout(8000) });
+  const response = await fetch(url, { ...options, headers: { ...options.headers, Authorization: 'Bearer ' + ownerAccess }, signal: AbortSignal.timeout(8000) });
   const body = await response.json();
   if (!response.ok) { const error = new Error(body.error || 'Request failed'); error.status = response.status; throw error; }
   return body;
 }
 function controls() {
-  $('launch').disabled = busy || replaying;
+  $('launch').disabled = busy || replaying || safety.paused || safety.open;
+  $('pause').textContent = safety.paused ? 'Resume coordinator' : 'Pause & stop';
+  $('pause').disabled = safety.open;
+  $('reset').hidden = !safety.open;
   $('launch').textContent = busy ? 'Checking the handoffs…' : unresolved ? 'Retry same request ↻' : run ? 'Run another rehearsal ↗' : 'Run rehearsal ↗';
   $('replay').disabled = busy || !run?.events.length;
   $('replay').textContent = replaying ? 'Stop replay ■' : 'Replay messages ↺';
@@ -109,6 +123,7 @@ function replay() {
   }
   step();
 }
+async function refreshSafety() { safety = await api('/api/scout/control'); controls(); }
 async function refreshRun() {
   if (!request) return null;
   const data = await api('/api/scout/' + encodeURIComponent(request.operationKey));
@@ -135,22 +150,32 @@ async function launch() {
     }
     notice('Execution is still unconfirmed. Refresh to reconcile this run; your request key is preserved.', true);
   } catch (error) {
-    notice(error.status === 409 ? error.message : 'Could not confirm the outcome. Retry uses the same request key; no success has been assumed.', true);
-  } finally { busy = false; controls(); }
+    notice([401, 409, 429, 503, 507].includes(error.status) ? error.message : 'Could not confirm the outcome. Retry uses the same request key; no success has been assumed.', true);
+  } finally { busy = false; try { await refreshSafety(); } catch {} controls(); }
 }
 async function connect() {
   try {
-    await api('/api/status'); $('connection').dataset.state = 'online'; $('connection-text').textContent = 'Runtime connected'; $('sidebar-state').textContent = 'ONLINE';
+    await api('/api/status'); await refreshSafety(); $('connection').dataset.state = 'online'; $('connection-text').textContent = 'Runtime connected'; $('sidebar-state').textContent = 'ONLINE';
     if (request) {
       unresolved = true;
       try { await refreshRun(); notice(run ? 'Restored your saved rehearsal. Start another or inspect what came back.' : 'A request is active. Refresh to check progress.'); }
       catch (error) { notice('Previous request not confirmed. Retry preserves its original key.', true); }
       controls();
     }
-  } catch { $('connection').dataset.state = 'offline'; $('connection-text').textContent = 'Runtime offline'; $('sidebar-state').textContent = 'OFFLINE'; notice('Local runtime unavailable. Refresh the connection after starting the server.', true); }
+  } catch { $('connection').dataset.state = 'offline'; $('connection-text').textContent = 'Runtime offline'; $('sidebar-state').textContent = 'OFFLINE'; notice('Owner connection unavailable. Open the private startup link from the server terminal, then refresh.', true); }
 }
 $('launch').onclick = launch; $('replay').onclick = replay; $('connection').onclick = async () => { if (replaying) stopReplay(); await connect(); };
 $('close-inspector').onclick = () => $('inspector').close();
 document.querySelectorAll('[data-inspect]').forEach(button => { button.onclick = () => inspect(button.dataset.inspect); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && replaying) { stopReplay(); notice('Replay paused because the page was hidden. Saved results remain available.'); } });
 controls(); connect();
+
+$('pause').onclick = async () => {
+  try { safety = await api('/api/scout/control', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: safety.paused ? 'resume' : 'pause' }) }); controls(); notice(safety.paused ? 'Paused. Cancellation requested for active workers; refresh to inspect their final state.' : 'Coordinator resumed. Repository access remains denied.'); }
+  catch (error) { notice(error.message, true); }
+};
+$('reset').onclick = async () => {
+  if (!confirm('Reset only after inspecting the failure cause and saved run. This leaves dispatch paused until you choose Resume.')) return;
+  try { safety = await api('/api/scout/control', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'reset' }) }); controls(); notice('Circuit reset. Dispatch remains paused until you explicitly resume.'); }
+  catch (error) { notice(error.message, true); }
+};

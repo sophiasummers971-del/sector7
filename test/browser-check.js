@@ -6,6 +6,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 
+const testOwnerKey = 'test-owner-0123456789abcdef0123456789abcdef012345';
+const fetch = (url, options = {}) => globalThis.fetch(url, { ...options, headers: { ...options.headers, Authorization: 'Bearer ' + testOwnerKey } });
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const temp=await mkdtemp(path.join(root,'.browser-check-'));
 let server,browser,socket;
@@ -15,7 +17,7 @@ const deadline=setTimeout(()=>{console.error('Browser check timed out');socket?.
 async function stop(child){if(child&&child.exitCode===null){const exited=once(child,'exit');child.kill();await exited}}
 try{
   async function launchServer(port='0'){
-    server=spawn(process.execPath,['server.js'],{cwd:root,env:{...process.env,SECTOR7_HOST:'127.0.0.1',PORT:port,SECTOR7_DATA_DIR:path.join(temp,'data')},stdio:['ignore','pipe','pipe']});
+    server=spawn(process.execPath,['server.js'],{cwd:root,env:{...process.env, SECTOR7_ACCESS_TOKEN: testOwnerKey,SECTOR7_HOST:'127.0.0.1',PORT:port,SECTOR7_DATA_DIR:path.join(temp,'data')},stdio:['ignore','pipe','pipe']});
     return await new Promise((resolve,reject)=>{
       const timer=setTimeout(()=>reject(Error('Server startup timed out')),10000);
       server.once('error',error=>{clearTimeout(timer);reject(error)});server.once('exit',code=>{clearTimeout(timer);reject(Error('Test server exited '+code))});
@@ -48,7 +50,7 @@ try{
   async function until(expression){for(let attempt=0;attempt<60;attempt++){if(await evaluate(expression))return;await wait(50)}throw Error('Browser condition failed: '+expression)}
   await cdp('Page.enable');
   await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
-  await cdp('Page.navigate',{url:base+'/studio'});
+  await cdp('Page.navigate',{url:base+'/studio#access='+testOwnerKey});
   await until("document.getElementById('server-state')?.textContent.includes('Connected') && !document.getElementById('refresh').disabled");
   const click=async selector=>evaluate(`document.querySelector(${JSON.stringify(selector)}).click()`);
   const choose=async value=>evaluate(`document.getElementById('scenario').value=${JSON.stringify(value)};document.getElementById('scenario').dispatchEvent(new Event('change'))`);
@@ -76,7 +78,7 @@ try{
   // Browser refresh must not count as a restart; a real isolated-server restart must.
   await click('#persistence > summary');await click('#restart-baseline');await idle();await click('#restart-check');await idle();
   assert.equal(await evaluate("document.getElementById('restart-verdict').textContent"),'NOT VERIFIED');
-  await cdp('Page.navigate',{url:base+'/studio'});await until("document.getElementById('server-state')?.textContent.includes('Connected') && !document.getElementById('refresh').disabled");
+  await cdp('Page.navigate',{url:base+'/studio#access='+testOwnerKey});await until("document.getElementById('server-state')?.textContent.includes('Connected') && !document.getElementById('refresh').disabled");
   await click('#persistence > summary');await click('#restart-check');await idle();
   assert.equal(await evaluate("document.getElementById('restart-verdict').textContent"),'NOT VERIFIED');
   await click('#history > summary');await click(`[data-task-id="${original.id}"]`);await click('#restart-baseline');await idle();

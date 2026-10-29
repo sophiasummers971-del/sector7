@@ -11,8 +11,7 @@ http://127.0.0.1:3000/. Select one or more of workflow/local/queue and choose
 Run rehearsal. Four fictional repository samples are processed by at most two
 asynchronous local slots. Scores count literal README matches only.
 
-The runtime is not publicly hosted. Existing private-LAN binding and authentication
-limitations still apply. There is no general natural-language mission planner,
+The runtime is not publicly hosted. All APIs require an owner key; plain-HTTP LAN binding is now refused. See SECURITY.md. There is no general natural-language mission planner,
 live GitHub adapter, external AI, model billing or independent worker identity yet.
 
 The home page reads actual saved jobs and events. Fast local work can finish before
@@ -44,8 +43,7 @@ not continuous monitoring. Refresh reconciles the selected run.
 
 ## Verification
 
-47 Node tests passed: 40 existing coordinator/workflow tests, six new HTTP subtests
-and their parent. New checks cover explicit home/studio routes, bounded/cross-origin
+The original command-centre milestone passed 47 Node tests. The later security baseline expands coverage; SECURITY.md records the current checks. New checks cover explicit home/studio routes, bounded/cross-origin
 requests, real dispatch/result provenance, duplicate retrieval, conflicting input
 and results across an actual server process restart.
 

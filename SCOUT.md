@@ -19,8 +19,7 @@ npm run scout:demo
 ```
 
 On Windows use `npm.cmd`. The demo reads four explicitly fictional README samples
-from `examples/scout-samples.json`. It uses two asynchronous local worker slots,
-not two models, two operating-system processes, or two CPU-parallel threads.
+from `examples/scout-samples.json`. It uses at most two Node worker threads for fixed, trusted inspection code. They are not AI models or an arbitrary-code sandbox. See SECURITY.md for supervision, deadlines and limits.
 There is no crawling, GitHub API call, model call, code execution or external write.
 The command centre now connects to this runner through the local HTTP API. The original linear workflow editor remains available at /studio. See COMMAND.md.
 
@@ -65,7 +64,7 @@ Do not use a shared/network filesystem as a distributed coordination service.
 
 ## Verification
 
-29 existing tests and 11 new tests pass locally on Node v24.22.1: 40 total.
+Original coordinator milestone: 29 existing tests plus 11 new tests passed. The subsequent security baseline adds authenticated HTTP, supervision and PostgreSQL tests; see SECURITY.md for the current evidence.
 New evidence covers schema/size bounds, at most two active callbacks, joining
 active work after a fatal callback error, literal untrusted-text handling,
 ordered carrier events, deterministic aggregation, fresh-process deduplication,

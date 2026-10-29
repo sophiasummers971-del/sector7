@@ -1,5 +1,7 @@
 # Sector 7
 
+**Security baseline:** see [SECURITY.md](SECURITY.md). All API calls now require an owner key. The server is loopback-only; the earlier plain-HTTP LAN setup is disabled. Repository access remains denied.
+
 ## Mission control
 
 The new home screen is a responsive command centre: mission template, worker map,
@@ -26,17 +28,20 @@ Set-Location E:\Sector7
 npm.cmd start
 ```
 
-Default URL: http://127.0.0.1:3000/. Stop with Ctrl+C. For the authorised private-Wi-Fi phone test:
+Open the **private owner link printed in your terminal**. Its fragment bootstraps a
+session credential and is immediately removed from the visible URL. Do not share
+that link. The regular localhost URL serves the interface but cannot access any
+API without the key. The studio is at `/studio` in the same browser tab/session.
+Stop with Ctrl+C. The default address is 127.0.0.1:3000.
 
-```powershell
-$env:SECTOR7_HOST = '192.168.0.86'
-$env:PORT = '3000'
-npm.cmd start
-```
+The owner key is generated into the ignored data directory with restrictive file
+permissions, or supplied through SECTOR7_ACCESS_TOKEN (40–128 URL-safe characters).
+There is no anonymous API fallback. LAN binding is refused until an authenticated
+TLS access path is separately commissioned; no firewall or tunnel is configured.
 
-Phone URL: http://192.168.0.86:3000/ on the same private Wi-Fi. This binds the specific private IPv4 only, not all interfaces. Addresses may change. Remove the SECTOR7_HOST environment variable before starting in loopback mode again. No firewall rules, tunnels, router forwarding, public deployment or Cloudflare provisioning have been added.
-
-Verified initial environment: Surface Pro 3, Windows 11, SD-backed E: virtual drive, Node v24.21.0, npm 11.19.0, Git 2.56.0.windows.2. Use npm.cmd; do not change PowerShell execution policy. No watchers or dependency-install step. The virtual drive is not a security sandbox.
+The app uses Node built-ins. For the PostgreSQL RLS development tests, run
+`npm ci --ignore-scripts` once; PGlite is a pinned development-only dependency.
+Use `npm.cmd` on Windows and do not change PowerShell execution policy.
 
 ## Local text review preset
 
@@ -47,7 +52,7 @@ Verified initial environment: Surface Pro 3, Windows 11, SD-backed E: virtual dr
 
 Text Input settings are `{text: string}` (empty is permitted; maximum 500 UTF-16 code units). Text Transform settings are `{operation: "uppercase" | "lowercase" | "trim"}`. Transform requires upstream text output; Ping replaces its predecessor output with pong, so placing a Transform after Ping without another Text Input is rejected. Multiple transforms are allowed in the same linear chain. Each consumes actual predecessor text. JavaScript's locale-independent case conversion and trim are used; trim removes leading/trailing whitespace, not internal whitespace. Transformed output is bounded to 2000 UTF-16 code units, checked during graph validation, including case-expansion chains. The existing whole-request 4096-byte limit also applies, so graphs with many long or multibyte text settings can hit that smaller byte budget (413).
 
-Settings persist with the saved definition and are copied into each run snapshot. Existing id/type-only graphs retain their revisions. Text is displayed through DOM textContent/value, never evaluated as HTML. Text is stored unencrypted in local graph/task JSON, and any reachable LAN client can read it; do not enter secrets. Copy tries the browser Clipboard API, then a user-triggered legacy copy fallback for plain LAN HTTP. If unavailable it reports that and selects the output for manual copying; it never claims copy success on a reported failure. Clipboard access varies by browser. The preset includes Approval, but custom text graphs may omit it; a completed Result alone is not an identity check or proof of human approval.
+Settings persist with the saved definition and are copied into each run snapshot. Existing id/type-only graphs retain their revisions. Text is displayed through DOM textContent/value, never evaluated as HTML. Text is stored unencrypted in local graph/task JSON, and protected by the local owner key over the API; do not enter secrets into fixture rehearsals. Copy tries the browser Clipboard API, then a user-triggered legacy copy fallback for plain LAN HTTP. If unavailable it reports that and selects the output for manual copying; it never claims copy success on a reported failure. Clipboard access varies by browser. The preset includes Approval, but custom text graphs may omit it; a completed Result alone is not an identity check or proof of human approval.
 
 There is still one saved-workflow slot: saving a preset replaces that definition, not historical run snapshots. No graph library or automatic backup/version history is implemented. Draft edits live only in the current browser page until saved; applying settings alone is not server persistence. No external services or AI dependencies are used.
 
@@ -80,7 +85,7 @@ Place an Approval node before a Ping you want to pause. For example: Start → P
 - Decisions leave receipts in the run's approvals array and task history. The first recorded decision for that pause wins. Repeating the same decision returns the run's current state without re-executing; a conflicting decision returns 409. A stale decision for an earlier pause cannot release a later pause.
 - Reloading the page or restarting the server retains a waiting pause. There is no automatic approval, timeout approval or replay. Editing/saving the current graph does not change a waiting run's snapshot. A task-key retry only retrieves the run; it is not an approval.
 
-This is a workflow control, not a secure identity check. There is no sign-in, verified approver, private approval link, signature or role check. Any reachable LAN client can submit decisions. Pause identifiers distinguish requests; they do not confer or establish authority. No external system is given permissions by this prototype.
+Approval routes now require the local owner key. This authenticates possession of that key, not a named human or independent approver. Pause identifiers only distinguish requests; they do not confer authority. No external system is given permissions by this prototype.
 
 ## API and execution
 
@@ -102,9 +107,9 @@ Run only one server per data directory. Whole-file JSON storage is not a databas
 
 One workflow, one editor is the intended use: the last valid save wins; there is no compare-and-swap protection for concurrent editors, undo stack or revision history beyond run snapshots. Unsaved drafts and unsubmitted operation keys are not retained across page reloads. History restores submitted runs.
 
-There is no authentication or TLS. Reachable LAN clients can read tasks, save a graph, run its bounded local actions and approve/reject/cancel waiting runs. Validation limits what can execute; it is not authentication or permission delegation. Cancellation is supported at waiting pauses, not as an interrupt for synchronous running Pings. No branching, drag positioning, external tools, AI workers, schedules or general plugins exist. No full accessibility audit, RTL/localisation support, production-readiness claim or hardware benchmark. Native buttons, focus outlines, selection states and live error/status regions are provided. Approval prompts are inline groups and do not steal focus or preselect approval.
+Every API route requires the owner key and enforces the local action allowlist. The listener is loopback-only with Host/origin checks; no LAN or public access is enabled. Shared keys do not provide per-person attribution, MFA or a hostile-OS boundary. Cancellation is supported at waiting pauses, not as an interrupt for synchronous running Pings. No branching, drag positioning, external tools, AI workers, schedules or general plugins exist. No full accessibility audit, RTL/localisation support, production-readiness claim or hardware benchmark. Native buttons, focus outlines, selection states and live error/status regions are provided. Approval prompts are inline groups and do not steal focus or preselect approval.
 
-If Windows blocks phone access, discuss a separate narrow inbound TCP 3000 rule first: Private profile only, Wi-Fi interface, Surface local IPv4, Node executable and preferably the phone's exact IP. Do not disable the firewall or add a Public-profile exception.
+Phone/LAN access is deliberately unavailable pending protected remote access. See SECURITY.md.
 
 ## Verification and checkpoints
 
