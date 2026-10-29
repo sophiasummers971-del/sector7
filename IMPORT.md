@@ -2,7 +2,7 @@
 
 Imported from Jade's Sector7.zip into sophiasummers971-del/sector7.
 Source, tests and original documentation are retained. AGENTS.md now supports
-repository checkouts outside the original Windows path. Application code is unchanged.
+repository checkouts outside the original Windows path. Application behavior is unchanged; Windows line endings are normalized to LF.
 
 Excluded from Git: original .git directory, runtime data, browser profiles,
 screenshots/artifacts, logs and caches. The original ZIP remains the recovery copy;
