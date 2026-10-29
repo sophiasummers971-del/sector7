@@ -22,7 +22,7 @@ On Windows use `npm.cmd`. The demo reads four explicitly fictional README sample
 from `examples/scout-samples.json`. It uses two asynchronous local worker slots,
 not two models, two operating-system processes, or two CPU-parallel threads.
 There is no crawling, GitHub API call, model call, code execution or external write.
-The existing canvas and HTTP API are unchanged; this milestone runs from the CLI.
+The command centre now connects to this runner through the local HTTP API. The original linear workflow editor remains available at /studio. See COMMAND.md.
 
 Each sample produces a job. Its messages record dispatched, accepted, completed
 or failed. Packets carry version, sequence, correlation ID, job ID, sender,
@@ -74,12 +74,11 @@ run recovery, lock collision and corrupt/modified storage. The seeded recovery
 test is not an abrupt power-loss or actual process-kill test.
 
 The demo was run in two separate CLI processes: first run completed, second returned
-the identical persisted run as a duplicate. No browser rerun or physical device
-verification was performed because the frontend is unchanged.
+the identical persisted run as a duplicate. The subsequent command-centre work adds browser verification; see COMMAND.md. Physical-device verification remains separate.
 
 ## Next milestones
 
-1. Connect this run/event model to the phone-first canvas. Show real queued,
+1. Implemented in the command-centre milestone: connect the run/event model to the phone-first canvas. Show real queued,
    accepted, completed, failed and interrupted states; clearly distinguish fixture
    data, completed historical runs and active work.
 2. Add a read-only GitHub adapter for user-selected repositories, with response
@@ -92,4 +91,4 @@ verification was performed because the frontend is unchanged.
 
 Still absent: live discovery, meaningful code analysis, secure worker identity,
 network isolation, model budgets, external-worker deadlines, automatic retry,
-checkpoint resume, configurable parallel graphs, workflow library and redesigned UI.
+checkpoint resume, configurable parallel graphs and workflow library.

@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test --test-concurrency=1 test/prototype.test.js test/ui-evidence.test.js test/scout.test.js",
+    "test": "node --test --test-concurrency=1 test/prototype.test.js test/ui-evidence.test.js test/scout.test.js test/command-api.test.js",
     "test:browser": "node test/browser-check.js",
-    "scout:demo": "node scripts/scout-demo.js"
+    "scout:demo": "node scripts/scout-demo.js",
+    "test:command-browser": "node test/command-browser-check.js",
+    "preview:build": "node scripts/build-command-preview.js"
   },
   "engines": {
     "node": ">=24"

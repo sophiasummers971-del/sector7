@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101211"><title>Sector 7 — Mission control</title>
+  <link rel="stylesheet" href="/command.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="Sector 7 mission control"><span class="emblem" aria-hidden="true">7</span><span>SECTOR<span class="brand-number">7</span><small>YOUR IDEAS. IN MOTION.</small></span></a>
+    <div class="workspace-label"><span class="avatar">JS</span><span>Jade’s workspace<small>Personal command centre</small></span><span class="workspace-dot"></span></div>
+    <p class="nav-label">WORKSPACE</p>
+    <nav aria-label="Workspace"><a class="nav-item selected" href="/" aria-current="page"><span>⌘</span> Mission control <b>01</b></a><a class="nav-item" href="/studio"><span>◇</span> Workflow studio <span class="arrow">↗</span></a></nav>
+    <div class="mission-library"><p class="nav-label">MISSION TEMPLATE</p><div class="template selected-template"><span class="template-icon">↗</span><div>Discover &amp; shortlist<small>One goal. Several workers.</small></div></div><p class="library-note">First mission · local rehearsal</p></div>
+    <div class="sidebar-bottom"><div class="host-icon">▣</div><strong>Small machine.<br>Big possibilities.</strong><p>Lightweight coordination.<br>Your decisions stay yours.</p><div class="local-line"><i></i> LOCAL RUNTIME <span id="sidebar-state">CHECKING</span></div></div>
+    <div class="profile"><span class="avatar">JS</span><div>Jade Summers<small>SJ–INSIDES</small></div><span>✧</span></div>
+  </aside>
+  <main>
+    <header class="topbar"><div><span class="breadcrumb">WORKSPACE</span><span class="slash">/</span><span>Mission control</span></div><button id="connection" class="connection"><i></i><span id="connection-text">Connecting</span><span>↻</span></button></header>
+    <section class="intro"><div class="eyebrow"><span class="tiny-square"></span> THE ORCHESTRATION WORKSPACE <span class="version">EARLY ACCESS / 0.2</span></div><div class="intro-row"><div><h1>One idea.<br><span>A whole system in motion.</span></h1><p>Give the work a direction. Follow every handoff. Own the outcome.</p></div><div class="intro-index">S / 07<span>HUMAN AT THE HELM</span></div></div></section>
+    <section class="mission-brief" aria-labelledby="mission-heading"><div class="brief-icon" aria-hidden="true">↗</div><div class="brief-copy"><span class="eyebrow">MISSION 001 / DISCOVERY</span><h2 id="mission-heading">Find the pieces for your next big idea.</h2><p>Try the local scout: four fictional project samples, two worker slots, one evidence-backed shortlist.</p><fieldset><legend>Look for</legend><label><input type="checkbox" name="term" value="workflow" checked> workflow</label><label><input type="checkbox" name="term" value="local" checked> local</label><label><input type="checkbox" name="term" value="queue" checked> queue</label></fieldset></div><div class="brief-actions"><button id="launch" class="primary">Run rehearsal <span>↗</span></button><span>LOCAL SAMPLES · NO MODEL COST</span></div></section>
+    <p id="notice" class="notice" role="status" aria-live="polite">Ready when you are. Your first mission starts here.</p>
+    <div class="workspace-grid">
+      <section class="canvas-panel" aria-labelledby="canvas-heading"><div class="section-head"><div><span class="section-number">01</span><h2 id="canvas-heading">The mission map</h2></div><span class="badge" id="run-state">STANDBY</span></div>
+        <div class="canvas-toolbar"><span><i class="green-dot"></i> LOCAL REHEARSAL</span><span id="canvas-mode">No run yet</span></div>
+        <div class="canvas" id="canvas"><div class="canvas-grid"></div><div class="map-stage">
+          <svg class="routes" preserveAspectRatio="none" viewBox="0 0 800 460" aria-hidden="true"><path id="route-start" d="M400 69 V110"/><path id="route-left" d="M400 183 V220 Q400 232 388 232 H208 Q196 232 196 244 V267"/><path id="route-right" d="M400 183 V220 Q400 232 412 232 H592 Q604 232 604 244 V267"/><path id="route-return-left" d="M196 341 V367 Q196 379 208 379 H388 Q400 379 400 391 V400"/><path id="route-return-right" d="M604 341 V367 Q604 379 592 379 H412 Q400 379 400 391 V400"/></svg>
+          <div class="goal-pin"><span class="small-cross">✧</span> YOUR MISSION <span>↓</span></div>
+          <button class="map-node coordinator" data-inspect="coordinator"><span class="node-symbol">⌘</span><span class="node-copy"><small>THE COORDINATOR</small><strong>Plan. Dispatch. Collect.</strong><span>One queue. Every handoff accounted for.</span></span><span class="node-port"></span></button>
+          <span class="wire-label">CARRIER MESSAGES</span>
+          <button class="map-node worker worker-one" data-inspect="worker-1"><span class="node-top"><span class="worker-index">01</span><span class="node-state" id="worker-1-state">READY</span></span><strong>Scout worker</strong><span class="node-description" id="worker-1-copy">Waiting for the first assignment</span><span class="node-bottom">LOCAL SLOT <span>↗</span></span></button>
+          <button class="map-node worker worker-two" data-inspect="worker-2"><span class="node-top"><span class="worker-index">02</span><span class="node-state" id="worker-2-state">READY</span></span><strong>Scout worker</strong><span class="node-description" id="worker-2-copy">Waiting for the next assignment</span><span class="node-bottom">LOCAL SLOT <span>↗</span></span></button>
+          <button class="result-node" data-inspect="results"><span>▤</span><span>Collect the evidence</span><span id="map-count">0 results</span></button>
+        </div></div>
+        <div class="canvas-footer"><span><i></i> States come from saved execution records</span><button id="replay" class="text-button" disabled>Replay messages ↺</button></div>
+      </section>
+      <aside class="activity-panel"><div class="section-head"><div><span class="section-number">02</span><h2>Signal feed</h2></div><span class="feed-icon">≋</span></div><div class="feed-header"><span id="feed-label">AWAITING YOUR FIRST SIGNAL</span><span id="event-count">00</span></div><ol id="events" class="events"><li class="empty-feed"><span>⌁</span><strong>Quiet, for now.</strong><p>Dispatches, acknowledgements and results will appear here.</p></li></ol><div class="feed-foot"><span class="tiny-square"></span> REAL EVENTS. CLEAR PROVENANCE.</div></aside>
+    </div>
+    <section class="outcomes" aria-labelledby="outcomes-heading"><div class="section-head"><div><span class="section-number">03</span><h2 id="outcomes-heading">What came back</h2></div><span class="muted" id="result-summary">The useful part, without the noise.</span></div><div id="results" class="result-grid"><div class="empty-results"><span>↳</span><p>Your shortlist lands here.<small>Every result keeps its source and the reason it matched.</small></p></div></div></section>
+    <div class="bottom-line"><p><i></i> Built to coordinate. Designed for you.</p><span>LOCAL PROTOTYPE · UNAUTHENTICATED · FICTIONAL SAMPLES</span></div>
+  </main>
+</div>
+<dialog id="inspector"><div class="inspector-head"><span class="eyebrow">UNDER THE SURFACE</span><button id="close-inspector" aria-label="Close inspector">×</button></div><h2 id="inspector-title"></h2><p id="inspector-copy"></p><pre id="inspector-data"></pre></dialog>
+<script type="module" src="/command.js"></script>
+</body></html>

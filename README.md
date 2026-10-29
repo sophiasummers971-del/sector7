@@ -1,9 +1,17 @@
 # Sector 7
 
-New worker-coordination milestone: see [SCOUT.md](SCOUT.md). Run `npm run scout:demo`
-(`npm.cmd` on Windows) for a saved, offline rehearsal with two local worker slots.
-The four repository samples are fictional. This does not yet connect to the canvas,
-GitHub or an AI model. `npm test` includes the coordinator regression tests.
+## Mission control
+
+The new home screen is a responsive command centre: mission template, worker map,
+recorded carrier feed, result inspection and clearly labelled message replay.
+Start with `npm start` (`npm.cmd start` on Windows), then open http://127.0.0.1:3000/.
+The existing linear workflow editor is preserved at http://127.0.0.1:3000/studio.
+
+The first mission is a **local rehearsal using four fictional repository samples**.
+It runs the real saved coordinator, not a live GitHub crawler or AI model. See
+[COMMAND.md](COMMAND.md) for behavior and verification and [SCOUT.md](SCOUT.md)
+for the coordinator contract. A [standalone recorded preview](docs/sector7-command-preview.html)
+can be downloaded and opened without a server; its run button is disabled.
 
 Owner-reported verification (2026-10-18): Jade reports that approval controls and restart behaviour were exercised successfully on both the Honor Magic 6 Lite and Surface. This is owner-reported device verification, not independently observed by Codex.
 
