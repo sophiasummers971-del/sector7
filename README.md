@@ -8,6 +8,15 @@ Reports are written under `artifacts/security-preflight/`. Add
 `-- --require-repository-ready` for a strict release gate; it intentionally blocks
 this local-only build until live connector commissioning is implemented and verified.
 
+## Living Foundry
+
+The cyan/turquoise operator frame, spatial signal field and read-only trace now
+share appearance preferences with the workflow editor. Every pulse follows a
+saved event; external agent execution remains unavailable. See the
+[architecture, acceptance evidence and desktop handover](docs/living-foundry/HANDOVER.md).
+Rendered acceptance for this redesign remains outstanding; do not infer it from
+the older command-centre screenshots.
+
 ## Mission control
 
 The new home screen is a responsive command centre: mission template, worker map,

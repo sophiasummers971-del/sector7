@@ -101,7 +101,7 @@ export async function main(argv = process.argv.slice(2)) {
       durationMs: result.durationMs, ...counters });
   };
   const files = ['test/prototype.test.js', 'test/ui-evidence.test.js', 'test/scout.test.js', 'test/command-api.test.js',
-    'test/security.test.js', 'test/rls.test.js', 'test/preflight.test.js', 'test/security-probes.test.js'];
+    'test/security.test.js', 'test/rls.test.js', 'test/preflight.test.js', 'test/security-probes.test.js', 'test/foundry.test.js'];
   await execute('functional-security-and-postgresql', ['--test', '--test-reporter=spec', '--test-concurrency=1', ...files], 90000, childEnvironment());
   if (browsers) {
     if (!process.env.SECTOR7_BROWSER || !process.env.SECTOR7_PLAYWRIGHT) add('browser-regressions', 'FAIL', { reason: '--browser requires explicit host-provided browser and Playwright paths' });

@@ -74,7 +74,7 @@ test('command centre serves real scout records and retains workflow studio', asy
       assert.equal((await (await fetch(base + '/api/scout/control')).json()).repositoryAccess, 'denied');
     });
     await t.test('home and studio are distinct explicit routes; raw runtime files stay inaccessible', async () => {
-      assert.match(await (await fetch(base)).text(), /The mission map/);
+      assert.match(await (await fetch(base)).text(), /SIGNAL FIELD/);
       assert.match(await (await fetch(base + '/studio')).text(), /node-sheet/);
       for (const name of ['command.css', 'command.js']) assert.equal((await fetch(base + '/' + name)).status, 200);
       assert.equal((await fetch(base + '/data/scouts')).status, 404);

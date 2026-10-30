@@ -1,6 +1,10 @@
-# Mission control — 29 October 2026
+# Mission control — original milestone, 29 October 2026
 
-Sector 7 now opens on a graphite/lime mission command centre. It connects the
+**Current redesign and validation:** [Living Foundry handover](docs/living-foundry/HANDOVER.md).
+The verification and screenshots below describe the earlier implementation; they
+are not rendered evidence for the Living Foundry changes.
+
+Sector 7 now opens on a cyan/turquoise Living Foundry command centre. It connects the
 offline coordinator to a responsive worker map, a persisted carrier feed, result
 cards and a node/result inspector. The existing linear editor is at `/studio`.
 

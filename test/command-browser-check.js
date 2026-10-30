@@ -29,7 +29,7 @@ try {
   assert.equal(await page.locator('#run-state').textContent(), 'STANDBY');
   assert.equal(await page.locator('.result-card').count(), 0);
   await page.locator('#launch').click();
-  await page.waitForFunction(() => document.getElementById('run-state').textContent === 'COMPLETED');
+  await page.waitForFunction(() => document.getElementById('run-state').textContent.includes('COMPLETED'));
   await page.waitForFunction(() => !document.getElementById('launch').disabled);
   assert.equal(await page.locator('.result-card').count(), 3);
   assert.equal(await page.locator('.event').count(), 12);
@@ -56,26 +56,50 @@ try {
   await page.locator('#replay').click();
   assert.match(await page.locator('#canvas-mode').textContent(), /Saved run/);
   await page.reload();
-  await page.waitForFunction(() => document.getElementById('run-state').textContent === 'COMPLETED');
+  await page.waitForFunction(() => document.getElementById('run-state').textContent.includes('COMPLETED'));
   assert.deepEqual((await (await page.request.get(base + '/api/scout/' + key)).json()).run, original.run);
   await mkdir(path.join(root, 'docs'), { recursive: true });
-  for (const [width, height, name] of [[1440, 1080, 'command-desktop'], [390, 844, 'command-phone'], [320, 740, 'command-small-phone']]) {
+  for (const [width, height, name] of [[1440, 1080, 'living-foundry/after-desktop'], [3840, 1080, 'living-foundry/after-dual-monitor'], [390, 844, 'living-foundry/after-phone'], [320, 740, 'living-foundry/after-small-phone']]) {
     await page.setViewportSize({ width, height });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'No page overflow at ' + width);
     await page.screenshot({ path: path.join(root, 'docs', name + '.png'), fullPage: true });
   }
+  await page.setViewportSize({ width: 1440, height: 1080 });
+  await page.locator('.preferences summary').click();
+  await page.locator('#theme-choice').selectOption('neon');
+  await page.locator('#low-power').check();
+  assert.equal(await page.evaluate(() => document.documentElement.dataset.motion), 'off');
+  await page.reload();
+  await page.waitForFunction(() => document.documentElement.dataset.theme === 'neon');
+  assert.equal(await page.locator('#low-power').isChecked(), true);
+  await page.locator('#canvas').focus();
+  await page.keyboard.press('+');
+  assert.equal(await page.locator('#zoom-level').textContent(), '120%');
+  await page.keyboard.press('0');
+  assert.equal(await page.locator('#zoom-level').textContent(), '100%');
+  await page.locator('.event button').first().click();
+  assert.match(await page.locator('#inspector-data').textContent(), /inputHash/);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(() => [...document.querySelectorAll('.routes path')].every(n => getComputedStyle(n).animationName === 'none')), true, 'Reduced motion and low-power stop effects');
+  // A forged enabled control does not confer authenticated backend authority.
+  const anonymous = await browser.newContext();
+  const denied = await anonymous.request.post(base + '/api/scout', { data: { operationKey:'forged-ui', terms:['local'] } });
+  assert.equal(denied.status(), 401);
+  await anonymous.close();
   await page.locator('.result-card').first().click();
   assert.match(await page.locator('#inspector-copy').textContent(), /Fictional/);
   await page.locator('#close-inspector').click();
-  await context.setOffline(true);
+  await page.route('**/api/scout', route => route.abort());
   await page.locator('#launch').click();
   await page.waitForFunction(() => document.getElementById('notice').textContent.includes('Could not confirm'));
   assert.equal(await page.locator('.result-card').count(), 0, 'Old results do not masquerade as the new run');
   assert.match(await page.locator('#launch').textContent(), /Retry same request/);
   const uncertain = await page.evaluate(() => JSON.parse(localStorage.getItem('sector7-command-request')).operationKey);
-  await context.setOffline(false);
+  await page.unroute('**/api/scout');
+  await page.locator('#connection').click();
+  await page.waitForFunction(() => !document.getElementById('launch').disabled);
   await page.locator('#launch').click();
-  await page.waitForFunction(() => document.getElementById('run-state').textContent === 'COMPLETED' && !document.getElementById('launch').disabled);
+  await page.waitForFunction(() => document.getElementById('run-state').textContent.includes('COMPLETED') && !document.getElementById('launch').disabled);
   assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('sector7-command-request')).operationKey), uncertain);
   await page.goto(base + '/studio');
   await page.waitForFunction(() => document.getElementById('server-state')?.textContent.includes('Connected'));

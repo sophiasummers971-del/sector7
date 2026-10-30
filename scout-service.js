@@ -71,13 +71,16 @@ export function createScoutService(dataDir, samples) {
       await ready;
       if (typeof key !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(key)) fail('Invalid run key', 400);
       if (errors.has(key)) { const error = errors.get(key); fail(error.message, error.status); }
+      let run;
       try {
-        const run = await loadScoutRun(dataDir, key);
+        run = await loadScoutRun(dataDir, key);
+        // A terminal record can be the previous outcome while a same-key
+        // submission is still being checked. Never publish it as the new result.
+        if (active === key && run.status !== 'running') await pending;
         if (run.status === 'running' && active !== key) {
           run.status = 'interrupted';
           for (const job of run.jobs) if (['running', 'queued'].includes(job.status)) job.status = 'interrupted';
         }
-        return { run, active: active === key };
       } catch (error) {
         if (error.code === 'ENOENT') {
           if (active === key) return { run: null, active: true };
@@ -87,6 +90,8 @@ export function createScoutService(dataDir, samples) {
         try { await persist(); } catch { state.paused = true; }
         fail('Saved rehearsal validation failed; circuit opened', 503);
       }
+      if (errors.has(key)) { const error = errors.get(key); fail(error.message, error.status); }
+      return { run, active: active === key };
     },
     async cancel(key) {
       await ready;

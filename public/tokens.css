@@ -1,0 +1,11 @@
+:root{color-scheme:dark;--bg:#070b13;--panel:#101927;--surface:#101927;--surface2:#172338;--line:#34465f;--text:#edf7ff;--muted:#a5b9cf;--cyan:#63e5f3;--turquoise:#50d9dd;--violet:#bbabff;--primary:#147b90;--amber:#ffd08a;--coral:#ff9e9c;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+:root[data-theme=neon]{--bg:#08091b;--panel:#14162d;--surface:#14162d;--surface2:#20203b;--line:#4b476f;--primary:#326b96;--turquoise:#82ccff}
+:root[data-theme=minimal]{--bg:#0c1119;--panel:#151c27;--surface:#151c27;--surface2:#202a38;--line:#516075;--primary:#286b7c}
+:root[data-motion=off] *, :root[data-low-power=true] *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* Shared Foundry surfaces for the existing editor; execution code is unchanged. */
+.viewport{background-color:var(--bg);background-image:radial-gradient(#345575 1px,transparent 1px);background-size:24px 24px}
+.node-body{background:var(--panel);border-color:var(--line)}
+.node-symbol,.brand-mark{background:var(--surface2);color:var(--cyan);border-color:var(--line)}
+.wire{stroke:var(--violet)}
+.studio-home{display:inline-flex;align-items:center;min-height:44px;color:var(--cyan);font-size:.85rem;text-decoration:none}

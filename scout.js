@@ -9,6 +9,9 @@ const hash = value => createHash('sha256').update(JSON.stringify(value)).digest(
 const exact = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).sort().join(',') === keys;
 function invalid(message, status = 400) { const error = new Error(message); error.status = status; throw error; }
 const terminal = new Set(['completed', 'failed', 'cancelled', 'interrupted', 'timed_out']);
+// Canonicalise only new submissions/comparisons. Old persisted hashes stay valid.
+const canonicalScout = input => ({ operationKey: input.operationKey, terms: [...input.terms],
+  repositories: input.repositories.map(repo => ({ id: repo.id, readme: repo.readme })) });
 
 export function validateScout(input) {
   if (!exact(input, 'operationKey,repositories,terms') || typeof input.operationKey !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(input.operationKey))
@@ -106,7 +109,7 @@ export async function loadScoutRun(dataDir, key) {
 // One local coordinator per run. Lock collisions fail closed; stale locks need manual review.
 export async function runScout(raw, { dataDir, signal, batchMs = LIMITS.batchMs } = {}) {
   authorize(OWNER, 'scout.run');
-  const input = validateScout(raw);
+  const input = canonicalScout(validateScout(raw));
   if (typeof dataDir !== 'string' || !path.isAbsolute(dataDir)) invalid('Trusted host must provide an absolute dataDir');
   if (!Number.isInteger(batchMs) || batchMs < 1 || batchMs > LIMITS.batchMs) invalid('Invalid batch deadline');
   await mkdir(dataDir, { recursive: true, mode: 0o700 });
@@ -130,14 +133,14 @@ export async function runScout(raw, { dataDir, signal, batchMs = LIMITS.batchMs 
     const file = path.join(directory, 'run.json');
     const inputFile = path.join(directory, 'input.json');
     const fingerprint = hash(input);
-    let prior;
-    try { prior = await readBoundedJSON(file); }
+    let prior, hasPrior = false;
+    try { prior = await readBoundedJSON(file); hasPrior = true; }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
-    if (prior) {
-      if (prior.fingerprint !== fingerprint) invalid('Operation key already belongs to different input', 409);
-      const persistedInput = await readBoundedJSON(inputFile);
-      if (hash(persistedInput) !== fingerprint) throw new Error('Saved input fingerprint mismatch');
-      validateStoredRun(prior, input);
+    if (hasPrior) {
+      const persistedInput = validateScout(await readBoundedJSON(inputFile));
+      if (!prior || typeof prior !== 'object' || prior.fingerprint !== hash(persistedInput)) throw new Error('Saved input fingerprint mismatch');
+      validateStoredRun(prior, persistedInput);
+      if (hash(canonicalScout(persistedInput)) !== fingerprint) invalid('Operation key already belongs to different input', 409);
       if (!terminal.has(prior.status)) {
         prior.status = 'interrupted';
         for (const job of prior.jobs) if (!terminal.has(job.status)) {

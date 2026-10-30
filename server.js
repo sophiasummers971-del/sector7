@@ -62,7 +62,7 @@ const scouts = createScoutService(path.join(dataDir, 'scouts'), scoutSamples);
 await scouts.ready;
 assets.set('/studio', { body: page, type: 'text/html; charset=utf-8' });
 assets.set('/', { body: await readFile(path.join(root, 'public', 'command.html')), type: 'text/html; charset=utf-8' });
-for (const [name, type] of [['command.js', 'text/javascript; charset=utf-8'], ['command.css', 'text/css; charset=utf-8']]) {
+for (const [name, type] of [['command.js', 'text/javascript; charset=utf-8'], ['command.css', 'text/css; charset=utf-8'], ['tokens.css', 'text/css; charset=utf-8'], ['foundry-state.js', 'text/javascript; charset=utf-8'], ['theme.js', 'text/javascript; charset=utf-8']]) {
   assets.set('/' + name, { body: await readFile(path.join(root, 'public', name)), type });
 }
 let queue = Promise.resolve();
