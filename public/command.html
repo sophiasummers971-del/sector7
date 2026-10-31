@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070b13"><title>Sector7 // The Living Foundry</title>
+<link rel="stylesheet" href="/command.css"><link rel="stylesheet" href="/tokens.css">
+</head>
+<body>
+<a class="skip-link" href="#control-frame">Skip to operator controls</a>
+<div class="shell">
+<aside class="sidebar">
+ <a class="brand" href="/" aria-label="Sector 7 factory overview"><span class="emblem">7</span><span>SECTOR<span class="brand-number">7</span><small>SJ–INSIDES / THE LIVING FOUNDRY</small></span></a>
+ <p class="nav-label">OPERATIONS / LOCAL</p>
+ <nav aria-label="Workspace"><a class="nav-item selected" href="/" aria-current="page">01 <span>Factory overview</span></a><a class="nav-item" href="/studio">02 <span>Workflow foundry ↗</span></a><a class="nav-item" href="#swarm">03 <span>Swarm operations</span></a><a class="nav-item" href="#trace">04 <span>Execution trace</span></a></nav>
+ <div class="boundary"><span class="eyebrow">AUTHORITY BOUNDARY</span><strong>Visuals grant<br>no permissions.</strong><p>Local samples only.<br>OSIRIS and Pegasus retain their independent boundaries.</p><span class="badge">EXTERNAL EXECUTION DENIED</span></div>
+ <details class="preferences"><summary>Operator appearance</summary><label for="theme-choice">Environment</label><select id="theme-choice"><option value="industrial">Industrial Factory</option><option value="neon">Neon Command Deck</option><option value="minimal">Minimal Operations</option></select><label for="motion-choice">Event animation</label><select id="motion-choice"><option value="off">Off</option><option value="subtle">Subtle</option><option value="full">Full signal</option></select><label class="check"><input id="low-power" type="checkbox"> Low-power mode</label><p id="preference-status">Device reduced-motion settings always take priority.</p></details>
+ <div class="local-line">LOCAL RUNTIME <span id="sidebar-state">CHECKING</span></div>
+</aside>
+<main>
+ <header class="topbar"><span class="breadcrumb">SJ–INSIDES <span>/</span> FACTORY FLOOR</span><button id="connection" class="connection" title="Refresh owner connection and reconcile saved state"><span id="connection-text">Connecting</span> ↻</button></header>
+ <section class="intro"><div><span class="eyebrow">SECTOR7 // OPERATOR AT THE HELM</span><h1>The living <span>foundry.</span></h1><p>Give the work a direction. Follow the signal. Inspect the proof.</p></div><div class="intro-index">S / 07<small>THE FACTORY NEVER FAKES A SIGNAL.</small></div></section>
+ <section class="starting-desk" aria-labelledby="starting-heading">
+  <span class="eyebrow">YOUR STARTING POINT</span><h2 id="starting-heading">What’s on your mind, Jade?</h2>
+  <p>Choose a suggestion from your saved work, or put your idea into words first.</p>
+  <form id="idea-form"><div><label for="idea-input">Your idea</label><textarea id="idea-input" rows="2" maxlength="500" placeholder="For example: I want to review some text" aria-describedby="idea-help"></textarea></div><button class="primary" type="submit">Choose a next step →</button></form>
+  <p id="idea-help" class="starting-help">Local starting guide · No AI chat connected. Your idea stays on this page; nothing runs from this box.</p>
+  <div id="idea-response" class="idea-response" role="status" aria-live="polite" hidden><strong id="idea-heading"></strong><p id="idea-copy"></p></div>
+  <div id="starting-points" class="starting-points" aria-label="Suggested starting points"></div>
+ </section>
+ <section class="telemetry" aria-label="Confirmed workflow inventory"><div><span>SAVED WORKFLOWS</span><strong id="inventory-workflows">—</strong><small>one local definition slot</small></div><div><span>WORKFLOW RUNS</span><strong id="inventory-completed">—</strong><small>completed / saved runs</small></div><div><span>AWAITING APPROVAL</span><strong id="inventory-waiting">—</strong><a href="/studio">Inspect exact run in foundry ↗</a></div><div><span>FAILED / INTERRUPTED</span><strong id="inventory-failed">—</strong><small>includes rejected workflows</small></div></section>
+ <p class="observation" id="observed">No confirmed connection yet. Heartbeat monitoring is unavailable.</p>
+ <div class="factory-grid">
+ <section id="control-frame" class="control-frame" aria-labelledby="mission-heading" tabindex="-1">
+  <div class="section-head"><span class="eyebrow">01 / CONTROL FRAME</span><span class="badge">LOCAL ONLY</span></div>
+  <div class="desk-body"><span class="step-label">SETUP ZONE</span><h2 id="mission-heading">Discover &amp; shortlist</h2><p>Match README terms across four bundled fictional samples. Two bounded worker slots. No AI or repository access.</p>
+  <fieldset><legend>1. Choose match terms</legend><label><input type="checkbox" name="term" value="workflow" checked> Workflow</label><label><input type="checkbox" name="term" value="local" checked> Local</label><label><input type="checkbox" name="term" value="queue" checked> Queue</label></fieldset>
+  <div class="run-controls"><span class="step-label">2. START / RECONCILE</span><button id="launch" aria-describedby="control-reason" class="primary" disabled>Run rehearsal ↗</button><p id="control-reason">Checking owner access and safety state.</p></div>
+  <div class="approval-zone"><span class="step-label">APPROVAL ZONE</span><p>This rehearsal has no approval step. Workflow approvals belong to their saved pause in the foundry.</p><div class="disabled-actions"><button disabled aria-describedby="approval-reason">Approve</button><button disabled aria-describedby="approval-reason">Reject</button></div><p id="approval-reason">Unavailable here. <a href="/studio">Open workflow approvals ↗</a></p></div>
+  <div class="safety-zone"><span class="step-label">COORDINATOR SAFETY</span><button id="pause" class="danger" disabled>Pause &amp; stop</button><p>Pauses admission and requests worker cancellation. Refresh to confirm saved outcomes.</p><button id="reset" class="danger" hidden>Reset circuit after review</button></div>
+  </div>
+ </section>
+ <section class="canvas-panel" aria-labelledby="canvas-heading"><div class="section-head"><div><span class="eyebrow">02 / SIGNAL FIELD</span><h2 id="canvas-heading">Watch the work take shape.</h2></div><span class="badge" id="run-state">STANDBY</span></div>
+  <div class="canvas-toolbar"><span id="canvas-mode">No run yet</span><div class="camera"><button id="zoom-out" aria-label="Zoom out signal field">−</button><output id="zoom-level">100%</output><button id="zoom-in" aria-label="Zoom in signal field">+</button><button id="fit-field">Fit</button></div></div>
+  <div class="canvas" id="canvas" tabindex="0" aria-label="Signal field. Scroll or drag empty space to pan. Arrow keys pan; plus and minus zoom; 0 fits."><div class="map-stage" id="map-stage">
+   <svg class="routes" viewBox="0 0 900 600" preserveAspectRatio="none" aria-hidden="true"><path id="route-start" d="M450 65 C450 100 450 100 450 135"/><path id="route-left" d="M450 205 C450 265 205 195 205 295"/><path id="route-right" d="M450 205 C450 265 695 195 695 295"/><path id="route-return-left" d="M205 405 C205 500 450 415 450 505"/><path id="route-return-right" d="M695 405 C695 500 450 415 450 505"/></svg>
+   <div class="goal-pin"><span>◇</span> LOCAL SAMPLE REHEARSAL</div>
+   <button class="map-node coordinator" data-inspect="coordinator"><span class="node-symbol">⌘</span><span class="node-copy"><small>COORDINATOR / ONE PROCESS</small><strong>Plan · dispatch · collect</strong><span>Fixed local authority. Bounded execution.</span></span></button>
+   <span class="wire-label">SAVED CARRIER EVENTS</span>
+   <button class="map-node worker worker-one" data-inspect="worker-1"><span class="node-top"><span class="worker-index">01 / LOCAL SLOT</span><span class="node-state" id="worker-1-state">IDLE</span></span><strong>README inspector</strong><span class="node-description" id="worker-1-copy">No recorded assignment</span><span class="node-bottom">INSPECT EVIDENCE <span>↗</span></span></button>
+   <button class="map-node worker worker-two" data-inspect="worker-2"><span class="node-top"><span class="worker-index">02 / LOCAL SLOT</span><span class="node-state" id="worker-2-state">IDLE</span></span><strong>README inspector</strong><span class="node-description" id="worker-2-copy">No recorded assignment</span><span class="node-bottom">INSPECT EVIDENCE <span>↗</span></span></button>
+   <button class="result-node" data-inspect="results"><span>▤</span><span>Collected evidence</span><span id="map-count">0 results</span></button>
+  </div></div>
+  <div class="canvas-footer"><span>Drag blank space / scroll to pan · select a node to inspect</span><button id="replay" class="text-button" disabled>Replay messages ↺</button></div>
+  <div class="signal-legend"><span>◇ Idle</span><span>↗ Dispatched</span><span>◉ Accepted</span><span>✓ Completed</span><span>× Failed</span><span>Ⅱ Interrupted</span></div>
+ </section>
+ <aside id="trace" class="activity-panel"><div class="section-head"><div><span class="eyebrow">03 / EXECUTION TRACE</span><h2>Every handoff, accounted for.</h2></div></div><div class="feed-header"><span id="feed-label">AWAITING RECORDED SIGNAL</span><span id="event-count">00</span></div><ol id="events" class="events"><li class="empty-feed"><span>⌁</span><strong>The field is quiet.</strong><p>No execution is assumed. Events appear only when recorded.</p></li></ol><div class="feed-foot">SELECT AN EVENT FOR ITS SAVED RECEIPT</div></aside>
+ </div>
+ <p id="notice" class="notice" role="status" aria-live="polite">Checking the local owner connection…</p>
+ <section class="outcomes" aria-labelledby="outcomes-heading"><div class="section-head"><div><span class="eyebrow">04 / RESULTS ZONE</span><h2 id="outcomes-heading">Evidence before opinions.</h2></div><span class="muted" id="result-summary">No result claimed.</span></div><div id="results" class="result-grid"><div class="empty-results"><span>↳</span><p>Your shortlist lands here.<small>Literal term matches, with source hashes. No code review or claim verification.</small></p></div></div></section>
+ <section id="swarm" class="swarm"><div><span class="eyebrow">SWARM OPERATIONS / UNAVAILABLE</span><h2>No external agents connected.</h2><p>Agent identities, capability grants, dependencies and resource budgets need an authenticated backend contract. This local rehearsal does not provide one.</p></div><div><button disabled aria-describedby="swarm-reason">Launch swarm</button><p id="swarm-reason">No authorised swarm backend.</p></div></section>
+ <footer class="bottom-line"><span>SECTOR7 // STRUCTURED COMMAND. VISIBLE SIGNAL.</span><span>OWNER KEY REQUIRED · LOCAL PROTOTYPE · FICTIONAL SAMPLES</span></footer>
+</main>
+</div>
+<dialog id="inspector"><div class="inspector-head"><span class="eyebrow">SAVED EVIDENCE / READ ONLY</span><button id="close-inspector" aria-label="Close inspector">×</button></div><h2 id="inspector-title"></h2><p id="inspector-copy"></p><pre id="inspector-data" tabindex="0"></pre></dialog>
+<script type="module" src="/command.js"></script>
+</body></html>

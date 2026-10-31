@@ -6,6 +6,8 @@ import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const testOwnerKey = 'test-owner-0123456789abcdef0123456789abcdef012345';
+const fetch = (url, options = {}) => globalThis.fetch(url, { ...options, headers: { ...options.headers, Authorization: 'Bearer ' + testOwnerKey } });
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 test('local task execution, validation, idempotency and restart persistence', async t => {
   const dir = await mkdtemp(path.join(root, '.test-data-'));
@@ -13,7 +15,7 @@ test('local task execution, validation, idempotency and restart persistence', as
   let base;
   async function start() {
     child = spawn(process.execPath, ['server.js'], { cwd: root,
-      env: { ...process.env, PORT: '0', SECTOR7_HOST: '127.0.0.1', SECTOR7_DATA_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
+      env: { ...process.env, SECTOR7_ACCESS_TOKEN: testOwnerKey, PORT: '0', SECTOR7_HOST: '127.0.0.1', SECTOR7_DATA_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
     base = await new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(Error('Server startup timed out')), 5000);
       child.once('error', error => { clearTimeout(timer); reject(error); });
