@@ -227,3 +227,13 @@ test('signal-field implementation is read-only and does not animate invented eve
   assert.match(code,/Historical saved step only/);
   assert.match(code,/connected \? localWorkflowTrace/);
 });
+
+test('saved workflow evidence refresh uses read-only authenticated reconciliation', async () => {
+  const c = await controller();
+  const before = c.calls.length;
+  await c.get('refresh-local-signal').onclick();
+  assert.ok(c.calls.length > before,'refresh must re-read backend state');
+  const added = c.calls.slice(before);
+  assert.ok(added.every(call => !call.options?.method || call.options.method === 'GET'));
+  assert.match(c.get('local-signal-observed').textContent,/snapshot|verified/i);
+});
