@@ -194,3 +194,13 @@ test('factory prioritises approval requiring attention and gives safe next actio
   assert.match(localWorkflowTrace([make('b','running')]).guidance,/Outcome not confirmed/);
   assert.match(localWorkflowTrace([done]).guidance,/Recorded execution finished/);
 });
+
+test('recorded workflow highlight is static and does not fabricate live animation', async () => {
+  const command = await readFile(path.join(root,'public/command.js'),'utf8');
+  const css = await readFile(path.join(root,'public/command.css'),'utf8');
+  assert.match(command,/recent-transition/);
+  assert.match(css,/LAST RECORDED/);
+  const section = css.slice(css.indexOf('Evidence trail: last confirmed'));
+  assert.doesNotMatch(section,/@keyframes|animation\s*:/);
+  assert.match(command,/Saved history only; not a live swarm/);
+});
