@@ -204,3 +204,26 @@ test('recorded workflow highlight is static and does not fabricate live animatio
   assert.doesNotMatch(section,/@keyframes|animation\s*:/);
   assert.match(command,/Saved history only; not a live swarm/);
 });
+
+test('local signal field switches sources without submitting or approving work', async () => {
+  const c = await controller();
+  const before = c.calls.length;
+  c.get('view-local').onclick();
+  assert.equal(c.get('local-signal-field').hidden,false);
+  assert.equal(c.get('scout-signal-field').hidden,true);
+  assert.equal(c.get('view-local').ariaPressed,'true');
+  assert.equal(c.calls.length,before);
+  c.get('view-scout').onclick();
+  assert.equal(c.get('local-signal-field').hidden,true);
+  assert.equal(c.get('scout-signal-field').hidden,false);
+  assert.equal(c.calls.length,before);
+});
+test('signal-field implementation is read-only and does not animate invented events',async()=>{
+  const css=await readFile(path.join(root,'public/command.css'),'utf8');
+  const code=await readFile(path.join(root,'public/command.js'),'utf8');
+  const region=css.slice(css.lastIndexOf('Two distinct evidence sources:'));
+  assert.match(region,/local-signal-field/);
+  assert.doesNotMatch(region,/@keyframes|animation\s*:/);
+  assert.match(code,/Historical saved step only/);
+  assert.match(code,/connected \? localWorkflowTrace/);
+});
