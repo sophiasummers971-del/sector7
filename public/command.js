@@ -247,6 +247,44 @@ function drawLocalTrace() {
     if (latest) latest.classList.add('recent-transition');
   }
 }
+let signalView = 'scout';
+function selectSignalView(next) {
+  signalView = next === 'local' ? 'local' : 'scout';
+  $('local-signal-field').hidden = signalView !== 'local';
+  $('scout-signal-field').hidden = signalView !== 'scout';
+  $('view-local').ariaPressed = String(signalView === 'local');
+  $('view-scout').ariaPressed = String(signalView === 'scout');
+  drawLocalSignal();
+}
+function drawLocalSignal() {
+  const list = $('local-signal-steps');
+  const trace = connected ? localWorkflowTrace(inventoryState?.tasks) : null;
+  if (!trace) {
+    list.replaceChildren();
+    $('local-signal-caption').textContent = connected
+      ? 'No saved workflow run found. Create a local run in Workflow Foundry.'
+      : 'Owner connection unconfirmed. No workflow outcome is assumed.';
+    return;
+  }
+  $('local-signal-caption').textContent = 'Recorded ' + trace.status + ' · ' + trace.guidance +
+    ' This is historical evidence, not a live agent display.';
+  list.replaceChildren(...trace.nodes.map((step, index) => {
+    const item = node('li', undefined, 'local-signal-node');
+    item.dataset.state = step.status;
+    const button = node('button');
+    button.type = 'button';
+    button.ariaLabel = 'Inspect recorded workflow step ' + (index + 1) + ': ' + step.type;
+    button.append(node('small', String(index + 1).padStart(2, '0') + ' / ' + step.type),
+      node('strong', step.status === 'completed' ? '✓ COMPLETED' : step.status));
+    button.onclick = () => showEvidence('Workflow circuit / step ' + (index + 1),
+      'Historical saved step only. Inspection cannot approve, retry, or execute any work.',
+      {runId: trace.id, id: step.id, type: step.type, status: step.status, recordedAt: step.at});
+    item.append(button);
+    return item;
+  }));
+}
+$('view-local').onclick = () => selectSignalView('local');
+$('view-scout').onclick = () => selectSignalView('scout');
 function drawInventory() {
   const totals = inventory(inventoryState?.tasks);
   $('inventory-workflows').textContent = inventoryState?.workflow ? '1' : '—';
@@ -254,9 +292,10 @@ function drawInventory() {
   $('inventory-waiting').textContent = totals?.waiting ?? '—';
   $('inventory-failed').textContent = totals?.failed ?? '—';
   drawLocalTrace();
+  drawLocalSignal();
 }
 async function connect() {
-  connected = false; connectionState(); drawLocalTrace();
+  connected = false; connectionState(); drawLocalTrace(); drawLocalSignal();
   try {
     await api('/api/status');
     await refreshSafety();
@@ -271,7 +310,7 @@ async function connect() {
     }
     draw(run); controls();
   } catch {
-    connected = false; connectionState(); draw(run); drawLocalTrace();
+    connected = false; connectionState(); draw(run); drawLocalTrace(); drawLocalSignal();
     notice('Owner connection unavailable. Open the private startup link from the local terminal, then refresh. Outcomes remain unconfirmed.', true);
   }
 }
