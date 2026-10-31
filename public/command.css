@@ -344,3 +344,9 @@ fieldset label{margin:0;padding:8px;font-size:12px;flex:1}
 .local-trace-inspect:hover,.local-trace-inspect:focus-visible{border:0;outline-offset:3px}
 .local-trace-step[data-state="WAITING_APPROVAL"]::after{color:var(--amber)}
 @media(max-width:650px){.local-trace-step:not(:last-child){margin-right:0}.local-trace-step:not(:last-child)::after{display:none}}
+
+/* Evidence trail: last confirmed recorded step, not an animated heartbeat. */
+.local-trace-step.recent-transition{border-color:var(--violet);box-shadow:inset 0 0 0 1px #bbabff33}
+.local-trace-step.recent-transition .local-trace-inspect::before{content:"LAST RECORDED";color:var(--violet);font:8px var(--mono);letter-spacing:.7px}
+.local-trace-step.recent-transition[data-state="WAITING_APPROVAL"]{border-color:var(--amber)}
+.local-trace-step.recent-transition[data-state="WAITING_APPROVAL"] .local-trace-inspect::before{color:var(--amber)}
