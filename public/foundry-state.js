@@ -53,11 +53,14 @@ export function startingPoints({ connected = false, preview = false, workflow, t
  */
 export function localWorkflowTrace(tasks) {
   if (!Array.isArray(tasks)) return null;
-  const task = tasks.find(item =>
+  const valid = item =>
     item && typeof item === 'object' && !Array.isArray(item) &&
-    Array.isArray(item.nodeResults) && item.workflowSnapshot?.definition?.nodes &&
-    typeof item.id === 'string'
-  );
+    Array.isArray(item.nodeResults) && Array.isArray(item.workflowSnapshot?.definition?.nodes) &&
+    typeof item.id === 'string';
+  // Prefer work requiring human attention; otherwise show the newest record.
+  // The API returns newest first. Do not infer activity from timestamps.
+  const task = tasks.find(item => valid(item) && item.status === 'WAITING_APPROVAL') ||
+    tasks.find(valid);
   if (!task) return null;
   const definition = task.workflowSnapshot.definition;
   const byId = new Map(definition.nodes.filter(n => typeof n?.id === 'string').map(n => [n.id, n]));
@@ -74,5 +77,9 @@ export function localWorkflowTrace(tasks) {
     nodes,
     recorded: true,
     waiting: task.status === 'WAITING_APPROVAL',
+    guidance: task.status === 'WAITING_APPROVAL' ? 'Approval required: open Workflow Foundry to inspect the exact saved pause.' :
+      ['interrupted','failed','rejected','cancelled'].includes(task.status) ? 'Execution did not finish successfully. Inspect the saved run; no automatic retry is performed.' :
+      task.status === 'completed' ? 'Recorded execution finished. Inspect the evidence or start a new run in Workflow Foundry.' :
+      'Outcome not confirmed here. Open Workflow Foundry and refresh before taking further action.',
   };
 }
