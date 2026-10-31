@@ -239,6 +239,13 @@ function drawLocalTrace() {
     item.append(detail);
     return item;
   }));
+  // Highlight transitions only when they are present in confirmed saved records.
+  // Static recorded signals never impersonate a live agent or heartbeat.
+  for (const item of list.children) item.classList.remove('recent-transition');
+  if (trace.nodes.length > 0) {
+    const latest = list.children[trace.nodes.length - 1];
+    if (latest) latest.classList.add('recent-transition');
+  }
 }
 function drawInventory() {
   const totals = inventory(inventoryState?.tasks);
