@@ -181,3 +181,16 @@ test('actual workflow trace is read-only, bounded, and never invents agent activ
   recorded.nodeResults.push({id:'unknown-step',status:'running'});
   assert.equal(localWorkflowTrace([recorded]).nodes.length,3);
 });
+
+test('factory prioritises approval requiring attention and gives safe next actions', () => {
+  const make = (id,status) => ({ id, status, workflowSnapshot: { definition: {nodes:[{id:'start',type:'start'}]} }, nodeResults:[{id:'start',status:'completed'}] });
+  const done = make('newer','completed');
+  const approval = make('older','WAITING_APPROVAL');
+  const selected = localWorkflowTrace([done,approval]);
+  assert.equal(selected.id,'older');
+  assert.equal(selected.waiting,true);
+  assert.match(selected.guidance,/inspect the exact saved pause/);
+  assert.match(localWorkflowTrace([make('a','interrupted')]).guidance,/no automatic retry/);
+  assert.match(localWorkflowTrace([make('b','running')]).guidance,/Outcome not confirmed/);
+  assert.match(localWorkflowTrace([done]).guidance,/Recorded execution finished/);
+});
