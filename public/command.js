@@ -227,10 +227,16 @@ function drawLocalTrace() {
     ' observed steps. This is saved history, not a live swarm or heartbeat.';
   list.replaceChildren(...trace.nodes.map((step, index) => {
     const item = node('li', undefined, 'local-trace-step');
-    const label = node('span', String(index + 1).padStart(2, '0') + ' · ' + step.type);
-    const state = node('strong', step.status === 'completed' ? '✓ COMPLETED' : step.status);
     item.dataset.state = step.status;
-    item.append(label, state);
+    const detail = node('button', undefined, 'local-trace-inspect');
+    detail.type = 'button';
+    detail.setAttribute('aria-label', 'Inspect recorded step ' + (index + 1) + ': ' + step.type);
+    detail.append(node('span', String(index + 1).padStart(2, '0') + ' · ' + step.type),
+      node('strong', step.status === 'completed' ? '✓ COMPLETED' : step.status));
+    detail.onclick = () => showEvidence('Saved workflow step / ' + (index + 1),
+      'Read-only record. No text payloads, tool permissions or execution controls are exposed.',
+      { runId: trace.id, runStatus: trace.status, id: step.id, type: step.type, status: step.status, recordedAt: step.at });
+    item.append(detail);
     return item;
   }));
 }
