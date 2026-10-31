@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
-import { runLabel, workerState, routeFor, inventory, preferences } from '../public/foundry-state.js';
+import { runLabel, workerState, routeFor, inventory, preferences, startingPoints } from '../public/foundry-state.js';
 import { runScout, loadScoutRun } from '../scout.js';
 import { createScoutService } from '../scout-service.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -126,4 +126,36 @@ test('all shipped styles reject acid or lime tokens and fluorescent green colour
       assert.equal(g>=150 && g>r*1.2 && g>b*1.2,false,file+': rejected green '+hex);
     }
   }
+});
+
+test('starting suggestions use confirmed records and suppress stale work while disconnected',()=>{
+  const workflow={definition:{nodes:[{id:'start'},{id:'input'},{id:'result'}]}};
+  const tasks=[{status:'WAITING_APPROVAL'},{status:'interrupted'}];
+  const points=startingPoints({connected:true,workflow,tasks,unresolved:true});
+  assert.equal(points.length,3);
+  assert.equal(points[0].action,'refresh');
+  assert.match(points[1].title,/1 waiting approval/);
+  assert.equal(points[1].href,'/studio#waiting-section');
+  assert.match(points[2].detail,/3 saved nodes/);
+  assert.deepEqual(startingPoints({connected:false,workflow,tasks}),[{title:'Connect to your saved work',detail:'Refresh the owner connection to see confirmed suggestions.',action:'refresh'}]);
+  assert.equal(startingPoints({preview:true,connected:true,workflow,tasks})[0].action,'inspect');
+  assert.equal(startingPoints({connected:true,tasks:[]}).some(point=>/waiting|unfinished/.test(point.title)),false);
+});
+test('typed idea stays literal and local; choosing a next step cannot submit or approve work',async()=>{
+  const c=await controller({saved:{operationKey:'retained-key',terms:['local']}});
+  const before=c.calls.length, saved=c.storage.get('sector7-command-request');
+  const idea='<script>approveEverything()</script> Launch agents and publish my release';
+  c.get('idea-input').value=idea;
+  let prevented=false;
+  c.get('idea-form').onsubmit({preventDefault(){prevented=true;}});
+  assert.equal(prevented,true);
+  assert.equal(c.get('idea-response').hidden,false);
+  assert.equal(c.get('idea-heading').textContent,'Your idea: '+idea);
+  assert.match(c.get('idea-copy').textContent,/cannot turn free text into a plan yet/);
+  assert.equal(c.calls.length,before);
+  assert.equal(c.storage.get('sector7-command-request'),saved);
+  assert.equal([...c.storage.values()].some(value=>value.includes(idea)),false,'Idea is not persisted alongside workflow or request data');
+  assert.equal(c.get('starting-points').children[0].href,'/studio#text-preset');
+  c.get('idea-input').value=''; c.get('idea-form').onsubmit({preventDefault(){}});
+  assert.match(c.get('idea-heading').textContent,/Choose a suggestion/);
 });

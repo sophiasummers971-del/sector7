@@ -27,6 +27,16 @@ try {
   await page.goto(base + '/#access=' + testOwnerKey);
   await page.waitForFunction(() => document.getElementById('connection-text').textContent === 'Runtime connected');
   assert.equal(await page.locator('#run-state').textContent(), 'STANDBY');
+  assert.equal(await page.locator('#starting-heading').textContent(), 'What’s on your mind, Jade?');
+  assert.ok(await page.locator('.starting-card').count() > 0);
+  const ideaRequests=[];
+  const recordIdeaRequest=request=>{if(request.method()!=='GET')ideaRequests.push(request.url());};
+  page.on('request',recordIdeaRequest);
+  await page.locator('#idea-input').fill('Help me review a release message');
+  await page.locator('#idea-form button').click();
+  assert.match(await page.locator('#idea-heading').textContent(),/release message/);
+  assert.equal(ideaRequests.length,0,'Idea form does not execute work');
+  page.off('request',recordIdeaRequest);
   assert.equal(await page.locator('.result-card').count(), 0);
   await page.locator('#launch').click();
   await page.waitForFunction(() => document.getElementById('run-state').textContent.includes('COMPLETED'));

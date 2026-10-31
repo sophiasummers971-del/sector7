@@ -1,4 +1,4 @@
-import { TERMINAL, runLabel, workerState, routeFor, inventory } from './foundry-state.js';
+import { TERMINAL, runLabel, workerState, routeFor, inventory, startingPoints } from './foundry-state.js';
 import './theme.js';
 
 // Owner credentials stay in this tab, never in persisted run data or query strings.
@@ -47,7 +47,31 @@ function controls() {
   $('replay').title = busy ? 'Wait for submission reconciliation.' : !run?.events.length ? 'No saved event receipts to replay.' : 'Replay saved receipts without executing work.';
   $('replay').textContent = replaying ? 'Stop replay ■' : 'Replay messages ↺';
   document.querySelectorAll('input[name=term]').forEach(n => { n.disabled = busy || unresolved || replaying; });
+  drawStartingPoints();
 }
+function drawStartingPoints() {
+  const points = startingPoints({ connected, preview, workflow: inventoryState?.workflow, tasks: inventoryState?.tasks, unresolved });
+  $('starting-points').replaceChildren(...points.map(point => {
+    const card = node(point.href ? 'a' : 'button', undefined, 'starting-card');
+    card.append(node('strong', point.title), node('small', point.detail));
+    if (point.href) card.href = point.href;
+    else {
+      card.type = 'button';
+      card.disabled = busy || replaying;
+      card.title = card.disabled ? 'Finish reconciliation or stop replay before opening this view.' : point.detail;
+      card.onclick = () => { if (busy || replaying) return; point.action === 'inspect' ? inspect('results') : connect(); };
+    }
+    return card;
+  }));
+}
+$('idea-form').onsubmit = event => {
+  event.preventDefault();
+  const idea = ($('idea-input').value || '').slice(0, 500).trim();
+  $('idea-response').hidden = false;
+  $('idea-heading').textContent = idea ? 'Your idea: ' + idea : 'Choose a suggestion or write a short idea.';
+  $('idea-copy').textContent = idea ? 'Keep this idea in view while you choose a starting point below. This build cannot turn free text into a plan yet. Opening a suggestion does not run or approve work.' : 'The suggestions below show the tools and saved work currently available.';
+  drawStartingPoints();
+};
 function draw(state, events = state?.events || []) {
   const jobs = state?.jobs || [];
   if (!state) {

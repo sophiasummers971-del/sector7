@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "startedAt": "2026-10-30T23:26:41.023Z",
-  "completedAt": "2026-10-30T23:26:54.860Z",
+  "startedAt": "2026-10-31T00:18:15.244Z",
+  "completedAt": "2026-10-31T00:18:28.914Z",
   "node": "v24.22.1",
   "platform": "linux",
   "arch": "x64",
   "scope": "Isolated local runtime and local PostgreSQL policies; no live repository access",
   "source": {
-    "sha256": "e6b4a173a1b8bf8cca034d8e0043fb1c2b264c817c5892864f93a884028bc33c",
+    "sha256": "6ed06a7057c053b7a07a5fd7cf2eefe0efa42170836b1c5893bcb2e09f71e4ea",
     "files": [
       {
         "path": ".github/workflows/verify.yml",
@@ -35,15 +35,15 @@
       },
       {
         "path": "public/command.css",
-        "sha256": "5e5f4a7d397916c14278da32c3d2a6bb97a408a33af1b7af3fa42e6b10d629cb"
+        "sha256": "5ec3bad14512f1c0fa672e94d35b857898c91c9efaf2335fa25cc658df7b89c3"
       },
       {
         "path": "public/command.html",
-        "sha256": "a7d3e03e4f79738d9f4c01e73ce661f4866ef5a70d0d4d61236bcd2604c056e0"
+        "sha256": "f7f03a62b42546de26044ae317751ec4c4c7fedbaf7eb31032c9aee77d8c0289"
       },
       {
         "path": "public/command.js",
-        "sha256": "d2c2beb51ba12b665f975f110e5395d7f43801e95b141e63e212f1450f1b1aa1"
+        "sha256": "dc06eff15ebde49eff99a8a7edaa5cf1acc51a4492acb83ea4a6c48a9cb7eee9"
       },
       {
         "path": "public/evidence.js",
@@ -51,7 +51,7 @@
       },
       {
         "path": "public/foundry-state.js",
-        "sha256": "66c9dad258bbc38a7af7ae981b6a35b88ee3eb7f97ae52a8f906bc805f4ce4dc"
+        "sha256": "bd1b9e4557053c94ac67bf748aa38f10317a76122957f3afafa39b3365390817"
       },
       {
         "path": "public/index.html",
@@ -119,11 +119,11 @@
       },
       {
         "path": "test/command-browser-check.js",
-        "sha256": "bc9309e5bbbbec87154fd69ae8619a75572d1b3ced0ab2410d9bc4860592f600"
+        "sha256": "11bf87a84542a04a429f908b19737adf811bffb304616d0960e96c4ec065dc07"
       },
       {
         "path": "test/foundry.test.js",
-        "sha256": "62b380b42a72ce0080e8ce61caf2b16f2464e83ddbc49ddf7f7748fecb24fa31"
+        "sha256": "ba3c33fe70526e50479a76f4ee560703f51dd18b70cb660656d9ab4cb661c515"
       },
       {
         "path": "test/preflight.test.js",
@@ -164,7 +164,7 @@
       "id": "source-inventory",
       "status": "PASS",
       "details": {
-        "sha256": "e6b4a173a1b8bf8cca034d8e0043fb1c2b264c817c5892864f93a884028bc33c",
+        "sha256": "6ed06a7057c053b7a07a5fd7cf2eefe0efa42170836b1c5893bcb2e09f71e4ea",
         "files": 37
       }
     },
@@ -210,9 +210,9 @@
         "exitCode": 0,
         "timedOut": false,
         "outputLimit": false,
-        "durationMs": 13262,
-        "tests": 98,
-        "pass": 98,
+        "durationMs": 13628,
+        "tests": 100,
+        "pass": 100,
         "fail": 0,
         "skipped": 0,
         "cancelled": 0
@@ -229,7 +229,7 @@
       "id": "source-stability",
       "status": "PASS",
       "details": {
-        "sha256": "e6b4a173a1b8bf8cca034d8e0043fb1c2b264c817c5892864f93a884028bc33c"
+        "sha256": "6ed06a7057c053b7a07a5fd7cf2eefe0efa42170836b1c5893bcb2e09f71e4ea"
       }
     }
   ],

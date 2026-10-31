@@ -295,3 +295,25 @@ fieldset label{margin:0;padding:8px;font-size:12px;flex:1}
 .goal-pin{font-size:8px}
 .result-node>span:last-child{font-size:9px}
 }
+
+/* A small, read-only front door; execution remains in the existing controls. */
+.starting-desk{padding:23px;margin:0 0 22px;border:1px solid #387184;border-radius:7px;background:linear-gradient(125deg,#122a3b,var(--panel) 65%)}
+.starting-desk h2{font-size:25px;letter-spacing:-.6px;margin:7px 0 9px}
+.starting-desk>p{font-size:12px}
+#idea-form{display:flex;align-items:flex-end;gap:12px;margin:19px 0 10px}
+#idea-form>div{flex:1;min-width:0}
+#idea-form label{display:block;font-size:12px;margin-bottom:6px;color:var(--text)}
+#idea-input{display:block;width:100%;resize:vertical;min-height:76px;max-height:250px;padding:12px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--text);font:14px/1.6 system-ui}
+#idea-input::placeholder{color:var(--muted)}
+#idea-input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+#idea-form .primary{width:auto;flex-shrink:0;min-height:48px}
+.starting-desk .starting-help{font-size:11px;line-height:1.8}
+.starting-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+.starting-card{display:flex;flex-direction:column;justify-content:flex-start;gap:8px;padding:15px;background:var(--bg);border:1px solid var(--line);border-radius:5px;text-align:left;min-width:0;color:var(--text);min-height:96px;overflow-wrap:anywhere}
+.starting-card strong{font-size:13px;font-weight:600}
+.starting-card small{font:11px/1.8 system-ui;color:var(--muted)}
+.idea-response{border-left:2px solid var(--violet);padding:12px 15px;margin-top:16px;overflow-wrap:anywhere}
+.idea-response strong{font-size:13px;white-space:pre-wrap}
+.idea-response p{font-size:12px;line-height:1.8;margin-top:7px}
+@media(max-width:850px){.starting-points{grid-template-columns:1fr}.starting-card{min-height:80px}}
+@media(max-width:650px){.starting-desk{padding:17px}.starting-desk h2{font-size:23px}#idea-form{display:block}#idea-form .primary{width:100%;margin-top:10px}.starting-points{gap:9px}}
