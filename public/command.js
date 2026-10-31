@@ -1,4 +1,4 @@
-import { TERMINAL, runLabel, workerState, routeFor, inventory, startingPoints } from './foundry-state.js';
+import { TERMINAL, runLabel, workerState, routeFor, inventory, startingPoints, localWorkflowTrace } from './foundry-state.js';
 import './theme.js';
 
 // Owner credentials stay in this tab, never in persisted run data or query strings.
@@ -212,15 +212,38 @@ function connectionState() {
   $('observed').textContent = lastConfirmed ? `Connection snapshot confirmed: ${lastConfirmed}. Snapshot only; no heartbeat monitor. Refresh to reconcile.` : 'No confirmed response. Heartbeat monitoring is unavailable.';
   controls();
 }
+function drawLocalTrace() {
+  const trace = connected ? localWorkflowTrace(inventoryState?.tasks) : null;
+  const list = $('local-trace-steps');
+  if (!trace) {
+    $('local-trace-status').textContent = connected
+      ? 'No saved local workflow execution found. Create and run one in the Workflow Foundry.'
+      : 'Connection unconfirmed. Saved workflow status cannot be verified.';
+    list.replaceChildren();
+    return;
+  }
+  $('local-trace-status').textContent =
+    'Recorded run · ' + trace.status + ' · ' + trace.nodes.length +
+    ' observed steps. This is saved history, not a live swarm or heartbeat.';
+  list.replaceChildren(...trace.nodes.map((step, index) => {
+    const item = node('li', undefined, 'local-trace-step');
+    const label = node('span', String(index + 1).padStart(2, '0') + ' · ' + step.type);
+    const state = node('strong', step.status === 'completed' ? '✓ COMPLETED' : step.status);
+    item.dataset.state = step.status;
+    item.append(label, state);
+    return item;
+  }));
+}
 function drawInventory() {
   const totals = inventory(inventoryState?.tasks);
   $('inventory-workflows').textContent = inventoryState?.workflow ? '1' : '—';
   $('inventory-completed').textContent = totals ? `${totals.completed} / ${totals.runs}` : '—';
   $('inventory-waiting').textContent = totals?.waiting ?? '—';
   $('inventory-failed').textContent = totals?.failed ?? '—';
+  drawLocalTrace();
 }
 async function connect() {
-  connected = false; connectionState();
+  connected = false; connectionState(); drawLocalTrace();
   try {
     await api('/api/status');
     await refreshSafety();
@@ -235,7 +258,7 @@ async function connect() {
     }
     draw(run); controls();
   } catch {
-    connected = false; connectionState(); draw(run);
+    connected = false; connectionState(); draw(run); drawLocalTrace();
     notice('Owner connection unavailable. Open the private startup link from the local terminal, then refresh. Outcomes remain unconfirmed.', true);
   }
 }
