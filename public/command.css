@@ -333,3 +333,14 @@ fieldset label{margin:0;padding:8px;font-size:12px;flex:1}
 .local-trace-step[data-state="WAITING_APPROVAL"] strong{color:var(--amber)}
 .local-trace-step[data-state="failed"] strong,.local-trace-step[data-state="interrupted"] strong,.local-trace-step[data-state="unknown"] strong{color:var(--coral)}
 @media(max-width:650px){.local-trace-step{flex:1 1 120px;min-width:0}}
+
+
+/* Real saved workflow circuit: explicit connectors, inspectable receipts, no idle animation. */
+.local-trace-steps{align-items:center}
+.local-trace-step{position:relative;padding:0;overflow:visible}
+.local-trace-step:not(:last-child){margin-right:23px}
+.local-trace-step:not(:last-child)::after{content:"→";position:absolute;right:-26px;top:50%;transform:translateY(-50%);color:var(--cyan);font:19px var(--mono);pointer-events:none}
+.local-trace-inspect{display:flex;flex-direction:column;align-items:flex-start;gap:7px;width:100%;min-height:66px;padding:12px;border:0;background:transparent;text-align:left;word-break:break-word}
+.local-trace-inspect:hover,.local-trace-inspect:focus-visible{border:0;outline-offset:3px}
+.local-trace-step[data-state="WAITING_APPROVAL"]::after{color:var(--amber)}
+@media(max-width:650px){.local-trace-step:not(:last-child){margin-right:0}.local-trace-step:not(:last-child)::after{display:none}}
