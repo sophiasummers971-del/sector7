@@ -317,3 +317,57 @@ fieldset label{margin:0;padding:8px;font-size:12px;flex:1}
 .idea-response p{font-size:12px;line-height:1.8;margin-top:7px}
 @media(max-width:850px){.starting-points{grid-template-columns:1fr}.starting-card{min-height:80px}}
 @media(max-width:650px){.starting-desk{padding:17px}.starting-desk h2{font-size:23px}#idea-form{display:block}#idea-form .primary{width:100%;margin-top:10px}.starting-points{gap:9px}}
+
+
+/* Authenticated saved local workflow trace, distinct from the fictional scout map. */
+.local-trace{border:1px solid var(--line);border-radius:7px;background:var(--panel);padding:18px;margin:0 0 20px}
+.local-trace-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.local-trace-head h2{margin:5px 0;font-size:15px}
+.local-trace-head a{font-size:11px}
+.local-trace>p{font-size:11px;margin:10px 0}
+.local-trace-steps,.local-trace ol{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.local-trace-step{border:1px solid var(--line);background:var(--bg);border-radius:6px;display:flex;flex-direction:column;gap:6px;min-width:140px;padding:12px;font:11px var(--mono)}
+.local-trace-step span{color:var(--muted)}
+.local-trace-step strong{font-size:10px;color:var(--cyan)}
+.local-trace-step[data-state="WAITING_APPROVAL"]{border-color:var(--amber)}
+.local-trace-step[data-state="WAITING_APPROVAL"] strong{color:var(--amber)}
+.local-trace-step[data-state="failed"] strong,.local-trace-step[data-state="interrupted"] strong,.local-trace-step[data-state="unknown"] strong{color:var(--coral)}
+@media(max-width:650px){.local-trace-step{flex:1 1 120px;min-width:0}}
+
+
+/* Real saved workflow circuit: explicit connectors, inspectable receipts, no idle animation. */
+.local-trace-steps{align-items:center}
+.local-trace-step{position:relative;padding:0;overflow:visible}
+.local-trace-step:not(:last-child){margin-right:23px}
+.local-trace-step:not(:last-child)::after{content:"→";position:absolute;right:-26px;top:50%;transform:translateY(-50%);color:var(--cyan);font:19px var(--mono);pointer-events:none}
+.local-trace-inspect{display:flex;flex-direction:column;align-items:flex-start;gap:7px;width:100%;min-height:66px;padding:12px;border:0;background:transparent;text-align:left;word-break:break-word}
+.local-trace-inspect:hover,.local-trace-inspect:focus-visible{border:0;outline-offset:3px}
+.local-trace-step[data-state="WAITING_APPROVAL"]::after{color:var(--amber)}
+@media(max-width:650px){.local-trace-step:not(:last-child){margin-right:0}.local-trace-step:not(:last-child)::after{display:none}}
+
+/* Evidence trail: last confirmed recorded step, not an animated heartbeat. */
+.local-trace-step.recent-transition{border-color:var(--violet);box-shadow:inset 0 0 0 1px #bbabff33}
+.local-trace-step.recent-transition .local-trace-inspect::before{content:"LAST RECORDED";color:var(--violet);font:8px var(--mono);letter-spacing:.7px}
+.local-trace-step.recent-transition[data-state="WAITING_APPROVAL"]{border-color:var(--amber)}
+.local-trace-step.recent-transition[data-state="WAITING_APPROVAL"] .local-trace-inspect::before{color:var(--amber)}
+
+/* Two distinct evidence sources: fictional scout events vs saved local workflow steps. */
+.signal-view-switch{display:flex;gap:8px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.signal-view-switch button[aria-pressed="true"]{background:var(--surface2);border-color:var(--cyan);color:var(--cyan)}
+.local-signal-field{min-height:570px;padding:25px 20px;background:radial-gradient(ellipse at 50% 45%,#12304477,transparent 67%),var(--bg)}
+.local-signal-field>p{max-width:780px;font:11px/1.8 var(--mono);color:var(--muted)}
+.local-signal-field>a{display:inline-block;margin-top:24px;font-size:12px}
+.local-signal-field ol{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:26px;list-style:none;padding:30px 0 0;margin:0}
+.local-signal-node{position:relative;flex:0 1 160px;min-width:125px}
+.local-signal-node:not(:last-child)::after{content:"⟶";position:absolute;right:-25px;top:50%;transform:translateY(-50%);color:var(--cyan)}
+.local-signal-node button{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;min-height:90px;width:100%;text-align:left;background:linear-gradient(140deg,#172d40,#101a2c);border:1px solid var(--cyan);box-shadow:0 0 16px #63e5f31c}
+.local-signal-node small{font:10px var(--mono);color:var(--muted);overflow-wrap:anywhere}
+.local-signal-node strong{font:10px var(--mono);color:var(--cyan)}
+.local-signal-node[data-state="WAITING_APPROVAL"] button{border-color:var(--amber)}
+.local-signal-node[data-state="WAITING_APPROVAL"] strong{color:var(--amber)}
+.local-signal-node[data-state="unknown"] button,.local-signal-node[data-state="failed"] button,.local-signal-node[data-state="interrupted"] button{border-color:var(--coral)}
+.local-signal-node[data-state="unknown"] strong,.local-signal-node[data-state="failed"] strong,.local-signal-node[data-state="interrupted"] strong{color:var(--coral)}
+@media(max-width:650px){.local-signal-field{min-height:300px}.local-signal-field ol{gap:20px}.local-signal-node{flex:1 1 115px}.local-signal-node:not(:last-child)::after{display:none}.signal-view-switch button{flex:1;font-size:11px}}
+
+.local-signal-field #refresh-local-signal{margin:0 0 12px;font-size:11px}
+.local-signal-field #local-signal-observed{color:var(--violet);font:10px/1.7 var(--mono);margin-bottom:10px}

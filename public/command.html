@@ -28,6 +28,11 @@
   <div id="starting-points" class="starting-points" aria-label="Suggested starting points"></div>
  </section>
  <section class="telemetry" aria-label="Confirmed workflow inventory"><div><span>SAVED WORKFLOWS</span><strong id="inventory-workflows">—</strong><small>one local definition slot</small></div><div><span>WORKFLOW RUNS</span><strong id="inventory-completed">—</strong><small>completed / saved runs</small></div><div><span>AWAITING APPROVAL</span><strong id="inventory-waiting">—</strong><a href="/studio">Inspect exact run in foundry ↗</a></div><div><span>FAILED / INTERRUPTED</span><strong id="inventory-failed">—</strong><small>includes rejected workflows</small></div></section>
+ <section class="local-trace" aria-labelledby="local-trace-heading">
+  <div class="local-trace-head"><div><span class="eyebrow">SAVED WORKFLOW / ACTUAL RECORDS</span><h2 id="local-trace-heading">Inside your latest local run</h2></div><a href="/studio">Open workflow and approvals ↗</a></div>
+  <p id="local-trace-status">Connect to inspect a recorded workflow run. No live worker activity is inferred.</p>
+  <ol id="local-trace-steps" aria-label="Recorded workflow steps"></ol>
+ </section>
  <p class="observation" id="observed">No confirmed connection yet. Heartbeat monitoring is unavailable.</p>
  <div class="factory-grid">
  <section id="control-frame" class="control-frame" aria-labelledby="mission-heading" tabindex="-1">
@@ -40,7 +45,9 @@
   </div>
  </section>
  <section class="canvas-panel" aria-labelledby="canvas-heading"><div class="section-head"><div><span class="eyebrow">02 / SIGNAL FIELD</span><h2 id="canvas-heading">Watch the work take shape.</h2></div><span class="badge" id="run-state">STANDBY</span></div>
-  <div class="canvas-toolbar"><span id="canvas-mode">No run yet</span><div class="camera"><button id="zoom-out" aria-label="Zoom out signal field">−</button><output id="zoom-level">100%</output><button id="zoom-in" aria-label="Zoom in signal field">+</button><button id="fit-field">Fit</button></div></div>
+  <div class="signal-view-switch" role="group" aria-label="Signal field source"><button id="view-scout" type="button" aria-pressed="true">Scout rehearsal</button><button id="view-local" type="button" aria-pressed="false">Saved workflow</button></div>
+  <div id="local-signal-field" class="local-signal-field" hidden><button id="refresh-local-signal" type="button">Refresh saved workflow evidence ↻</button><p id="local-signal-observed" role="status">No confirmed workflow snapshot yet.</p><p id="local-signal-caption">Read-only saved workflow evidence. No live activity is inferred.</p><ol id="local-signal-steps" aria-label="Saved workflow signal path"></ol><a href="/studio">Open workflow editor and approval controls ↗</a></div>
+  <div id="scout-signal-field"><div class="canvas-toolbar"><span id="canvas-mode">No run yet</span><div class="camera"><button id="zoom-out" aria-label="Zoom out signal field">−</button><output id="zoom-level">100%</output><button id="zoom-in" aria-label="Zoom in signal field">+</button><button id="fit-field">Fit</button></div></div>
   <div class="canvas" id="canvas" tabindex="0" aria-label="Signal field. Scroll or drag empty space to pan. Arrow keys pan; plus and minus zoom; 0 fits."><div class="map-stage" id="map-stage">
    <svg class="routes" viewBox="0 0 900 600" preserveAspectRatio="none" aria-hidden="true"><path id="route-start" d="M450 65 C450 100 450 100 450 135"/><path id="route-left" d="M450 205 C450 265 205 195 205 295"/><path id="route-right" d="M450 205 C450 265 695 195 695 295"/><path id="route-return-left" d="M205 405 C205 500 450 415 450 505"/><path id="route-return-right" d="M695 405 C695 500 450 415 450 505"/></svg>
    <div class="goal-pin"><span>◇</span> LOCAL SAMPLE REHEARSAL</div>
@@ -51,6 +58,7 @@
    <button class="result-node" data-inspect="results"><span>▤</span><span>Collected evidence</span><span id="map-count">0 results</span></button>
   </div></div>
   <div class="canvas-footer"><span>Drag blank space / scroll to pan · select a node to inspect</span><button id="replay" class="text-button" disabled>Replay messages ↺</button></div>
+  </div>
   <div class="signal-legend"><span>◇ Idle</span><span>↗ Dispatched</span><span>◉ Accepted</span><span>✓ Completed</span><span>× Failed</span><span>Ⅱ Interrupted</span></div>
  </section>
  <aside id="trace" class="activity-panel"><div class="section-head"><div><span class="eyebrow">03 / EXECUTION TRACE</span><h2>Every handoff, accounted for.</h2></div></div><div class="feed-header"><span id="feed-label">AWAITING RECORDED SIGNAL</span><span id="event-count">00</span></div><ol id="events" class="events"><li class="empty-feed"><span>⌁</span><strong>The field is quiet.</strong><p>No execution is assumed. Events appear only when recorded.</p></li></ol><div class="feed-foot">SELECT AN EVENT FOR ITS SAVED RECEIPT</div></aside>

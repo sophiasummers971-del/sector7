@@ -44,3 +44,42 @@ export function startingPoints({ connected = false, preview = false, workflow, t
   points.push({ title: 'Start a text review', detail: 'Open the local preset: trim spaces, change case and review the result.', href: '/studio#text-preset' });
   return points.slice(0, 3);
 }
+
+
+/**
+ * Read-only projection of an existing, persisted local workflow run.
+ * No output payloads or secrets are copied into the display model.
+ * A projection is historical evidence, never proof of a live agent.
+ */
+export function localWorkflowTrace(tasks) {
+  if (!Array.isArray(tasks)) return null;
+  const valid = item =>
+    item && typeof item === 'object' && !Array.isArray(item) &&
+    Array.isArray(item.nodeResults) && Array.isArray(item.workflowSnapshot?.definition?.nodes) &&
+    typeof item.id === 'string';
+  // Prefer work requiring human attention; otherwise show the newest record.
+  // The API returns newest first. Do not infer activity from timestamps.
+  const task = tasks.find(item => valid(item) && item.status === 'WAITING_APPROVAL') ||
+    tasks.find(valid);
+  if (!task) return null;
+  const definition = task.workflowSnapshot.definition;
+  const byId = new Map(definition.nodes.filter(n => typeof n?.id === 'string').map(n => [n.id, n]));
+  const nodes = task.nodeResults.filter(record => byId.has(record?.id)).slice(0, 12).map(record => ({
+    id: record.id,
+    type: String(byId.get(record.id).type || 'step'),
+    status: ['completed', 'WAITING_APPROVAL', 'failed', 'interrupted', 'rejected', 'cancelled'].includes(record.status)
+      ? record.status : 'unknown',
+    at: typeof record.at === 'string' ? record.at : null,
+  }));
+  return {
+    id: task.id,
+    status: typeof task.status === 'string' ? task.status : 'unknown',
+    nodes,
+    recorded: true,
+    waiting: task.status === 'WAITING_APPROVAL',
+    guidance: task.status === 'WAITING_APPROVAL' ? 'Approval required: open Workflow Foundry to inspect the exact saved pause.' :
+      ['interrupted','failed','rejected','cancelled'].includes(task.status) ? 'Execution did not finish successfully. Inspect the saved run; no automatic retry is performed.' :
+      task.status === 'completed' ? 'Recorded execution finished. Inspect the evidence or start a new run in Workflow Foundry.' :
+      'Outcome not confirmed here. Open Workflow Foundry and refresh before taking further action.',
+  };
+}
