@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
-import { runLabel, workerState, routeFor, inventory, preferences, startingPoints } from '../public/foundry-state.js';
+import { runLabel, workerState, routeFor, inventory, preferences, startingPoints, localWorkflowTrace } from '../public/foundry-state.js';
 import { runScout, loadScoutRun } from '../scout.js';
 import { createScoutService } from '../scout-service.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -158,4 +158,26 @@ test('typed idea stays literal and local; choosing a next step cannot submit or 
   assert.equal(c.get('starting-points').children[0].href,'/studio#text-preset');
   c.get('idea-input').value=''; c.get('idea-form').onsubmit({preventDefault(){}});
   assert.match(c.get('idea-heading').textContent,/Choose a suggestion/);
+});
+
+test('actual workflow trace is read-only, bounded, and never invents agent activity', () => {
+  assert.equal(localWorkflowTrace(null), null);
+  assert.equal(localWorkflowTrace([{id:'not-a-workflow',status:'completed'}]), null);
+  const recorded = {
+    id:'run-real',status:'WAITING_APPROVAL',
+    workflowSnapshot:{definition:{nodes:[{id:'start',type:'start'},{id:'transform',type:'text.transform'},{id:'approval',type:'approval'}]}},
+    nodeResults:[
+      {id:'start',status:'completed',at:'2026-10-30T10:00:00Z',result:{secret:'never disclose'}},
+      {id:'transform',status:'completed',result:{text:'private text'}},
+      {id:'approval',status:'WAITING_APPROVAL',inputs:{text:'private text'}}
+    ]
+  };
+  const actual = localWorkflowTrace([recorded]);
+  assert.equal(actual.status,'WAITING_APPROVAL');
+  assert.equal(actual.waiting,true);
+  assert.deepEqual(actual.nodes.map(n=>n.status),['completed','completed','WAITING_APPROVAL']);
+  assert.equal(JSON.stringify(actual).includes('private text'),false);
+  assert.equal(JSON.stringify(actual).includes('never disclose'),false);
+  recorded.nodeResults.push({id:'unknown-step',status:'running'});
+  assert.equal(localWorkflowTrace([recorded]).nodes.length,3);
 });
