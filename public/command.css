@@ -368,3 +368,6 @@ fieldset label{margin:0;padding:8px;font-size:12px;flex:1}
 .local-signal-node[data-state="unknown"] button,.local-signal-node[data-state="failed"] button,.local-signal-node[data-state="interrupted"] button{border-color:var(--coral)}
 .local-signal-node[data-state="unknown"] strong,.local-signal-node[data-state="failed"] strong,.local-signal-node[data-state="interrupted"] strong{color:var(--coral)}
 @media(max-width:650px){.local-signal-field{min-height:300px}.local-signal-field ol{gap:20px}.local-signal-node{flex:1 1 115px}.local-signal-node:not(:last-child)::after{display:none}.signal-view-switch button{flex:1;font-size:11px}}
+
+.local-signal-field #refresh-local-signal{margin:0 0 12px;font-size:11px}
+.local-signal-field #local-signal-observed{color:var(--violet);font:10px/1.7 var(--mono);margin-bottom:10px}
