@@ -224,7 +224,7 @@ function drawLocalTrace() {
   }
   $('local-trace-status').textContent =
     'Recorded run · ' + trace.status + ' · ' + trace.nodes.length +
-    ' observed steps. This is saved history, not a live swarm or heartbeat.';
+    ' observed steps. ' + trace.guidance + ' Saved history only; not a live swarm.';
   list.replaceChildren(...trace.nodes.map((step, index) => {
     const item = node('li', undefined, 'local-trace-step');
     item.dataset.state = step.status;
