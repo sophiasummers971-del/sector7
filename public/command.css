@@ -317,3 +317,19 @@ fieldset label{margin:0;padding:8px;font-size:12px;flex:1}
 .idea-response p{font-size:12px;line-height:1.8;margin-top:7px}
 @media(max-width:850px){.starting-points{grid-template-columns:1fr}.starting-card{min-height:80px}}
 @media(max-width:650px){.starting-desk{padding:17px}.starting-desk h2{font-size:23px}#idea-form{display:block}#idea-form .primary{width:100%;margin-top:10px}.starting-points{gap:9px}}
+
+
+/* Authenticated saved local workflow trace, distinct from the fictional scout map. */
+.local-trace{border:1px solid var(--line);border-radius:7px;background:var(--panel);padding:18px;margin:0 0 20px}
+.local-trace-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.local-trace-head h2{margin:5px 0;font-size:15px}
+.local-trace-head a{font-size:11px}
+.local-trace>p{font-size:11px;margin:10px 0}
+.local-trace-steps,.local-trace ol{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.local-trace-step{border:1px solid var(--line);background:var(--bg);border-radius:6px;display:flex;flex-direction:column;gap:6px;min-width:140px;padding:12px;font:11px var(--mono)}
+.local-trace-step span{color:var(--muted)}
+.local-trace-step strong{font-size:10px;color:var(--cyan)}
+.local-trace-step[data-state="WAITING_APPROVAL"]{border-color:var(--amber)}
+.local-trace-step[data-state="WAITING_APPROVAL"] strong{color:var(--amber)}
+.local-trace-step[data-state="failed"] strong,.local-trace-step[data-state="interrupted"] strong,.local-trace-step[data-state="unknown"] strong{color:var(--coral)}
+@media(max-width:650px){.local-trace-step{flex:1 1 120px;min-width:0}}
