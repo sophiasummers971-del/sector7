@@ -257,6 +257,10 @@ function selectSignalView(next) {
   drawLocalSignal();
 }
 function drawLocalSignal() {
+  $('refresh-local-signal').disabled = busy || replaying;
+  $('local-signal-observed').textContent = connected && lastConfirmed
+    ? 'Last verified snapshot: ' + lastConfirmed + '. Refresh to check changes; no live monitoring.'
+    : 'No verified current snapshot. Display is unavailable until reconnection.';
   const list = $('local-signal-steps');
   const trace = connected ? localWorkflowTrace(inventoryState?.tasks) : null;
   if (!trace) {
@@ -285,6 +289,7 @@ function drawLocalSignal() {
 }
 $('view-local').onclick = () => selectSignalView('local');
 $('view-scout').onclick = () => selectSignalView('scout');
+$('refresh-local-signal').onclick = async () => { if (busy || replaying) return; await connect(); };
 function drawInventory() {
   const totals = inventory(inventoryState?.tasks);
   $('inventory-workflows').textContent = inventoryState?.workflow ? '1' : '—';
