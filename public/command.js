@@ -230,7 +230,7 @@ function drawLocalTrace() {
     item.dataset.state = step.status;
     const detail = node('button', undefined, 'local-trace-inspect');
     detail.type = 'button';
-    detail.setAttribute('aria-label', 'Inspect recorded step ' + (index + 1) + ': ' + step.type);
+    detail.ariaLabel = 'Inspect recorded step ' + (index + 1) + ': ' + step.type;
     detail.append(node('span', String(index + 1).padStart(2, '0') + ' · ' + step.type),
       node('strong', step.status === 'completed' ? '✓ COMPLETED' : step.status));
     detail.onclick = () => showEvidence('Saved workflow step / ' + (index + 1),
