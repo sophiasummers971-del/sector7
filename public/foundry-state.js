@@ -44,3 +44,35 @@ export function startingPoints({ connected = false, preview = false, workflow, t
   points.push({ title: 'Start a text review', detail: 'Open the local preset: trim spaces, change case and review the result.', href: '/studio#text-preset' });
   return points.slice(0, 3);
 }
+
+
+/**
+ * Read-only projection of an existing, persisted local workflow run.
+ * No output payloads or secrets are copied into the display model.
+ * A projection is historical evidence, never proof of a live agent.
+ */
+export function localWorkflowTrace(tasks) {
+  if (!Array.isArray(tasks)) return null;
+  const task = tasks.find(item =>
+    item && typeof item === 'object' && !Array.isArray(item) &&
+    Array.isArray(item.nodeResults) && item.workflowSnapshot?.definition?.nodes &&
+    typeof item.id === 'string'
+  );
+  if (!task) return null;
+  const definition = task.workflowSnapshot.definition;
+  const byId = new Map(definition.nodes.filter(n => typeof n?.id === 'string').map(n => [n.id, n]));
+  const nodes = task.nodeResults.filter(record => byId.has(record?.id)).slice(0, 12).map(record => ({
+    id: record.id,
+    type: String(byId.get(record.id).type || 'step'),
+    status: ['completed', 'WAITING_APPROVAL', 'failed', 'interrupted', 'rejected', 'cancelled'].includes(record.status)
+      ? record.status : 'unknown',
+    at: typeof record.at === 'string' ? record.at : null,
+  }));
+  return {
+    id: task.id,
+    status: typeof task.status === 'string' ? task.status : 'unknown',
+    nodes,
+    recorded: true,
+    waiting: task.status === 'WAITING_APPROVAL',
+  };
+}
