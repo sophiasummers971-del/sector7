@@ -52,7 +52,13 @@ power-loss durability, hostile-OS isolation, MFA or independent human attributio
 
 1. Start Node normally and open the private owner URL from the local terminal.
    A random 256-bit key is generated in the ignored data directory, mode 0600 on
-   supported systems. Optional SECTOR7_ACCESS_TOKEN must be a strong random
+   POSIX systems. On Windows, creation/reopening replaces the credential file's
+   DACL with protected access for the current Windows account, SYSTEM and local
+   Administrators, then reads it back to verify the allowed identities. Failure
+   refuses startup; no execution-policy change or credential rotation is used.
+   Existing keys retain their bytes. This protects the key file, not every local
+   plaintext record or a compromised owner/administrator account.
+   Optional SECTOR7_ACCESS_TOKEN must be a strong random
    40–128-character URL-safe value. Never put it into Git or a shared URL/query.
 2. Use Pause & stop to stop admission and request active cancellation. Refresh
    the record to confirm all workers have reached terminal states.
@@ -68,6 +74,10 @@ power-loss durability, hostile-OS isolation, MFA or independent human attributio
 5. If the owner key is disclosed, stop the server, establish a new strong local
    credential and restart. This is a local key-rotation procedure, not a remotely
    verified identity recovery service.
+
+See `docs/LOCAL-RECOVERY.md` for the stopped-store backup/restore procedure and
+the automated disposable restore drill. A successful local copy drill does not
+establish encrypted backups, media redundancy or power-loss durability.
 
 Authenticated API controls: GET /api/scout/control for the actual limits/state;
 POST /api/scout/control with exactly {action: pause|reset|resume};

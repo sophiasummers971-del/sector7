@@ -1,6 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { lstat, open, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { protectCredentialFile } from './credential-file.js';
 
 export const LIMITS = Object.freeze({ jobMs: 2000, batchMs: 15000, outputBytes: 8192,
   failures: 3, runs: 100, diskBytes: 20 * 1024 * 1024, requestsPerMinute: 120,
@@ -23,11 +24,15 @@ export async function ownerCredential(dataDir, configured = process.env.SECTOR7_
   const file = path.join(dataDir, '.owner-key');
   try {
     const handle = await open(file, 'wx', 0o600);
-    try { await handle.writeFile(randomBytes(32).toString('base64url')); await handle.sync(); }
+    try {
+      await protectCredentialFile(file);
+      await handle.writeFile(randomBytes(32).toString('base64url')); await handle.sync();
+    }
     finally { await handle.close(); }
   } catch (error) { if (error.code !== 'EEXIST') throw error; }
   const stat = await lstat(file);
   if (!stat.isFile() || stat.size < 40 || stat.size > 128 || (process.platform !== 'win32' && (stat.mode & 0o077))) throw new Error('Owner key must be a private regular file');
+  await protectCredentialFile(file);
   const value = await readFile(file, 'utf8');
   if (!/^[A-Za-z0-9_-]{40,128}$/.test(value)) throw new Error('Invalid owner credential file');
   return value;
