@@ -1,3 +1,4 @@
+import { stopServer } from './server-process.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -15,7 +16,7 @@ test('local task execution, validation, idempotency and restart persistence', as
   let base;
   async function start() {
     child = spawn(process.execPath, ['server.js'], { cwd: root,
-      env: { ...process.env, SECTOR7_ACCESS_TOKEN: testOwnerKey, PORT: '0', SECTOR7_HOST: '127.0.0.1', SECTOR7_DATA_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
+      env: { ...process.env, SECTOR7_ACCESS_TOKEN: testOwnerKey, PORT: '0', SECTOR7_HOST: '127.0.0.1', SECTOR7_DATA_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
     base = await new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(Error('Server startup timed out')), 5000);
       child.once('error', error => { clearTimeout(timer); reject(error); });
@@ -24,7 +25,7 @@ test('local task execution, validation, idempotency and restart persistence', as
     });
   }
   async function stop() {
-    if (child && child.exitCode === null) { const ended = once(child, 'exit'); child.kill(); await ended; }
+    await stopServer(child);
   }
   async function post(body, type='application/json') {
     const response = await fetch(base+'/api/tasks', { method:'POST', headers:{'Content-Type':type}, body });

@@ -90,9 +90,9 @@ test('run quota fails closed without deleting history', async () => isolated(asy
   await assert.rejects(runScout(fixture, { dataDir }), { status: 507 });
   assert.equal((await readFile(path.join(root, 'examples', 'scout-samples.json'), 'utf8')).includes('FICTIONAL'), true);
 }));
-test('symlinked data directory is rejected before executing a worker', { skip: process.platform === 'win32' }, async () => isolated(async dir => {
+test('linked data directory is rejected before executing a worker', async () => isolated(async dir => {
   const real = path.join(dir, 'real'), link = path.join(dir, 'link');
-  await mkdir(real); await symlink(real, link);
+  await mkdir(real); await symlink(real, link, process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(runScout(fixture, { dataDir: link }), /directory type/);
 }));
 test('safety write failure leaves a recovery marker and cannot resume after restart', async () => isolated(async dataDir => {

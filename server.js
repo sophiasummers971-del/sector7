@@ -1,5 +1,6 @@
+import { replaceFile } from './storage.js';
 import http from 'node:http';
-import { readFile, mkdir, writeFile, rename, realpath, open, unlink } from 'node:fs/promises';
+import { readFile, mkdir, writeFile, realpath, open, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
@@ -30,7 +31,7 @@ async function save() {
   const bytes = JSON.stringify(tasks, null, 2) + '\n';
   if (Buffer.byteLength(bytes) > 5 * 1024 * 1024) throw new Error('Legacy task storage limit reached');
   await writeFile(file + '.tmp', bytes, { mode: 0o600 });
-  await rename(file + '.tmp', file);
+  await replaceFile(file + '.tmp', file);
 }
 for (const task of tasks) {
   if (task.status === 'running') {
@@ -48,7 +49,7 @@ try {
   if (error.code !== 'ENOENT') throw error;
   workflow = savedWorkflow(defaultDefinition);
   await writeFile(workflowFile + '.tmp', JSON.stringify(workflow, null, 2) + '\n');
-  await rename(workflowFile + '.tmp', workflowFile);
+  await replaceFile(workflowFile + '.tmp', workflowFile);
 }
 const page = await readFile(path.join(root, 'public', 'index.html'));
 const assets = new Map([['/', { body: page, type: 'text/html; charset=utf-8' }]]);
@@ -221,7 +222,7 @@ const server = http.createServer(async (req, res) => {
         if (storageFailed) return reply(res, 503, { error: 'Storage unavailable' });
         try {
           await writeFile(workflowFile + '.tmp', JSON.stringify(candidate, null, 2) + '\n');
-          await rename(workflowFile + '.tmp', workflowFile);
+          await replaceFile(workflowFile + '.tmp', workflowFile);
           workflow = candidate;
         } catch (error) { storageFailed = true; throw error; }
         reply(res, 200, workflow);
@@ -257,10 +258,22 @@ server.listen(Number(process.env.PORT || 3000), host, () => {
   console.log(`Sector 7: http://${host}:${server.address().port}`);
   console.log(`Private owner link (do not share): http://${host}:${server.address().port}/#access=${credential}`);
 });
-for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => {
+let shuttingDown = false;
+function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
   scouts.stop();
   server.close(() => { Promise.allSettled([queue, scouts.drain()]).then(async () => {
     await serverLock.close(); await unlink(serverLockPath); process.exit(0);
   }); });
   server.closeIdleConnections();
-});
+}
+for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, shutdown);
+// This channel exists only when a trusted host starts this process with IPC.
+// No HTTP shutdown route or new application permission is exposed.
+if (process.send) {
+  process.on('message', message => {
+    if (message?.type === 'sector7.shutdown' && Object.keys(message).length === 1) shutdown();
+  });
+  process.on('disconnect', shutdown);
+}

@@ -1,3 +1,4 @@
+import { stopServer } from './server-process.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -14,7 +15,7 @@ test('command centre serves real scout records and retains workflow studio', asy
   const dir = await mkdtemp(path.join(root, '.test-data-command-'));
   let child, base;
   async function start() {
-    child = spawn(process.execPath, ['server.js'], { cwd: root, env: { ...process.env, SECTOR7_ACCESS_TOKEN: testOwnerKey, PORT: '0', SECTOR7_HOST: '127.0.0.1', SECTOR7_DATA_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
+    child = spawn(process.execPath, ['server.js'], { cwd: root, env: { ...process.env, SECTOR7_ACCESS_TOKEN: testOwnerKey, PORT: '0', SECTOR7_HOST: '127.0.0.1', SECTOR7_DATA_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
     base = await new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('Startup timeout')), 5000);
       child.once('error', error => { clearTimeout(timer); reject(error); });
@@ -22,7 +23,7 @@ test('command centre serves real scout records and retains workflow studio', asy
       child.stdout.on('data', chunk => { const match = String(chunk).match(/http:\/\/127\.0\.0\.1:\d+/); if (match) { clearTimeout(timer); resolve(match[0]); } });
     });
   }
-  async function stop() { if (child && child.exitCode === null) { const done = once(child, 'exit'); child.kill(); await done; } }
+  async function stop() { await stopServer(child); }
   async function post(body, headers = {}) { return fetch(base + '/api/scout', { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) }); }
   async function result(key) {
     for (let i = 0; i < 100; i++) {
@@ -39,7 +40,7 @@ test('command centre serves real scout records and retains workflow studio', asy
     await start();
     await t.test('second server cannot share the store and plaintext LAN startup is refused', async () => {
       for (const host of ['127.0.0.1', '192.168.0.86']) {
-        const extra = spawn(process.execPath, ['server.js'], { cwd: root, env: { ...process.env, PORT: '0', SECTOR7_HOST: host, SECTOR7_DATA_DIR: dir, SECTOR7_ACCESS_TOKEN: testOwnerKey }, stdio: ['ignore', 'pipe', 'pipe'] });
+        const extra = spawn(process.execPath, ['server.js'], { cwd: root, env: { ...process.env, PORT: '0', SECTOR7_HOST: host, SECTOR7_DATA_DIR: dir, SECTOR7_ACCESS_TOKEN: testOwnerKey }, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
         let output = ''; extra.stderr.on('data', chunk => { output += String(chunk); });
         const [code] = await once(extra, 'exit');
         assert.notEqual(code, 0);

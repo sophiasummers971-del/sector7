@@ -303,7 +303,7 @@ fieldset label{margin:0;padding:8px;font-size:12px;flex:1}
 #idea-form{display:flex;align-items:flex-end;gap:12px;margin:19px 0 10px}
 #idea-form>div{flex:1;min-width:0}
 #idea-form label{display:block;font-size:12px;margin-bottom:6px;color:var(--text)}
-#idea-input{display:block;width:100%;resize:vertical;min-height:76px;max-height:250px;padding:12px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--text);font:14px/1.6 system-ui}
+#idea-input{display:block;width:100%;resize:vertical;min-height:76px;max-height:250px;padding:12px;border:1px solid var(--muted);border-radius:5px;background:var(--bg);color:var(--text);font:14px/1.6 system-ui}
 #idea-input::placeholder{color:var(--muted)}
 #idea-input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
 #idea-form .primary{width:auto;flex-shrink:0;min-height:48px}

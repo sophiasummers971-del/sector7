@@ -1,0 +1,274 @@
+{
+  "version": 1,
+  "startedAt": "2026-11-01T02:46:41.207Z",
+  "completedAt": "2026-11-01T02:47:16.281Z",
+  "node": "v24.22.1",
+  "platform": "win32",
+  "arch": "x64",
+  "scope": "Isolated local runtime and local PostgreSQL policies; no live repository access",
+  "source": {
+    "sha256": "1bccf9e70056ce25091191f636f640bc54d9fbc68327b9a25f78dcab263d70e1",
+    "files": [
+      {
+        "path": ".github/workflows/verify.yml",
+        "sha256": "33f827ab0db816984da41e6385684206d91e7264e54b33b539b768cfe8bae58e"
+      },
+      {
+        "path": "db/0001_owner_isolation.sql",
+        "sha256": "40011e7ae6bf2c35da8696f3a6dd002506cfcfdf7c50f4dc291ffea79f76687b"
+      },
+      {
+        "path": "examples/scout-samples.json",
+        "sha256": "3776a29f4f4ee420feecf62614a7716066ce45de82a0c86893e8465d6e50c4c6"
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "4a5fb89cb5bd9318920ee29bdbcca814138cedd8b70cdec07455014f29851676"
+      },
+      {
+        "path": "package.json",
+        "sha256": "dec89d80f37d53d2fdecbf564c6e5cc58263798df64b52ee752cc72dbb869ccf"
+      },
+      {
+        "path": "public/app.js",
+        "sha256": "2cf25159906bd5ec7f031d289cf1ad07ec3fb6de0cd549fa4e1156fa2aeb3895"
+      },
+      {
+        "path": "public/command.css",
+        "sha256": "df212bbf3d64146b720e87c54da5b5556fd5fc57a87c626c5b30b6d1978d16a9"
+      },
+      {
+        "path": "public/command.html",
+        "sha256": "fed346f131ea718ff0ebabafd09d51ca319b2490c862d0ec29b07657a386aa4b"
+      },
+      {
+        "path": "public/command.js",
+        "sha256": "de006ae82687dd4647a7057ad802f8fb3a006758be1963e57232796aba23edcf"
+      },
+      {
+        "path": "public/evidence.js",
+        "sha256": "02f6d877261f589f52e6a93848cd58b7a4edb0faaad38a25e3777e0a526c6933"
+      },
+      {
+        "path": "public/foundry-state.js",
+        "sha256": "135748f0582e4457e29eb909b665d95beb898024c154e65e63c2c660d281f360"
+      },
+      {
+        "path": "public/index.html",
+        "sha256": "4919a79b526aa6f997d57f0f3a720d0cf81a401cfe8760cef8ff81dea3571542"
+      },
+      {
+        "path": "public/styles.css",
+        "sha256": "4f0b04287c87d507d41edbc792899cdb710b38839b592ba623df25750fdbfbd0"
+      },
+      {
+        "path": "public/theme.js",
+        "sha256": "8de7ecdc2831788d8ccc4ca703d9fa3203862dae4b0a903d4ccd8470a979cc8b"
+      },
+      {
+        "path": "public/tokens.css",
+        "sha256": "a62f5ccfff57d0d4ff385be6b659f2b0a7026ddb4b701f22a0ecd7ec2b18fd48"
+      },
+      {
+        "path": "scout-service.js",
+        "sha256": "82eb69271c4274336abb049422e4fb3bbf059276e4a86630a4f66182e82001e6"
+      },
+      {
+        "path": "scout-supervisor.js",
+        "sha256": "c67db23c239f08c0f4c5234dacbc0b6d96016a4aed7b4312fb5ae501a20a10fd"
+      },
+      {
+        "path": "scout-worker.js",
+        "sha256": "075a2b9fd3ff32a39877de667897fece59739569a6a1a59ba91367daaaf2598d"
+      },
+      {
+        "path": "scout.js",
+        "sha256": "7c2beb4c5bf881d55fe6eab9449374ffba970bd5a7992f3e08b889e43c5a1566"
+      },
+      {
+        "path": "scripts/build-command-preview.js",
+        "sha256": "03102176fca30dd6229a615aeb35b0037f171d90dfc8fc39c38774faee6df06e"
+      },
+      {
+        "path": "scripts/preflight-process.js",
+        "sha256": "3e9d64f336321e1e924b01dee5f1d3221a41d94c33f11ba52ce04522d255d50f"
+      },
+      {
+        "path": "scripts/scout-demo.js",
+        "sha256": "59a300f7476011de02c2f0cf33e62dc76dd85ede101be9dd63bb4674ba5068d1"
+      },
+      {
+        "path": "scripts/security-preflight.js",
+        "sha256": "695d41d9a119a2ce425cc17825b58348a79c621b9a2e2aa46bae6798b7b8cb01"
+      },
+      {
+        "path": "security.js",
+        "sha256": "7516c751d58f93e23ae2944df1be344a61c6d05d88c7d2fd1cf2365e6d93792d"
+      },
+      {
+        "path": "server.js",
+        "sha256": "2d9fd63ff0b17160425576e8fb61b07106a93ba96c06c0b16137ede342f3d193"
+      },
+      {
+        "path": "storage.js",
+        "sha256": "57b99ba1cae24960e763d908707fa6865683dbe1e46da1fbbfdbbdb402e5b0f9"
+      },
+      {
+        "path": "test/browser-check.js",
+        "sha256": "9df1f03eab7db2d8f3cc2334b537d40806096df20ce9715eaa2a08a1991e3a3d"
+      },
+      {
+        "path": "test/command-api.test.js",
+        "sha256": "9d90fb908e49d8b779cedfc981dc4134fe548e71fd0b19fcc12f383a5701f83e"
+      },
+      {
+        "path": "test/command-browser-check.js",
+        "sha256": "366d2c2fe2f2cf3f1de3c49933942a16c551e93fb2392f38ed50f92b1a5b0b89"
+      },
+      {
+        "path": "test/foundry.test.js",
+        "sha256": "e8864c2b30f2d7c52e936faf45231a316075a137a3deaf18a3276a19a4cfc29c"
+      },
+      {
+        "path": "test/preflight.test.js",
+        "sha256": "2dd220ebedd6caabb3af8fb0be5cf6bb8bff80c3d11ca7ec5d08a383f3da8160"
+      },
+      {
+        "path": "test/prototype.test.js",
+        "sha256": "939bc65ef6a607538c28ef2f166b549eb9d9fbc6d1f2abdfdbefd4300784c05a"
+      },
+      {
+        "path": "test/rls.test.js",
+        "sha256": "80c743d7e3bd8658ac12c08d081aef8582d51de2fadf51ff6c0c52b4a2d3013d"
+      },
+      {
+        "path": "test/scout.test.js",
+        "sha256": "5e71e75a2b6b1b4b223ae3dd3be9435d4386357498152c2815afef41e46b28f5"
+      },
+      {
+        "path": "test/security-probes.test.js",
+        "sha256": "49c1f0f12cffcd539b011f19fa2f13122d211e46d88cc850de9ec04c6a6232fe"
+      },
+      {
+        "path": "test/security.test.js",
+        "sha256": "8846a59894eacce63d61fce0b1167a664b313a02f94ae59dd8e5f1baed62d501"
+      },
+      {
+        "path": "test/server-process.js",
+        "sha256": "0718006a29d2ba78b8f27bb5ade1aea00d08efc08d3a000b6ee991775a9db5c2"
+      },
+      {
+        "path": "test/storage.test.js",
+        "sha256": "a7369fdb8e0bbd296bc344e302737f8547cedf3185ce210c8d796a22f7826d9f"
+      },
+      {
+        "path": "test/ui-evidence.test.js",
+        "sha256": "3758cf4e076e91156cb2a2f38b7f5e3653e2c168a241afdc26ba04930128b0d9"
+      },
+      {
+        "path": "workflow.js",
+        "sha256": "7fa336a867a8eb976155587d42e75d50a7edf4b1d8e2bfc6cde3a3cab8432de8"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "source-inventory",
+      "status": "PASS",
+      "details": {
+        "sha256": "1bccf9e70056ce25091191f636f640bc54d9fbc68327b9a25f78dcab263d70e1",
+        "files": 40
+      }
+    },
+    {
+      "id": "policy-and-budget-gate",
+      "status": "PASS",
+      "details": {
+        "denied": [
+          "repo.read",
+          "repo.write",
+          "network.fetch",
+          "shell.exec",
+          "secrets.read",
+          "policy.update"
+        ],
+        "limits": {
+          "jobMs": 2000,
+          "batchMs": 15000,
+          "outputBytes": 8192,
+          "failures": 3,
+          "runs": 100,
+          "diskBytes": 20971520,
+          "requestsPerMinute": 120,
+          "startsPerMinute": 6,
+          "concurrentRequests": 8,
+          "readBytes": 262144
+        }
+      }
+    },
+    {
+      "id": "dependency-baseline",
+      "status": "PASS",
+      "details": {
+        "runtimeDependencies": 0,
+        "postgresTestEngine": "pglite 0.5.13",
+        "vulnerabilityAudit": "NOT_RUN_OFFLINE"
+      }
+    },
+    {
+      "id": "functional-security-and-postgresql",
+      "status": "PASS",
+      "details": {
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimit": false,
+        "durationMs": 18463,
+        "tests": 108,
+        "pass": 108,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0
+      }
+    },
+    {
+      "id": "command-centre-browser",
+      "status": "PASS",
+      "details": {
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimit": false,
+        "durationMs": 7800
+      }
+    },
+    {
+      "id": "workflow-studio-browser",
+      "status": "PASS",
+      "details": {
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimit": false,
+        "durationMs": 8386
+      }
+    },
+    {
+      "id": "source-stability",
+      "status": "PASS",
+      "details": {
+        "sha256": "1bccf9e70056ce25091191f636f640bc54d9fbc68327b9a25f78dcab263d70e1"
+      }
+    }
+  ],
+  "decision": {
+    "local": "PASS",
+    "repository": "BLOCKED",
+    "repositoryReady": false,
+    "overall": "PASS_LOCAL_ONLY",
+    "exitCode": 0
+  },
+  "unverified": [
+    "Live connector authorization, HTTPS/SSRF/redirect and response limits",
+    "Hosted JWT verification, deployed RLS and actual DB role grants",
+    "Production deployment, physical phone, OS isolation and power-loss recovery",
+    "Current dependency vulnerability advisory audit"
+  ]
+}

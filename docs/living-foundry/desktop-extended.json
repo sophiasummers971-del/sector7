@@ -1,0 +1,333 @@
+{
+  "startedAt": "2026-10-31T22:23:30.734Z",
+  "keyboard": [
+    "First Tab reaches visible skip link",
+    "Keyboard zoom and reset work",
+    "Inspector opens with Enter, no background page control receives Tab focus, and Escape returns focus; browser chrome focus allowed"
+  ],
+  "touch": [
+    "Touch-emulated source switch, step inspection/close and preference persistence; zero write requests",
+    "Emulated swipe did not move the page; physical touch scrolling remains unverified"
+  ],
+  "contrast": [
+    {
+      "page": "foundry",
+      "theme": "industrial",
+      "checked": 163,
+      "excluded": 34,
+      "failures": [],
+      "minimum": {
+        "tag": "BUTTON",
+        "id": "pause",
+        "text": "Pause & stop",
+        "ratio": 8.323,
+        "threshold": 4.5,
+        "pass": true,
+        "color": "rgb(255, 158, 156)",
+        "background": [
+          40,
+          27,
+          39
+        ]
+      }
+    },
+    {
+      "page": "foundry",
+      "theme": "neon",
+      "checked": 163,
+      "excluded": 34,
+      "failures": [],
+      "minimum": {
+        "tag": "BUTTON",
+        "id": "pause",
+        "text": "Pause & stop",
+        "ratio": 8.323,
+        "threshold": 4.5,
+        "pass": true,
+        "color": "rgb(255, 158, 156)",
+        "background": [
+          40,
+          27,
+          39
+        ]
+      }
+    },
+    {
+      "page": "foundry",
+      "theme": "minimal",
+      "checked": 185,
+      "excluded": 12,
+      "failures": [],
+      "minimum": {
+        "tag": "BUTTON",
+        "id": "pause",
+        "text": "Pause & stop",
+        "ratio": 8.323,
+        "threshold": 4.5,
+        "pass": true,
+        "color": "rgb(255, 158, 156)",
+        "background": [
+          40,
+          27,
+          39
+        ]
+      }
+    },
+    {
+      "page": "studio",
+      "theme": "industrial",
+      "checked": 62,
+      "excluded": 9,
+      "failures": [],
+      "minimum": {
+        "tag": "BUTTON",
+        "id": "start-new",
+        "text": "▶ Start new run",
+        "ratio": 4.923,
+        "threshold": 4.5,
+        "pass": true,
+        "color": "rgb(255, 255, 255)",
+        "background": [
+          20,
+          123,
+          144
+        ]
+      }
+    },
+    {
+      "page": "studio",
+      "theme": "neon",
+      "checked": 62,
+      "excluded": 9,
+      "failures": [],
+      "minimum": {
+        "tag": "BUTTON",
+        "id": "start-new",
+        "text": "▶ Start new run",
+        "ratio": 5.708,
+        "threshold": 4.5,
+        "pass": true,
+        "color": "rgb(255, 255, 255)",
+        "background": [
+          50,
+          107,
+          150
+        ]
+      }
+    },
+    {
+      "page": "studio",
+      "theme": "minimal",
+      "checked": 62,
+      "excluded": 9,
+      "failures": [],
+      "minimum": {
+        "tag": "BUTTON",
+        "id": "start-new",
+        "text": "▶ Start new run",
+        "ratio": 6.027,
+        "threshold": 4.5,
+        "pass": true,
+        "color": "rgb(255, 255, 255)",
+        "background": [
+          40,
+          107,
+          124
+        ]
+      }
+    }
+  ],
+  "performance": [
+    {
+      "label": "idle",
+      "browserWorkingSetSumMiB": 532.4609375,
+      "seconds": 5.008105200000001,
+      "browserCpuSeconds": 0.5294059999999999,
+      "percentOfOneCore": 10.57098401207706,
+      "jsHeapMiB": 4.686687469482422,
+      "domNodes": 750,
+      "processes": [
+        {
+          "type": "browser",
+          "id": 7136
+        },
+        {
+          "type": "renderer",
+          "id": 11332
+        },
+        {
+          "type": "renderer",
+          "id": 19660
+        },
+        {
+          "type": "renderer",
+          "id": 7648
+        },
+        {
+          "type": "GPU",
+          "id": 11748
+        },
+        {
+          "type": "network.mojom.NetworkService",
+          "id": 5712
+        },
+        {
+          "type": "storage.mojom.StorageService",
+          "id": 14072
+        }
+      ]
+    },
+    {
+      "label": "recorded replay",
+      "browserWorkingSetSumMiB": 541.09375,
+      "seconds": 5.012508599999999,
+      "browserCpuSeconds": 1.6021329999999996,
+      "percentOfOneCore": 31.962698278462796,
+      "jsHeapMiB": 3.2324905395507812,
+      "domNodes": 901,
+      "processes": [
+        {
+          "type": "browser",
+          "id": 7136
+        },
+        {
+          "type": "renderer",
+          "id": 11332
+        },
+        {
+          "type": "renderer",
+          "id": 19660
+        },
+        {
+          "type": "renderer",
+          "id": 7648
+        },
+        {
+          "type": "GPU",
+          "id": 11748
+        },
+        {
+          "type": "network.mojom.NetworkService",
+          "id": 5712
+        },
+        {
+          "type": "storage.mojom.StorageService",
+          "id": 14072
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Headless Chrome on this PC; physical touchscreen/display behaviour and whole-system power were not measured.",
+    "Contrast scan covers rendered solid backgrounds; gradient/image/opacity cases require separate inspection."
+  ],
+  "touchScroll": {
+    "scrollY": 0,
+    "maxScroll": 3774,
+    "touchAction": "auto"
+  },
+  "touchTargets": [
+    {
+      "label": "Operator appearance",
+      "width": 362,
+      "height": 44
+    },
+    {
+      "label": "Industrial FactoryNeon Command DeckMinimal Operations",
+      "width": 362,
+      "height": 44
+    },
+    {
+      "label": "OffSubtleFull signal",
+      "width": 362,
+      "height": 44
+    },
+    {
+      "label": "Runtime connected ↻",
+      "width": 124.796875,
+      "height": 44
+    },
+    {
+      "label": "Choose a next step →",
+      "width": 326,
+      "height": 48
+    },
+    {
+      "label": "01 · start✓ COMPLETED",
+      "width": 155,
+      "height": 66
+    },
+    {
+      "label": "02 · system.ping✓ COMPLETED",
+      "width": 155,
+      "height": 66
+    },
+    {
+      "label": "03 · result✓ COMPLETED",
+      "width": 322,
+      "height": 74
+    },
+    {
+      "label": "Run rehearsal ↗",
+      "width": 326,
+      "height": 48
+    },
+    {
+      "label": "Pause & stop",
+      "width": 326,
+      "height": 44
+    },
+    {
+      "label": "Scout rehearsal",
+      "width": 160,
+      "height": 44
+    },
+    {
+      "label": "Saved workflow",
+      "width": 160,
+      "height": 44
+    },
+    {
+      "label": "−",
+      "width": 44,
+      "height": 44
+    },
+    {
+      "label": "+",
+      "width": 44,
+      "height": 44
+    },
+    {
+      "label": "Fit",
+      "width": 44,
+      "height": 44
+    },
+    {
+      "label": "⌘COORDINATOR / ONE PROCESSPlan · dispatch · collectFixed loc",
+      "width": 280,
+      "height": 92.828125
+    },
+    {
+      "label": "01 / LOCAL SLOTIDLEREADME inspectorWaiting for an assignment",
+      "width": 158.390625,
+      "height": 140
+    },
+    {
+      "label": "02 / LOCAL SLOTIDLEREADME inspectorWaiting for an assignment",
+      "width": 158.390625,
+      "height": 140
+    },
+    {
+      "label": "▤Collected evidence0 results",
+      "width": 191,
+      "height": 52.09375
+    }
+  ],
+  "frameTiming": {
+    "samples": 120,
+    "medianMs": 16.700000000000728,
+    "p95Ms": 17.099999999998545,
+    "over50ms": 0
+  },
+  "completedAt": "2026-10-31T22:23:49.444Z"
+}
