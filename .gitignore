@@ -9,3 +9,6 @@ data/
 artifacts/
 .cache/
 coverage/
+
+.owner-key
+*.lock.tmp

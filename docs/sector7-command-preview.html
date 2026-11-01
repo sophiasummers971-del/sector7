@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070b13"><title>Sector7 // The Living Foundry</title>
+<style>/* Sector7: fixed operator frame + evidence-driven signal field. No perpetual animation. */
+:root{font:14px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+
+*{box-sizing:border-box}
+body{margin:0}
+button,input,select{font:inherit}
+button,a,input,select,summary{touch-action:manipulation}
+button{cursor:pointer;color:inherit;min-height:44px;background:var(--surface2);border:1px solid var(--line);border-radius:5px;padding:9px 12px}
+button:hover:not(:disabled),a:hover{border-color:var(--cyan);color:var(--cyan)}
+button:disabled{opacity:.55;cursor:not-allowed}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--cyan);outline-offset:4px}
+[hidden]{display:none!important}
+a{color:var(--cyan);text-decoration:none}
+p,h1,h2{margin:0}
+small{display:block}
+h2{font-size:16px;line-height:1.4;font-weight:600}
+p{color:var(--muted)}
+.skip-link{position:fixed;z-index:10;top:-100px;left:15px;background:var(--panel);padding:12px}
+.skip-link:focus{top:10px}
+.shell{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100dvh}
+.sidebar{position:sticky;top:0;height:100dvh;padding:28px 18px 16px;display:flex;flex-direction:column;background:#0b111d;border-right:1px solid var(--line);overflow:auto}
+.brand{display:flex;align-items:center;gap:11px;color:var(--text);font-size:25px;font-weight:800;letter-spacing:-1px}
+.brand-number{color:var(--cyan)}
+.brand small{color:var(--muted);font:8px var(--mono);letter-spacing:.5px;margin-top:4px}
+.emblem{width:36px;height:43px;display:grid;place-items:center;border:1px solid var(--cyan);color:var(--cyan);font:italic 900 33px system-ui;clip-path:polygon(0 0,100% 0,100% 78%,75% 100%,0 100%)}
+.nav-label{font:9px var(--mono);letter-spacing:1.3px;color:var(--muted);margin:45px 10px 14px}
+.nav-item{display:flex;align-items:center;gap:12px;min-height:48px;padding:10px;font:10px var(--mono);color:var(--muted);border:1px solid transparent;margin-bottom:6px;border-radius:4px}
+.nav-item span{font:12px system-ui}
+.nav-item.selected{color:var(--cyan);border-color:#2e667a;background:#102634}
+.boundary{padding:23px 10px;margin-top:25px;border-top:1px solid var(--line)}
+.eyebrow{display:block;font:9px/1.5 var(--mono);letter-spacing:1.3px;color:var(--cyan)}
+.boundary strong{display:block;font-size:21px;font-weight:500;line-height:1.3;margin:14px 0}
+.boundary p{font-size:11px;line-height:1.8;margin-bottom:15px}
+.badge{display:inline-block;border:1px solid var(--line);padding:5px 8px;border-radius:3px;font:9px/1.4 var(--mono);color:var(--muted);white-space:nowrap}
+.boundary .badge{font-size:8px;white-space:normal}
+.preferences{margin-top:auto;border-top:1px solid var(--line);padding-top:10px}
+.preferences summary{font-size:12px;cursor:pointer;min-height:44px;padding:10px 0}
+.preferences label{display:block;font-size:11px;color:var(--muted);margin:8px 0}
+.preferences select{min-height:44px;width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:4px;padding:7px;font-size:12px}
+.preferences p{font-size:10px;margin:10px 0}
+.preferences .check{display:flex;align-items:center;gap:8px;min-height:44px}
+.local-line{display:flex;justify-content:space-between;margin-top:18px;padding-top:15px;border-top:1px solid var(--line);font:9px var(--mono);color:var(--muted)}
+.local-line span{color:var(--cyan)}
+main{min-width:0;width:100%;padding:0 28px 20px}
+.topbar{height:72px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.breadcrumb{font:10px var(--mono);letter-spacing:1px;color:var(--muted)}
+.breadcrumb span{color:var(--violet);margin:0 16px}
+.connection{font:11px var(--mono);background:transparent}
+.connection[data-state=offline]{color:var(--coral)}
+.intro{display:flex;justify-content:space-between;align-items:center;padding:32px 0 26px;gap:20px}
+h1{font-size:clamp(32px,3.2vw,62px);font-weight:550;line-height:1.15;letter-spacing:-2px;margin:8px 0 10px}
+h1 span{color:var(--cyan)}
+.intro p{font-size:13px}
+.intro-index{font:36px var(--mono);color:var(--violet);text-align:right}
+.intro-index small{font:8px var(--mono);letter-spacing:1px;color:var(--muted);margin-top:10px}
+.telemetry{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.telemetry>div{padding:16px 20px;min-width:0}
+.telemetry>div+div{border-left:1px solid var(--line)}
+.telemetry span{font:9px var(--mono);letter-spacing:.7px;color:var(--muted);display:block}
+.telemetry strong{font:26px var(--mono);display:block;margin:7px 0}
+.telemetry small,.telemetry a{font-size:10px}
+.observation{font:10px/1.7 var(--mono);padding:12px 0 22px;color:var(--muted)}
+.factory-grid{display:grid;grid-template-columns:245px minmax(0,1fr) 270px;gap:14px;align-items:start}
+.control-frame,.canvas-panel,.activity-panel,.outcomes{background:var(--panel);border:1px solid var(--line);border-radius:6px;min-width:0;overflow:hidden}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px;border-bottom:1px solid var(--line);min-height:75px}
+.section-head h2{font-size:14px;margin-top:6px}
+.control-frame .section-head{padding:14px;min-height:65px;gap:6px}
+.control-frame .eyebrow{font-size:8px}
+.control-frame .badge{font-size:8px}
+.desk-body{padding:17px}
+.step-label{display:block;font:9px var(--mono);letter-spacing:1px;color:var(--violet);margin-bottom:10px}
+.desk-body h2{font-size:19px;margin:8px 0}
+.desk-body p{font-size:11px;line-height:1.8}
+fieldset{padding:0;border:0;margin:22px 0}
+legend{font-size:12px;font-weight:600;padding:0;margin-bottom:10px;color:var(--text)}
+fieldset label{display:flex;gap:10px;align-items:center;min-height:44px;border:1px solid var(--line);border-radius:4px;padding:9px;margin-bottom:7px;font-size:12px;background:var(--bg)}
+input{accent-color:var(--cyan);width:17px;height:17px}
+.run-controls{padding-bottom:20px}
+.primary{background:var(--cyan);color:#06131b;font-weight:750;border-color:var(--cyan);width:100%;min-height:48px}
+.primary:hover:not(:disabled){background:#b4f5ff;color:#06131b}
+.run-controls p{margin-top:8px}
+.approval-zone{border-top:1px solid var(--line);padding-top:18px}
+.disabled-actions{display:flex;gap:8px;margin:12px 0 8px}
+.disabled-actions button{flex:1;font-size:11px}
+.safety-zone{margin-top:20px;border-top:1px solid #6e424d;padding-top:18px}
+.safety-zone button{width:100%;margin:0 0 8px}
+.danger{color:var(--coral);background:#281b27;border-color:#81515e}
+.safety-zone .step-label{color:var(--coral)}
+.canvas-panel{background:var(--bg)}
+.canvas-panel .section-head{background:var(--panel)}
+.badge[data-state=completed]{color:var(--cyan);border-color:#368394}
+.badge[data-state=failed],.badge[data-state=timed_out],.badge[data-state=interrupted],.badge[data-state=cancelled],.badge[data-state=unknown]{color:var(--coral);border-color:#81515e}
+.canvas-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;font:10px var(--mono);border-bottom:1px solid #203147}
+.camera{display:flex;gap:4px;align-items:center}
+.camera button{min-width:44px;padding:4px;background:var(--panel)}
+.camera output{min-width:40px;text-align:center;font-size:10px}
+.canvas{height:570px;position:relative;overflow:auto;overscroll-behavior:contain;background:radial-gradient(ellipse at 50% 48%,#11324766,transparent 65%),radial-gradient(#4f789b55 .7px,transparent .7px);background-size:auto,24px 24px;cursor:grab}
+.canvas:active{cursor:grabbing}
+.map-stage{position:relative;width:max(100%,640px);height:570px;min-width:640px;isolation:isolate}
+.map-stage:before{content:'';position:absolute;width:340px;height:340px;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-25deg);border:1px solid #45659033;border-radius:50%;pointer-events:none}
+.map-stage:after{content:'';position:absolute;width:460px;height:230px;left:50%;top:50%;transform:translate(-50%,-50%) rotate(24deg);border:1px dashed #6659b933;border-radius:50%;pointer-events:none;z-index:-1}
+.routes{position:absolute;width:100%;height:100%;inset:0;pointer-events:none}
+.routes path{stroke:#496585;stroke-width:1.5;fill:none;vector-effect:non-scaling-stroke}
+.routes path.lit{stroke:var(--cyan);stroke-width:2}
+.routes path.pulse{stroke:var(--cyan);stroke-width:3;stroke-dasharray:12 22;animation:packet .65s ease-out 1}
+:root[data-motion=full] .routes path.pulse{filter:drop-shadow(0 0 5px #63e5f399);animation-duration:.85s}
+@keyframes packet{from{stroke-dashoffset:120;opacity:.35}
+to{stroke-dashoffset:0;opacity:1}
+}
+.goal-pin{position:absolute;left:50%;top:5%;transform:translateX(-50%);font:9px var(--mono);letter-spacing:1.2px;white-space:nowrap;color:var(--muted)}
+.goal-pin span{color:var(--cyan);font-size:20px;margin-right:7px}
+.map-node{position:absolute;background:linear-gradient(130deg,#172d40,#101a2c);border:1px solid #4b7a91;box-shadow:0 12px 35px #0005;text-align:left;border-radius:8px;z-index:1}
+.coordinator{top:22.5%;left:50%;transform:translateX(-50%);width:280px;min-height:78px;display:flex;align-items:center;gap:12px;padding:15px}
+.node-symbol{width:39px;height:39px;border:1px solid #4b8795;display:grid;place-items:center;font-size:25px;border-radius:7px;flex-shrink:0;color:var(--cyan)}
+.node-copy small{font:8px var(--mono);letter-spacing:.6px;color:var(--cyan)}
+.node-copy strong{display:block;font-size:13px;margin:5px 0}
+.node-copy>span{font-size:9px;color:var(--muted)}
+.wire-label{position:absolute;left:50%;top:42%;transform:translateX(-50%);font:8px var(--mono);letter-spacing:1px;color:var(--muted);white-space:nowrap}
+.worker{top:49.2%;width:210px;min-height:110px;padding:14px}
+.worker-one{left:22.8%;transform:translateX(-50%)}
+.worker-two{left:77.2%;transform:translateX(-50%)}
+.node-top{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-bottom:9px}
+.worker-index{font:8px var(--mono);color:var(--violet)}
+.node-state{font:9px var(--mono);color:var(--muted)}
+.worker strong{font-size:14px;font-weight:550}
+.node-description{display:block;font-size:10px;color:var(--muted);margin-top:7px}
+.node-bottom{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:8px;margin-top:10px;font:8px var(--mono);color:var(--cyan)}
+.worker[data-state=completed]{border-color:var(--cyan);box-shadow:0 0 22px #63e5f314}
+.worker[data-state=completed] .node-state{color:var(--cyan)}
+.worker[data-state=running]{border-color:var(--violet)}
+.worker[data-state=failed],.worker[data-state=timed_out],.worker[data-state=cancelled],.worker[data-state=interrupted],.worker[data-state=unknown]{border-color:var(--coral)}
+.worker[data-state=failed] .node-state,.worker[data-state=unknown] .node-state{color:var(--coral)}
+.result-node{position:absolute;left:50%;top:84%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:#112536;border-color:#468295;min-height:46px;z-index:1;white-space:nowrap;font-size:11px}
+.result-node>span:first-child{color:var(--cyan);font-size:22px}
+.result-node>span:last-child{border-left:1px solid var(--line);padding-left:10px;font:10px var(--mono);color:var(--cyan)}
+.canvas-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;border-top:1px solid var(--line);background:var(--panel)}
+.canvas-footer>span{font-size:10px;color:var(--muted)}
+.text-button{font:10px var(--mono);background:transparent;color:var(--cyan)}
+.signal-legend{display:flex;gap:14px;flex-wrap:wrap;padding:11px 14px;font:9px var(--mono);color:var(--muted);border-top:1px solid var(--line)}
+.feed-header{display:flex;justify-content:space-between;gap:7px;padding:16px;font:9px var(--mono);color:var(--muted);min-height:48px}
+.events{list-style:none;margin:0;padding:0 14px;height:620px;overflow:auto}
+.empty-feed{text-align:center;padding:115px 12px}
+.empty-feed>span{font-size:45px;color:var(--violet);display:block;margin-bottom:10px}
+.empty-feed strong{font-size:13px}
+.empty-feed p{font-size:11px;margin-top:12px}
+.event{border-bottom:1px solid var(--line)}
+.event button{display:block;border:0;background:none;width:100%;text-align:left;padding:14px 0;border-radius:0;min-height:66px}
+.event strong{font-size:12px;font-weight:500;display:block}
+.event small{font:10px/1.7 var(--mono);color:var(--muted);margin-top:5px}
+.event time{display:block;font:9px var(--mono);margin-top:5px;color:var(--muted)}
+.event p{font-size:11px;margin-top:5px}
+.event[data-kind=completed] strong{color:var(--cyan)}
+.event[data-kind=failed] strong,.event[data-kind=timed_out] strong,.event[data-kind=cancelled] strong{color:var(--coral)}
+.feed-foot{border-top:1px solid var(--line);font:8px/1.5 var(--mono);letter-spacing:.5px;color:var(--muted);padding:15px}
+.notice{font:11px/1.8 var(--mono);padding:15px 0;min-height:50px;overflow-wrap:anywhere}
+.notice.error{color:var(--coral)}
+.outcomes .section-head{border-bottom:0}
+.muted{font-size:11px;color:var(--muted)}
+.result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:0 17px 17px;gap:12px}
+.empty-results{grid-column:1/-1;display:flex;align-items:center;gap:15px;border:1px dashed var(--line);border-radius:5px;padding:20px}
+.empty-results>span{font-size:28px;color:var(--violet)}
+.empty-results p{font-size:12px}
+.empty-results small{font-size:10px;margin-top:5px}
+.result-card{padding:17px;text-align:left;background:var(--bg);min-width:0}
+.card-top{font:9px var(--mono);display:flex;justify-content:space-between;gap:10px;color:var(--cyan);margin-bottom:12px}
+.result-card strong{font-size:15px;display:block;overflow-wrap:anywhere}
+.result-card p{font-size:10px;margin-top:8px;overflow-wrap:anywhere}
+.card-tag{display:inline-block;font:9px var(--mono);border:1px solid var(--line);color:var(--cyan);padding:4px 7px;border-radius:3px;margin:12px 5px 0 0}
+.swarm{display:flex;gap:30px;justify-content:space-between;align-items:center;margin-top:18px;border:1px solid var(--line);padding:22px;border-radius:6px}
+.swarm .eyebrow{color:var(--violet)}
+.swarm h2{margin:9px 0}
+.swarm p{font-size:12px;max-width:700px}
+.swarm>div:last-child{flex-shrink:0}
+.swarm>div:last-child p{font-size:10px;margin-top:8px}
+.bottom-line{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;padding:24px 0 6px;font:8px/1.7 var(--mono);letter-spacing:.5px;color:var(--muted)}
+dialog{background:var(--panel);color:var(--text);width:min(640px,calc(100% - 28px));border:1px solid #5c93a8;border-radius:8px;padding:24px;max-height:85dvh}
+dialog::backdrop{background:#020611cc}
+.inspector-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+.inspector-head button{font-size:23px;min-width:44px;background:transparent}
+dialog h2{font-size:24px;margin-bottom:13px;overflow-wrap:anywhere}
+dialog p{font-size:13px;line-height:1.8}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:42dvh;overflow:auto;padding:17px;background:var(--bg);border:1px solid var(--line);font:11px/1.8 var(--mono)}
+:root[data-theme=minimal] .canvas{background:var(--bg)}
+:root[data-theme=minimal] .map-stage:before,:root[data-theme=minimal] .map-stage:after,:root[data-low-power=true] .map-stage:before,:root[data-low-power=true] .map-stage:after{display:none}
+:root[data-theme=minimal] .map-node{background:var(--panel);box-shadow:none}
+:root[data-low-power=true] .map-node{box-shadow:none}
+
+@media(min-width:2200px){main{padding:0 44px 24px}
+.factory-grid{grid-template-columns:300px minmax(0,1fr) 380px;gap:22px}
+.canvas{height:680px}
+.map-stage{height:680px}
+.events{height:730px}
+.telemetry>div{padding:20px 28px}
+}
+
+@media(max-width:1350px){.shell{grid-template-columns:190px minmax(0,1fr)}
+.sidebar{padding:24px 12px}
+main{padding:0 20px 20px}
+.factory-grid{grid-template-columns:230px minmax(0,1fr)}
+.activity-panel{grid-column:1/-1}
+.events{height:250px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 20px}
+.empty-feed{grid-column:1/-1;padding:50px 20px}
+.intro-index{display:none}
+.telemetry>div{padding:14px}
+}
+
+@media(max-width:850px){.shell{display:block}
+.sidebar{position:static;height:auto;overflow:visible;padding:16px 20px;display:grid;grid-template-columns:1fr auto;gap:14px;border-right:0;border-bottom:1px solid var(--line)}
+.brand{font-size:24px}
+.sidebar nav{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
+.nav-item{font-size:9px;margin:0;padding:8px}
+.nav-item span{font-size:11px}
+.nav-label,.boundary,.local-line{display:none}
+.preferences{margin:0;padding:0;border:0;max-width:180px}
+.preferences summary{font-size:11px}
+.telemetry span{font-size:8px}
+.telemetry strong{font-size:24px}
+.factory-grid{grid-template-columns:225px minmax(0,1fr)}
+.intro{padding-top:24px}
+.intro p{font-size:12px}
+}
+
+@media(max-width:650px){main{padding:0 14px 20px}
+.sidebar{padding:15px 14px;grid-template-columns:1fr}
+.brand small{font-size:8px}
+.preferences{max-width:100%;grid-row:3}
+.preferences summary{min-height:44px}
+.sidebar nav{gap:3px}
+.nav-item{padding:7px 5px;gap:6px}
+.nav-item span{font-size:10px}
+.topbar{height:62px}
+.breadcrumb{font-size:8px;letter-spacing:0}
+.breadcrumb span{margin:0 7px}
+.connection{font-size:10px;padding:6px 8px}
+h1{font-size:38px;letter-spacing:-1.5px}
+.intro .eyebrow{font-size:8px}
+.intro p{font-size:12px;line-height:1.8}
+.telemetry{grid-template-columns:repeat(2,minmax(0,1fr))}
+.telemetry>div{padding:14px 12px}
+.telemetry>div:nth-child(3){border-left:0}
+.telemetry>div:nth-child(n+3){border-top:1px solid var(--line)}
+.telemetry small,.telemetry a{font-size:10px}
+.observation{font-size:10px;line-height:1.8}
+.factory-grid{grid-template-columns:minmax(0,1fr)}
+.control-frame{order:0}
+.canvas-panel{order:1}
+.activity-panel{order:2}
+.desk-body{padding:17px}
+.desk-body h2{font-size:22px}
+.desk-body p{font-size:12px}
+fieldset{display:flex;flex-wrap:wrap;gap:8px}
+fieldset label{margin:0;padding:8px;font-size:12px;flex:1}
+.disabled-actions button{min-height:44px}
+.canvas-toolbar{padding:9px;flex-wrap:wrap;font-size:10px}
+.camera{margin-left:auto}
+.canvas{height:500px}
+.map-stage{height:500px}
+.canvas-panel .section-head{padding:15px 12px;gap:8px}
+.section-head h2{font-size:13px}
+.eyebrow{font-size:8px}
+.badge{font-size:8px}
+.canvas-footer{flex-wrap:wrap;padding:9px 12px}
+.canvas-footer>span{font-size:10px}
+.events{display:block;height:320px}
+.empty-feed{padding:65px 20px}
+.event button{padding:14px 0}
+.event strong{font-size:13px}
+.signal-legend{font-size:10px;gap:12px}
+.result-grid{grid-template-columns:1fr;padding:0 12px 12px}
+.outcomes .section-head{flex-wrap:wrap;padding:16px 12px}
+.swarm{display:block;padding:18px}
+.swarm>div:last-child{margin-top:18px}
+.swarm p{font-size:12px}
+.result-card strong{font-size:15px}
+.bottom-line{font-size:8px}
+.notice{font-size:11px}
+}
+
+
+@media(max-width:650px){.map-stage{min-width:0;width:100%;height:640px}
+.canvas{height:640px}
+.worker{width:44%;padding:11px 9px;min-height:140px}
+.worker-one{left:25%}
+.worker-two{left:75%}
+.node-top{flex-wrap:wrap;gap:7px}
+.worker-index{font-size:8px}
+.node-description{font-size:10px}
+.worker strong{font-size:12px}
+.node-bottom{font-size:8px;line-height:1.7}
+.coordinator{width:min(280px,calc(100% - 24px))}
+.result-node{gap:8px;font-size:10px;padding:8px}
+.wire-label{font-size:8px}
+.map-stage:before{width:210px;height:290px}
+.map-stage:after{width:250px;height:180px}
+.goal-pin{font-size:8px}
+.result-node>span:last-child{font-size:9px}
+}
+
+/* A small, read-only front door; execution remains in the existing controls. */
+.starting-desk{padding:23px;margin:0 0 22px;border:1px solid #387184;border-radius:7px;background:linear-gradient(125deg,#122a3b,var(--panel) 65%)}
+.starting-desk h2{font-size:25px;letter-spacing:-.6px;margin:7px 0 9px}
+.starting-desk>p{font-size:12px}
+#idea-form{display:flex;align-items:flex-end;gap:12px;margin:19px 0 10px}
+#idea-form>div{flex:1;min-width:0}
+#idea-form label{display:block;font-size:12px;margin-bottom:6px;color:var(--text)}
+#idea-input{display:block;width:100%;resize:vertical;min-height:76px;max-height:250px;padding:12px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--text);font:14px/1.6 system-ui}
+#idea-input::placeholder{color:var(--muted)}
+#idea-input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+#idea-form .primary{width:auto;flex-shrink:0;min-height:48px}
+.starting-desk .starting-help{font-size:11px;line-height:1.8}
+.starting-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+.starting-card{display:flex;flex-direction:column;justify-content:flex-start;gap:8px;padding:15px;background:var(--bg);border:1px solid var(--line);border-radius:5px;text-align:left;min-width:0;color:var(--text);min-height:96px;overflow-wrap:anywhere}
+.starting-card strong{font-size:13px;font-weight:600}
+.starting-card small{font:11px/1.8 system-ui;color:var(--muted)}
+.idea-response{border-left:2px solid var(--violet);padding:12px 15px;margin-top:16px;overflow-wrap:anywhere}
+.idea-response strong{font-size:13px;white-space:pre-wrap}
+.idea-response p{font-size:12px;line-height:1.8;margin-top:7px}
+@media(max-width:850px){.starting-points{grid-template-columns:1fr}.starting-card{min-height:80px}}
+@media(max-width:650px){.starting-desk{padding:17px}.starting-desk h2{font-size:23px}#idea-form{display:block}#idea-form .primary{width:100%;margin-top:10px}.starting-points{gap:9px}}
+
+:root{color-scheme:dark;--bg:#070b13;--panel:#101927;--surface:#101927;--surface2:#172338;--line:#34465f;--text:#edf7ff;--muted:#a5b9cf;--cyan:#63e5f3;--turquoise:#50d9dd;--violet:#bbabff;--primary:#147b90;--amber:#ffd08a;--coral:#ff9e9c;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+:root[data-theme=neon]{--bg:#08091b;--panel:#14162d;--surface:#14162d;--surface2:#20203b;--line:#4b476f;--primary:#326b96;--turquoise:#82ccff}
+:root[data-theme=minimal]{--bg:#0c1119;--panel:#151c27;--surface:#151c27;--surface2:#202a38;--line:#516075;--primary:#286b7c}
+:root[data-motion=off] *, :root[data-low-power=true] *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* Shared Foundry surfaces for the existing editor; execution code is unchanged. */
+.viewport{background-color:var(--bg);background-image:radial-gradient(#345575 1px,transparent 1px);background-size:24px 24px}
+.node-body{background:var(--panel);border-color:var(--line)}
+.node-symbol,.brand-mark{background:var(--surface2);color:var(--cyan);border-color:var(--line)}
+.wire{stroke:var(--violet)}
+.studio-home{display:inline-flex;align-items:center;min-height:44px;color:var(--cyan);font-size:.85rem;text-decoration:none}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#control-frame">Skip to operator controls</a>
+<div class="shell">
+<aside class="sidebar">
+ <a class="brand" href="#" aria-label="Sector 7 factory overview"><span class="emblem">7</span><span>SECTOR<span class="brand-number">7</span><small>SJ–INSIDES / THE LIVING FOUNDRY</small></span></a>
+ <p class="nav-label">OPERATIONS / LOCAL</p>
+ <nav aria-label="Workspace"><a class="nav-item selected" href="#" aria-current="page">01 <span>Factory overview</span></a><a class="nav-item" href="https://github.com/sophiasummers971-del/sector7/pull/1">02 <span>Workflow foundry ↗</span></a><a class="nav-item" href="#swarm">03 <span>Swarm operations</span></a><a class="nav-item" href="#trace">04 <span>Execution trace</span></a></nav>
+ <div class="boundary"><span class="eyebrow">AUTHORITY BOUNDARY</span><strong>Visuals grant<br>no permissions.</strong><p>Local samples only.<br>OSIRIS and Pegasus retain their independent boundaries.</p><span class="badge">EXTERNAL EXECUTION DENIED</span></div>
+ <details class="preferences"><summary>Operator appearance</summary><label for="theme-choice">Environment</label><select id="theme-choice"><option value="industrial">Industrial Factory</option><option value="neon">Neon Command Deck</option><option value="minimal">Minimal Operations</option></select><label for="motion-choice">Event animation</label><select id="motion-choice"><option value="off">Off</option><option value="subtle">Subtle</option><option value="full">Full signal</option></select><label class="check"><input id="low-power" type="checkbox"> Low-power mode</label><p id="preference-status">Device reduced-motion settings always take priority.</p></details>
+ <div class="local-line">LOCAL RUNTIME <span id="sidebar-state">CHECKING</span></div>
+</aside>
+<main>
+ <header class="topbar"><span class="breadcrumb">SJ–INSIDES <span>/</span> FACTORY FLOOR</span><button id="connection" class="connection" title="Refresh owner connection and reconcile saved state"><span id="connection-text">Connecting</span> ↻</button></header>
+ <section class="intro"><div><span class="eyebrow">SECTOR7 // OPERATOR AT THE HELM</span><h1>The living <span>foundry.</span></h1><p>Give the work a direction. Follow the signal. Inspect the proof.</p></div><div class="intro-index">S / 07<small>THE FACTORY NEVER FAKES A SIGNAL.</small></div></section>
+ <section class="starting-desk" aria-labelledby="starting-heading">
+  <span class="eyebrow">YOUR STARTING POINT</span><h2 id="starting-heading">What’s on your mind, Jade?</h2>
+  <p>Choose a suggestion from your saved work, or put your idea into words first.</p>
+  <form id="idea-form"><div><label for="idea-input">Your idea</label><textarea id="idea-input" rows="2" maxlength="500" placeholder="For example: I want to review some text" aria-describedby="idea-help"></textarea></div><button class="primary" type="submit">Choose a next step →</button></form>
+  <p id="idea-help" class="starting-help">Local starting guide · No AI chat connected. Your idea stays on this page; nothing runs from this box.</p>
+  <div id="idea-response" class="idea-response" role="status" aria-live="polite" hidden><strong id="idea-heading"></strong><p id="idea-copy"></p></div>
+  <div id="starting-points" class="starting-points" aria-label="Suggested starting points"></div>
+ </section>
+ <section class="telemetry" aria-label="Confirmed workflow inventory"><div><span>SAVED WORKFLOWS</span><strong id="inventory-workflows">—</strong><small>one local definition slot</small></div><div><span>WORKFLOW RUNS</span><strong id="inventory-completed">—</strong><small>completed / saved runs</small></div><div><span>AWAITING APPROVAL</span><strong id="inventory-waiting">—</strong><a href="https://github.com/sophiasummers971-del/sector7/pull/1">Inspect exact run in foundry ↗</a></div><div><span>FAILED / INTERRUPTED</span><strong id="inventory-failed">—</strong><small>includes rejected workflows</small></div></section>
+ <p class="observation" id="observed">No confirmed connection yet. Heartbeat monitoring is unavailable.</p>
+ <div class="factory-grid">
+ <section id="control-frame" class="control-frame" aria-labelledby="mission-heading" tabindex="-1">
+  <div class="section-head"><span class="eyebrow">01 / CONTROL FRAME</span><span class="badge">LOCAL ONLY</span></div>
+  <div class="desk-body"><span class="step-label">SETUP ZONE</span><h2 id="mission-heading">Discover &amp; shortlist</h2><p>Match README terms across four bundled fictional samples. Two bounded worker slots. No AI or repository access.</p>
+  <fieldset><legend>1. Choose match terms</legend><label><input type="checkbox" name="term" value="workflow" checked> Workflow</label><label><input type="checkbox" name="term" value="local" checked> Local</label><label><input type="checkbox" name="term" value="queue" checked> Queue</label></fieldset>
+  <div class="run-controls"><span class="step-label">2. START / RECONCILE</span><button id="launch" aria-describedby="control-reason" class="primary" disabled>Run rehearsal ↗</button><p id="control-reason">Checking owner access and safety state.</p></div>
+  <div class="approval-zone"><span class="step-label">APPROVAL ZONE</span><p>This rehearsal has no approval step. Workflow approvals belong to their saved pause in the foundry.</p><div class="disabled-actions"><button disabled aria-describedby="approval-reason">Approve</button><button disabled aria-describedby="approval-reason">Reject</button></div><p id="approval-reason">Unavailable here. <a href="https://github.com/sophiasummers971-del/sector7/pull/1">Open workflow approvals ↗</a></p></div>
+  <div class="safety-zone"><span class="step-label">COORDINATOR SAFETY</span><button hidden id="pause" class="danger" disabled>Pause &amp; stop</button><p>Pauses admission and requests worker cancellation. Refresh to confirm saved outcomes.</p><button id="reset" class="danger" hidden>Reset circuit after review</button></div>
+  </div>
+ </section>
+ <section class="canvas-panel" aria-labelledby="canvas-heading"><div class="section-head"><div><span class="eyebrow">02 / SIGNAL FIELD</span><h2 id="canvas-heading">Watch the work take shape.</h2></div><span class="badge" id="run-state">STANDBY</span></div>
+  <div class="canvas-toolbar"><span id="canvas-mode">No run yet</span><div class="camera"><button id="zoom-out" aria-label="Zoom out signal field">−</button><output id="zoom-level">100%</output><button id="zoom-in" aria-label="Zoom in signal field">+</button><button id="fit-field">Fit</button></div></div>
+  <div class="canvas" id="canvas" tabindex="0" aria-label="Signal field. Scroll or drag empty space to pan. Arrow keys pan; plus and minus zoom; 0 fits."><div class="map-stage" id="map-stage">
+   <svg class="routes" viewBox="0 0 900 600" preserveAspectRatio="none" aria-hidden="true"><path id="route-start" d="M450 65 C450 100 450 100 450 135"/><path id="route-left" d="M450 205 C450 265 205 195 205 295"/><path id="route-right" d="M450 205 C450 265 695 195 695 295"/><path id="route-return-left" d="M205 405 C205 500 450 415 450 505"/><path id="route-return-right" d="M695 405 C695 500 450 415 450 505"/></svg>
+   <div class="goal-pin"><span>◇</span> LOCAL SAMPLE REHEARSAL</div>
+   <button class="map-node coordinator" data-inspect="coordinator"><span class="node-symbol">⌘</span><span class="node-copy"><small>COORDINATOR / ONE PROCESS</small><strong>Plan · dispatch · collect</strong><span>Fixed local authority. Bounded execution.</span></span></button>
+   <span class="wire-label">SAVED CARRIER EVENTS</span>
+   <button class="map-node worker worker-one" data-inspect="worker-1"><span class="node-top"><span class="worker-index">01 / LOCAL SLOT</span><span class="node-state" id="worker-1-state">IDLE</span></span><strong>README inspector</strong><span class="node-description" id="worker-1-copy">No recorded assignment</span><span class="node-bottom">INSPECT EVIDENCE <span>↗</span></span></button>
+   <button class="map-node worker worker-two" data-inspect="worker-2"><span class="node-top"><span class="worker-index">02 / LOCAL SLOT</span><span class="node-state" id="worker-2-state">IDLE</span></span><strong>README inspector</strong><span class="node-description" id="worker-2-copy">No recorded assignment</span><span class="node-bottom">INSPECT EVIDENCE <span>↗</span></span></button>
+   <button class="result-node" data-inspect="results"><span>▤</span><span>Collected evidence</span><span id="map-count">0 results</span></button>
+  </div></div>
+  <div class="canvas-footer"><span>Drag blank space / scroll to pan · select a node to inspect</span><button id="replay" class="text-button" disabled>Replay messages ↺</button></div>
+  <div class="signal-legend"><span>◇ Idle</span><span>↗ Dispatched</span><span>◉ Accepted</span><span>✓ Completed</span><span>× Failed</span><span>Ⅱ Interrupted</span></div>
+ </section>
+ <aside id="trace" class="activity-panel"><div class="section-head"><div><span class="eyebrow">03 / EXECUTION TRACE</span><h2>Every handoff, accounted for.</h2></div></div><div class="feed-header"><span id="feed-label">AWAITING RECORDED SIGNAL</span><span id="event-count">00</span></div><ol id="events" class="events"><li class="empty-feed"><span>⌁</span><strong>The field is quiet.</strong><p>No execution is assumed. Events appear only when recorded.</p></li></ol><div class="feed-foot">SELECT AN EVENT FOR ITS SAVED RECEIPT</div></aside>
+ </div>
+ <p id="notice" class="notice" role="status" aria-live="polite">Checking the local owner connection…</p>
+ <section class="outcomes" aria-labelledby="outcomes-heading"><div class="section-head"><div><span class="eyebrow">04 / RESULTS ZONE</span><h2 id="outcomes-heading">Evidence before opinions.</h2></div><span class="muted" id="result-summary">No result claimed.</span></div><div id="results" class="result-grid"><div class="empty-results"><span>↳</span><p>Your shortlist lands here.<small>Literal term matches, with source hashes. No code review or claim verification.</small></p></div></div></section>
+ <section id="swarm" class="swarm"><div><span class="eyebrow">SWARM OPERATIONS / UNAVAILABLE</span><h2>No external agents connected.</h2><p>Agent identities, capability grants, dependencies and resource budgets need an authenticated backend contract. This local rehearsal does not provide one.</p></div><div><button disabled aria-describedby="swarm-reason">Launch swarm</button><p id="swarm-reason">No authorised swarm backend.</p></div></section>
+ <footer class="bottom-line"><span>SECTOR7 // STRUCTURED COMMAND. VISIBLE SIGNAL.</span><span>RECORDED OFFLINE PREVIEW · FICTIONAL SAMPLES</span></footer>
+</main>
+</div>
+<dialog id="inspector"><div class="inspector-head"><span class="eyebrow">SAVED EVIDENCE / READ ONLY</span><button id="close-inspector" aria-label="Close inspector">×</button></div><h2 id="inspector-title"></h2><p id="inspector-copy"></p><pre id="inspector-data" tabindex="0"></pre></dialog>
+<script type="module">const PREVIEW = {"version":1,"operationKey":"offline-scout-demo-v1","fingerprint":"943165407257a05ca9e13641f7ccb081a8ac2f43647517fffa65b694132e0920","status":"completed","concurrency":2,"source":"local-supplied-samples","jobs":[{"id":"job-1","repository":"fictional/workflow-queue","inputRef":"input.json#/repositories/0","inputHash":"3d677c4e907207fcfe8ded4d84e75bebdeca46623c9f22babb566972bfd4af70","status":"completed","result":{"method":"literal-readme-term-match-v1","matchedTerms":["workflow","local","queue"],"score":3,"readmeBytes":70,"codeReviewed":false,"claimsVerified":false}},{"id":"job-2","repository":"fictional/photo-viewer","inputRef":"input.json#/repositories/1","inputHash":"495f1a98db1fc87b86ebdfa11e83a913e80f38579d851f1b70d55710b1e88af6","status":"completed","result":{"method":"literal-readme-term-match-v1","matchedTerms":[],"score":0,"readmeBytes":62,"codeReviewed":false,"claimsVerified":false}},{"id":"job-3","repository":"fictional/local-notes","inputRef":"input.json#/repositories/2","inputHash":"8810702b60ddba3f8a8ecbdf3333609a8018eff070224bcb01a5b298fdabd9f0","status":"completed","result":{"method":"literal-readme-term-match-v1","matchedTerms":["local"],"score":1,"readmeBytes":51,"codeReviewed":false,"claimsVerified":false}},{"id":"job-4","repository":"fictional/cloud-workflow","inputRef":"input.json#/repositories/3","inputHash":"40e20bea89c601eaf6fa2b07ad037fba0a8da3d24a17cea45b6cb7a44793a69d","status":"completed","result":{"method":"literal-readme-term-match-v1","matchedTerms":["workflow"],"score":1,"readmeBytes":60,"codeReviewed":false,"claimsVerified":false}}],"events":[{"version":1,"sequence":1,"correlationId":"offline-scout-demo-v1","jobId":"job-1","sender":"coordinator","kind":"dispatched","inputRef":"input.json#/repositories/0","inputHash":"3d677c4e907207fcfe8ded4d84e75bebdeca46623c9f22babb566972bfd4af70","at":"2026-10-29T08:31:04.735Z"},{"version":1,"sequence":2,"correlationId":"offline-scout-demo-v1","jobId":"job-1","sender":"worker-1","kind":"accepted","inputRef":"input.json#/repositories/0","inputHash":"3d677c4e907207fcfe8ded4d84e75bebdeca46623c9f22babb566972bfd4af70","at":"2026-10-29T08:31:04.735Z"},{"version":1,"sequence":3,"correlationId":"offline-scout-demo-v1","jobId":"job-2","sender":"coordinator","kind":"dispatched","inputRef":"input.json#/repositories/1","inputHash":"495f1a98db1fc87b86ebdfa11e83a913e80f38579d851f1b70d55710b1e88af6","at":"2026-10-29T08:31:04.735Z"},{"version":1,"sequence":4,"correlationId":"offline-scout-demo-v1","jobId":"job-2","sender":"worker-2","kind":"accepted","inputRef":"input.json#/repositories/1","inputHash":"495f1a98db1fc87b86ebdfa11e83a913e80f38579d851f1b70d55710b1e88af6","at":"2026-10-29T08:31:04.735Z"},{"version":1,"sequence":5,"correlationId":"offline-scout-demo-v1","jobId":"job-1","sender":"worker-1","kind":"completed","inputRef":"input.json#/repositories/0","inputHash":"3d677c4e907207fcfe8ded4d84e75bebdeca46623c9f22babb566972bfd4af70","at":"2026-10-29T08:31:04.736Z","resultRef":"run.json#/jobs/0/result"},{"version":1,"sequence":6,"correlationId":"offline-scout-demo-v1","jobId":"job-2","sender":"worker-2","kind":"completed","inputRef":"input.json#/repositories/1","inputHash":"495f1a98db1fc87b86ebdfa11e83a913e80f38579d851f1b70d55710b1e88af6","at":"2026-10-29T08:31:04.736Z","resultRef":"run.json#/jobs/1/result"},{"version":1,"sequence":7,"correlationId":"offline-scout-demo-v1","jobId":"job-3","sender":"coordinator","kind":"dispatched","inputRef":"input.json#/repositories/2","inputHash":"8810702b60ddba3f8a8ecbdf3333609a8018eff070224bcb01a5b298fdabd9f0","at":"2026-10-29T08:31:04.737Z"},{"version":1,"sequence":8,"correlationId":"offline-scout-demo-v1","jobId":"job-3","sender":"worker-1","kind":"accepted","inputRef":"input.json#/repositories/2","inputHash":"8810702b60ddba3f8a8ecbdf3333609a8018eff070224bcb01a5b298fdabd9f0","at":"2026-10-29T08:31:04.737Z"},{"version":1,"sequence":9,"correlationId":"offline-scout-demo-v1","jobId":"job-4","sender":"coordinator","kind":"dispatched","inputRef":"input.json#/repositories/3","inputHash":"40e20bea89c601eaf6fa2b07ad037fba0a8da3d24a17cea45b6cb7a44793a69d","at":"2026-10-29T08:31:04.737Z"},{"version":1,"sequence":10,"correlationId":"offline-scout-demo-v1","jobId":"job-4","sender":"worker-2","kind":"accepted","inputRef":"input.json#/repositories/3","inputHash":"40e20bea89c601eaf6fa2b07ad037fba0a8da3d24a17cea45b6cb7a44793a69d","at":"2026-10-29T08:31:04.737Z"},{"version":1,"sequence":11,"correlationId":"offline-scout-demo-v1","jobId":"job-3","sender":"worker-1","kind":"completed","inputRef":"input.json#/repositories/2","inputHash":"8810702b60ddba3f8a8ecbdf3333609a8018eff070224bcb01a5b298fdabd9f0","at":"2026-10-29T08:31:04.738Z","resultRef":"run.json#/jobs/2/result"},{"version":1,"sequence":12,"correlationId":"offline-scout-demo-v1","jobId":"job-4","sender":"worker-2","kind":"completed","inputRef":"input.json#/repositories/3","inputHash":"40e20bea89c601eaf6fa2b07ad037fba0a8da3d24a17cea45b6cb7a44793a69d","at":"2026-10-29T08:31:04.738Z","resultRef":"run.json#/jobs/3/result"}],"shortlist":[{"repository":"fictional/workflow-queue","score":3,"matchedTerms":["workflow","local","queue"]},{"repository":"fictional/cloud-workflow","score":1,"matchedTerms":["workflow"]},{"repository":"fictional/local-notes","score":1,"matchedTerms":["local"]}]};
+// Presentation only. No authority, timers, storage writes or execution side effects.
+const TERMINAL = new Set(['completed', 'failed', 'cancelled', 'interrupted', 'timed_out', 'rejected']);
+function runLabel(run, { confirmed = true, replaying = false } = {}) {
+  if (replaying) return 'REPLAY · NOT LIVE';
+  if (!confirmed && (!run || !TERMINAL.has(run.status))) return 'UNKNOWN';
+  return run ? (run.status === 'completed' ? '✓ COMPLETED' : run.status.toUpperCase()) : 'STANDBY';
+}
+function workerState(run, events, id, { confirmed = true, replaying = false } = {}) {
+  const owned = events.filter(event => event.sender === id);
+  const last = owned.at(-1);
+  if (!run) return 'idle';
+  if (!replaying && !confirmed && !TERMINAL.has(run.status)) return 'unknown';
+  if (!replaying && TERMINAL.has(run.status) && last?.kind === 'accepted') return run.status === 'completed' ? 'unknown' : run.status;
+  if (!last) return !replaying && TERMINAL.has(run.status) ? 'not dispatched' : 'queued';
+  return last.kind === 'accepted' ? 'running' : last.kind;
+}
+function routeFor(event, events) {
+  if (!event) return null;
+  const owner = event.sender.startsWith('worker-') ? event.sender : events.find(e => e.jobId === event.jobId && e.sender.startsWith('worker-'))?.sender;
+  if (!owner) return 'route-start';
+  const side = owner === 'worker-1' ? 'left' : 'right';
+  return event.kind === 'completed' ? 'route-return-' + side : 'route-' + side;
+}
+function inventory(tasks) {
+  if (!Array.isArray(tasks)) return null;
+  const count = status => tasks.filter(task => status.includes(task.status)).length;
+  return { runs: tasks.length, completed: count(['completed']), waiting: count(['WAITING_APPROVAL']), failed: count(['failed', 'rejected', 'interrupted']) };
+}
+function preferences(value) {
+  return { theme: ['industrial', 'neon', 'minimal'].includes(value?.theme) ? value.theme : 'industrial',
+    motion: ['off', 'subtle', 'full'].includes(value?.motion) ? value.motion : 'subtle', lowPower: value?.lowPower === true };
+}
+
+// Suggestions are read-only entry points, never inferred execution permission.
+function startingPoints({ connected = false, preview = false, workflow, tasks, unresolved = false } = {}) {
+  if (preview) return [{ title: 'Inspect the recorded example', detail: 'Historical receipts only. No live connection or execution.', action: 'inspect' }];
+  if (!connected) return [{ title: 'Connect to your saved work', detail: 'Refresh the owner connection to see confirmed suggestions.', action: 'refresh' }];
+  const points = [];
+  if (unresolved) points.push({ title: 'Check your unfinished request', detail: 'Reconcile the saved operation key. No new work is submitted.', action: 'refresh' });
+  const waiting = Array.isArray(tasks) ? tasks.filter(task => task.status === 'WAITING_APPROVAL').length : 0;
+  if (waiting) points.push({ title: `Review ${waiting} waiting approval${waiting === 1 ? '' : 's'}`, detail: 'Inspect the exact saved pause before making a decision.', href: '/studio#waiting-section' });
+  if (Array.isArray(workflow?.definition?.nodes)) points.push({ title: 'Open your saved workflow', detail: `${workflow.definition.nodes.length} saved nodes. Review the steps before choosing Run.`, href: '/studio' });
+  if (Array.isArray(tasks) && tasks.length) points.push({ title: 'Review your workflow history', detail: `Latest recorded state: ${String(tasks[0].status).slice(0,40)}. Open History in the foundry.`, href: '/studio' });
+  points.push({ title: 'Start a text review', detail: 'Open the local preset: trim spaces, change case and review the result.', href: '/studio#text-preset' });
+  return points.slice(0, 3);
+}
+
+const key = 'sector7-visual-preferences';
+let prefs;
+try { prefs = preferences(JSON.parse(localStorage.getItem(key))); } catch { prefs = preferences(); }
+function applyPreferences() {
+  document.documentElement.dataset.theme = prefs.theme;
+  document.documentElement.dataset.motion = prefs.lowPower ? 'off' : prefs.motion;
+  document.documentElement.dataset.lowPower = String(prefs.lowPower);
+}
+applyPreferences();
+for (const [id, field] of [['theme-choice', 'theme'], ['motion-choice', 'motion'], ['low-power', 'lowPower']]) {
+  const input = document.getElementById(id);
+  if (!input) continue;
+  if (field === 'lowPower') input.checked = prefs[field]; else input.value = prefs[field];
+  input.addEventListener('change', () => {
+    prefs = preferences({ ...prefs, [field]: field === 'lowPower' ? input.checked : input.value });
+    applyPreferences();
+    try { localStorage.setItem(key, JSON.stringify(prefs)); } catch {
+      const status = document.getElementById('preference-status');
+      if (status) status.textContent = 'Preferences apply to this page; browser storage is unavailable.';
+    }
+  });
+}
+
+
+// Owner credentials stay in this tab, never in persisted run data or query strings.
+let ownerAccess = '';
+try {
+  const incoming = new URLSearchParams(location.hash.slice(1)).get('access');
+  if (incoming && /^[A-Za-z0-9_-]{40,128}$/.test(incoming)) {
+    ownerAccess = incoming; sessionStorage.setItem('sector7-owner-access', incoming);
+    history.replaceState(null, '', location.pathname + location.search);
+  } else ownerAccess = sessionStorage.getItem('sector7-owner-access') || '';
+} catch {}
+const $ = id => document.getElementById(id);
+const terminal = TERMINAL;
+const preview = typeof PREVIEW !== 'undefined';
+let connected = false, lastConfirmed = null, lastPulse = '';
+let inventoryState = null;
+let run = null, request = null, unresolved = false, busy = false, replaying = false, replayTimer = null, replaySequence = 0;
+let safety = { paused: true, open: true };
+const store = value => { try { localStorage.setItem('sector7-command-request', JSON.stringify(value)); } catch {} };
+try { request = JSON.parse(localStorage.getItem('sector7-command-request') || 'null'); } catch {}
+if (!request || typeof request.operationKey !== 'string' || !Array.isArray(request.terms)) request = null;
+unresolved = Boolean(request);
+const node = (tag, text, cls) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; if (cls) n.className = cls; return n; };
+function notice(text, error = false) { $('notice').textContent = text; $('notice').classList.toggle('error', error); }
+async function api(url, options = {}) {
+  if (preview) throw new Error('Recorded preview cannot contact a runtime');
+  let response;
+  try { response = await fetch(url, { ...options, headers: { ...options.headers, Authorization: 'Bearer ' + ownerAccess }, signal: AbortSignal.timeout(8000) }); }
+  catch (error) { connected = false; connectionState(); draw(run); throw error; }
+  const body = await response.json();
+  if ([401, 403, 503, 507].includes(response.status)) { connected = false; connectionState(); }
+  if (!response.ok) { const error = new Error(body.error || 'Request failed'); error.status = response.status; throw error; }
+  return body;
+}
+function controls() {
+  $('launch').disabled = preview || !connected || busy || replaying || safety.paused || safety.open;
+  $('pause').textContent = safety.paused ? 'Resume coordinator' : 'Pause & stop';
+  $('pause').disabled = preview || !connected || safety.open || replaying;
+  $('reset').hidden = preview || !safety.open;
+  $('reset').disabled = !connected || busy || replaying;
+  $('control-reason').textContent = preview ? 'Recorded preview. Execution is disabled.' : !connected ? 'Owner connection unconfirmed. Refresh to reconcile before acting.' : replaying ? 'Stop the recorded replay before starting or changing work.' : busy ? 'Submission is being reconciled; Pause & stop remains available.' : safety.open ? 'Circuit open. Inspect the failure before resetting.' : safety.paused ? 'Admission paused. Resume separately after review.' : unresolved ? 'Outcome unconfirmed. The original operation key is preserved.' : 'Runs only the four bundled samples. No external effects.';
+  $('launch').textContent = busy ? 'Checking the handoffs…' : unresolved ? 'Retry same request ↻' : run ? 'Run another rehearsal ↗' : 'Run rehearsal ↗';
+  $('replay').disabled = busy || !run?.events.length;
+  $('pause').title = preview ? 'Execution unavailable in a recorded preview.' : !connected ? 'Owner connection is unconfirmed.' : replaying ? 'Stop replay before changing coordinator safety.' : safety.open ? 'Circuit open. Inspect and reset after review.' : 'Pause admission and request cancellation; refresh to confirm final records.';
+  $('reset').title = !connected ? 'Owner connection is unconfirmed.' : replaying || busy ? 'Finish reconciliation or stop replay before reviewing a reset.' : 'Review the failure cause first; reset leaves dispatch paused.';
+  $('replay').title = busy ? 'Wait for submission reconciliation.' : !run?.events.length ? 'No saved event receipts to replay.' : 'Replay saved receipts without executing work.';
+  $('replay').textContent = replaying ? 'Stop replay ■' : 'Replay messages ↺';
+  document.querySelectorAll('input[name=term]').forEach(n => { n.disabled = busy || unresolved || replaying; });
+  drawStartingPoints();
+}
+function drawStartingPoints() {
+  const points = startingPoints({ connected, preview, workflow: inventoryState?.workflow, tasks: inventoryState?.tasks, unresolved });
+  $('starting-points').replaceChildren(...points.map(point => {
+    const card = node(point.href ? 'a' : 'button', undefined, 'starting-card');
+    card.append(node('strong', point.title), node('small', point.detail));
+    if (point.href) card.href = point.href;
+    else {
+      card.type = 'button';
+      card.disabled = busy || replaying;
+      card.title = card.disabled ? 'Finish reconciliation or stop replay before opening this view.' : point.detail;
+      card.onclick = () => { if (busy || replaying) return; point.action === 'inspect' ? inspect('results') : connect(); };
+    }
+    return card;
+  }));
+}
+$('idea-form').onsubmit = event => {
+  event.preventDefault();
+  const idea = ($('idea-input').value || '').slice(0, 500).trim();
+  $('idea-response').hidden = false;
+  $('idea-heading').textContent = idea ? 'Your idea: ' + idea : 'Choose a suggestion or write a short idea.';
+  $('idea-copy').textContent = idea ? 'Keep this idea in view while you choose a starting point below. This build cannot turn free text into a plan yet. Opening a suggestion does not run or approve work.' : 'The suggestions below show the tools and saved work currently available.';
+  drawStartingPoints();
+};
+function draw(state, events = state?.events || []) {
+  const jobs = state?.jobs || [];
+  if (!state) {
+    const empty = node('li', undefined, 'empty-feed');
+    empty.append(node('span', '⌁'), node('strong', 'Waiting for the first signal.'), node('p', 'No work is assumed complete. Recorded handoffs appear here.'));
+    $('events').replaceChildren(empty);
+    const result = node('div', undefined, 'empty-results');
+    result.append(node('span', '↳'), node('p', 'Your shortlist lands here when this run returns its results.'));
+    $('results').replaceChildren(result);
+    $('result-summary').textContent = 'The useful part, without the noise.';
+  }
+  $('run-state').textContent = runLabel(state, { confirmed: (connected || preview) && (!unresolved || Boolean(state)), replaying });
+  $('run-state').dataset.state = !connected && state && !terminal.has(state.status) ? 'unknown' : state?.status || 'idle';
+  $('canvas-mode').textContent = replaying ? `REPLAY ${replaySequence}/${state.events.length}` : state ? terminal.has(state.status) ? 'Saved run · ' + state.status : connected ? 'Last recorded · ' + state.status : 'UNKNOWN · reconcile required' : 'No run yet';
+  $('feed-label').textContent = replaying ? 'RECORDED REPLAY · NOT LIVE' : state ? terminal.has(state.status) ? 'SAVED EXECUTION RECORD' : 'CURRENT EXECUTION RECORD' : 'AWAITING YOUR FIRST SIGNAL';
+  $('event-count').textContent = String(events.length).padStart(2, '0');
+  for (const id of ['worker-1', 'worker-2']) {
+    const owned = events.filter(event => event.sender === id);
+    const last = owned.at(-1);
+    const completed = owned.filter(event => event.kind === 'completed').length;
+    const status = workerState(state, events, id, { confirmed: connected || preview, replaying });
+    $(id + '-state').textContent = (status === 'completed' ? '✓ ' : '') + status.toUpperCase();
+    document.querySelector(`[data-inspect="${id}"]`).dataset.state = status;
+    $(id + '-copy').textContent = last ? `${completed} result${completed === 1 ? '' : 's'} returned · ${last.jobId}` : 'Waiting for an assignment';
+  }
+  const completed = jobs.filter(job => job.status === 'completed').length;
+  $('map-count').textContent = `${completed} result${completed === 1 ? '' : 's'}`;
+  const paths = document.querySelectorAll('.routes path');
+  paths.forEach(p => { p.classList.remove('lit'); });
+  const lastEvent = events.at(-1);
+  const route = routeFor(lastEvent, state?.events || []);
+  if (route) $(route).classList.add('lit');
+  const pulseId = lastEvent ? `${state.operationKey}/${lastEvent.sequence}/${replaying}` : '';
+  // A single finite pulse per newly observed saved event. No idle heartbeat.
+  if (route && pulseId !== lastPulse && (connected || replaying || preview)) {
+    paths.forEach(p => p.classList.remove('pulse'));
+    void $(route).getBoundingClientRect();
+    $(route).classList.add('pulse');
+    lastPulse = pulseId;
+  }
+  if (events.length) {
+    $('events').replaceChildren(...events.map(event => {
+      const item = node('li', undefined, 'event'); item.dataset.kind = event.kind;
+      const copy = node('button');
+      copy.append(node('strong', (event.kind === 'completed' ? '✓ ' : event.kind === 'failed' ? '× ' : '↗ ') + (event.kind === 'accepted' ? 'Assignment accepted' : event.kind === 'completed' ? 'Evidence returned' : event.kind === 'dispatched' ? 'Carrier dispatched' : event.kind)));
+      copy.append(node('small', `${String(event.sequence).padStart(2, '0')} / ${event.sender} → ${event.jobId}`));
+      const time = node('time', event.at); time.dateTime = event.at; copy.append(time);
+      if (event.reason) copy.append(node('p', event.reason));
+      copy.onclick = () => showEvidence('Event / ' + event.sequence, 'Saved carrier receipt. This inspection cannot execute or approve work.', event);
+      item.append(copy); return item;
+    }));
+    $('events').scrollTop = $('events').scrollHeight;
+  }
+  if (state && !replaying) results(state);
+  controls();
+}
+function results(state) {
+  if (!terminal.has(state.status)) return;
+  $('result-summary').textContent = `${state.shortlist.length} matches / ${state.jobs.length} samples · README terms only`;
+  if (!state.shortlist.length) {
+    const p = node('div', undefined, 'empty-results'); p.append(node('span', '↳'), node('p', 'No matching completed samples in this run. Inspect the feed for failures or interruptions.')); $('results').replaceChildren(p); return;
+  }
+  $('results').replaceChildren(...state.shortlist.map((result, index) => {
+    const card = node('button', undefined, 'result-card');
+    const top = node('div', undefined, 'card-top'); top.append(node('span', 'MATCH / ' + String(index + 1).padStart(2, '0')), node('span', result.score + ' TERMS ↗'));
+    card.append(top, node('strong', result.repository.split('/').at(-1)), node('p', 'Fictional sample · ' + result.repository));
+    for (const term of result.matchedTerms) card.append(node('span', term, 'card-tag'));
+    card.onclick = () => inspect(result.repository); return card;
+  }));
+}
+function showEvidence(title, copy, data) {
+  $('inspector-title').textContent = title; $('inspector-copy').textContent = copy; $('inspector-data').textContent = JSON.stringify(data, null, 2); $('inspector').showModal();
+}
+function inspect(id) {
+  let title, copy, data;
+  if (id === 'coordinator') { title = 'The coordinator'; copy = 'Splits this rehearsal into one job per sample, dispatches across two local slots and collects the returned evidence. These are deterministic functions in one process, not independent AI agents.'; data = run ? { status: run.status, operationKey: run.operationKey, jobs: run.jobs.length, concurrency: run.concurrency, source: run.source } : { status: 'No run yet', samples: 4, workerSlots: 2 }; }
+  else if (id === 'results') { title = 'Evidence, before opinions.'; copy = 'The shortlist counts literal README term matches. Code quality, security and the claims inside these samples have not been verified.'; data = run?.shortlist || []; }
+  else if (id.startsWith('worker-')) { title = id === 'worker-1' ? 'Scout worker / 01' : 'Scout worker / 02'; copy = 'A bounded local worker slot. Carrier messages below are recorded events, with source references and hashes. No repository code is executed.'; data = run?.events.filter(event => event.sender === id) || []; }
+  else { title = id; copy = 'Fictional repository sample. This result is a transparent README match, not a recommendation to install anything.'; data = run?.jobs.find(job => job.repository === id); }
+  showEvidence(title, copy, data);
+}
+function stopReplay() { clearTimeout(replayTimer); replayTimer = null; replaying = false; draw(run); }
+function replay() {
+  if (replaying) { stopReplay(); return; }
+  if (!run?.events.length) return;
+  replaying = true; replaySequence = 0;
+  notice('Replaying saved carrier messages. The run has already finished; this is not live worker activity.');
+  function step() {
+    if (!replaying) return;
+    replaySequence++;
+    const snapshot = structuredClone(run);
+    // Reconstruct job counters solely from the recorded prefix.
+    for (const job of snapshot.jobs) {
+      const last = run.events.slice(0, replaySequence).filter(event => event.jobId === job.id).at(-1);
+      job.status = last?.kind === 'accepted' ? 'running' : last?.kind || 'queued';
+    }
+    draw(snapshot, run.events.slice(0, replaySequence));
+    if (replaySequence < run.events.length) replayTimer = setTimeout(step, 500);
+    else { replaying = false; draw(run); notice('Replay complete. The saved execution record is unchanged.'); }
+  }
+  step();
+}
+async function refreshSafety() { safety = await api('/api/scout/control'); controls(); }
+async function refreshRun() {
+  if (!request) return null;
+  const data = await api('/api/scout/' + encodeURIComponent(request.operationKey));
+  if (data.run) {
+    run = data.run; draw(run);
+    unresolved = data.active || !terminal.has(run.status);
+  }
+  return data;
+}
+async function launch() {
+  if (preview || !connected || safety.paused || safety.open || busy || replaying) return;
+  const terms = [...document.querySelectorAll('input[name=term]:checked')].map(n => n.value);
+  if (!unresolved && !terms.length) { notice('Choose at least one term to match.', true); return; }
+  if (!unresolved) { request = { operationKey: 'mission-' + crypto.randomUUID(), terms }; run = null; draw(null); }
+  store(request); unresolved = true; busy = true; controls(); notice('Submitting your local rehearsal…');
+  try {
+    await api('/api/scout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) });
+    for (let i = 0; i < 40; i++) {
+      const data = await refreshRun();
+      if (data.run && !data.active && terminal.has(data.run.status)) {
+        notice(`Rehearsal ${data.run.status}. ${data.run.jobs.filter(job => job.status === 'completed').length} samples processed. Replay the carrier messages or inspect a result.`); return;
+      }
+      await new Promise(resolve => setTimeout(resolve, 400));
+    }
+    connected = false; connectionState(); draw(run);
+    notice('Execution is still unconfirmed. Refresh to reconcile this run; your request key is preserved.', true);
+  } catch (error) {
+    notice([401, 409, 429, 503, 507].includes(error.status) ? error.message : 'Could not confirm the outcome. Retry uses the same request key; no success has been assumed.', true);
+  } finally { busy = false; try { await refreshSafety(); } catch {} controls(); }
+}
+function connectionState() {
+  $('connection').dataset.state = connected ? 'online' : 'offline';
+  $('connection-text').textContent = connected ? 'Runtime connected' : 'Connection unconfirmed';
+  $('sidebar-state').textContent = connected ? 'CONFIRMED' : 'UNKNOWN';
+  $('observed').textContent = lastConfirmed ? `Connection snapshot confirmed: ${lastConfirmed}. Snapshot only; no heartbeat monitor. Refresh to reconcile.` : 'No confirmed response. Heartbeat monitoring is unavailable.';
+  controls();
+}
+function drawInventory() {
+  const totals = inventory(inventoryState?.tasks);
+  $('inventory-workflows').textContent = inventoryState?.workflow ? '1' : '—';
+  $('inventory-completed').textContent = totals ? `${totals.completed} / ${totals.runs}` : '—';
+  $('inventory-waiting').textContent = totals?.waiting ?? '—';
+  $('inventory-failed').textContent = totals?.failed ?? '—';
+}
+async function connect() {
+  connected = false; connectionState();
+  try {
+    await api('/api/status');
+    await refreshSafety();
+    const workflow = await api('/api/workflow');
+    const tasks = await api('/api/tasks');
+    inventoryState = { workflow, tasks: tasks.tasks };
+    connected = true; lastConfirmed = new Date().toISOString(); connectionState(); drawInventory();
+    if (request) {
+      unresolved = true;
+      try { await refreshRun(); notice(run ? 'Restored saved rehearsal. Inspect the recorded evidence.' : 'Outcome UNKNOWN. Refresh to reconcile.'); }
+      catch { notice('Previous request is UNKNOWN. Original key retained. Refresh or retry the same request.', true); }
+    }
+    draw(run); controls();
+  } catch {
+    connected = false; connectionState(); draw(run);
+    notice('Owner connection unavailable. Open the private startup link from the local terminal, then refresh. Outcomes remain unconfirmed.', true);
+  }
+}
+$('launch').onclick = launch; $('replay').onclick = replay; $('connection').onclick = async () => { if (replaying) stopReplay(); await connect(); };
+$('close-inspector').onclick = () => $('inspector').close();
+document.querySelectorAll('[data-inspect]').forEach(button => { button.onclick = () => inspect(button.dataset.inspect); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && replaying) { stopReplay(); notice('Replay paused because the page was hidden. Saved results remain available.'); } });
+
+run = PREVIEW; draw(run);
+$('connection-text').textContent = 'Recorded preview';
+$('sidebar-state').textContent = 'OFFLINE VIEW';
+$('observed').textContent = 'Historical fictional-sample receipt. No connection or heartbeat monitor.';
+$('connection').onclick = () => notice('Recorded preview. Open the private startup link for the working local application.');
+notice('RECORDED PREVIEW · NOT LIVE. Inspect saved events and replay recorded messages. Execution is disabled.');
+
+
+$('pause').onclick = async () => {
+  if (preview || !connected || replaying) return;
+  try { safety = await api('/api/scout/control', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: safety.paused ? 'resume' : 'pause' }) }); controls(); notice(safety.paused ? 'Paused. Cancellation requested for active workers; refresh to inspect their final state.' : 'Coordinator resumed. Repository access remains denied.'); }
+  catch (error) { notice(error.message, true); }
+};
+$('reset').onclick = async () => {
+  if (preview || !connected || replaying) return;
+  if (!confirm('Reset only after inspecting the failure cause and saved run. This leaves dispatch paused until you choose Resume.')) return;
+  try { safety = await api('/api/scout/control', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'reset' }) }); controls(); notice('Circuit reset. Dispatch remains paused until you explicitly resume.'); }
+  catch (error) { notice(error.message, true); }
+};
+
+// Camera changes affect presentation only; nodes keep readable text and native focus.
+let zoom = 1;
+const field = $('canvas'), stage = $('map-stage');
+function camera(next) {
+  zoom = Math.max(1, Math.min(2, next));
+  stage.style.width = Math.max(field.clientWidth, field.clientWidth <= 650 ? field.clientWidth : 640) * zoom + 'px';
+  stage.style.height = (field.clientWidth <= 650 ? 640 : 570) * zoom + 'px';
+  $('zoom-level').textContent = Math.round(zoom * 100) + '%';
+}
+$('zoom-in').onclick = () => camera(zoom + .2);
+$('zoom-out').onclick = () => camera(zoom - .2);
+$('fit-field').onclick = () => { camera(1); field.scrollTo({ left: Math.max(0, (stage.clientWidth - field.clientWidth) / 2), top: 0 }); };
+field.addEventListener('keydown', event => {
+  if (event.target !== field) return;
+  if (['+', '=', '-', '0'].includes(event.key)) { event.preventDefault(); event.key === '0' ? $('fit-field').click() : camera(zoom + (event.key === '-' ? -.2 : .2)); }
+});
+let drag;
+field.addEventListener('pointerdown', event => {
+  if (event.target.closest('button') || event.pointerType !== 'mouse') return;
+  drag = { x: event.clientX, y: event.clientY, left: field.scrollLeft, top: field.scrollTop };
+  field.setPointerCapture(event.pointerId);
+});
+field.addEventListener('pointermove', event => { if (drag) { field.scrollLeft = drag.left + drag.x - event.clientX; field.scrollTop = drag.top + drag.y - event.clientY; } });
+for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) field.addEventListener(type, () => { drag = null; });
+window.addEventListener('offline', () => { connected = false; connectionState(); draw(run); notice('Connection lost. Saved evidence remains visible; unconfirmed outcomes are UNKNOWN.', true); });
+window.addEventListener('resize', () => camera(zoom));
+</script>
+</body></html>

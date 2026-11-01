@@ -1,30 +1,35 @@
 import http from 'node:http';
-import { readFile, mkdir, writeFile, rename } from 'node:fs/promises';
+import { readFile, mkdir, writeFile, rename, realpath, open, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { isIPv4 } from 'node:net';
 import { defaultDefinition, savedWorkflow, executeDefinition } from './workflow.js';
+import { createScoutService } from './scout-service.js';
+import { ownerCredential, authenticate, authorize, rateGate, LIMITS } from './security.js';
+import { readBoundedJSON } from './scout.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const host = process.env.SECTOR7_HOST || '127.0.0.1';
-const octets = host.split('.').map(Number);
-if (!isIPv4(host) || !(host === '127.0.0.1' || octets[0] === 10 ||
-    (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) ||
-    (octets[0] === 192 && octets[1] === 168))) {
-  throw new Error('SECTOR7_HOST must be loopback or a specific private LAN IPv4 address');
-}
+if (host !== '127.0.0.1') throw new Error('LAN binding disabled until an authenticated TLS access path is commissioned');
 const dataDir = path.resolve(root, process.env.SECTOR7_DATA_DIR || 'data');
 if (dataDir !== root && !dataDir.startsWith(root + path.sep)) throw new Error('Data directory must be inside project');
 const file = path.join(dataDir, 'tasks.json');
 const workflowFile = path.join(dataDir, 'workflow.json');
 await mkdir(dataDir, { recursive: true });
+const resolvedRoot = await realpath(root), resolvedData = await realpath(dataDir);
+if (resolvedData !== resolvedRoot && !resolvedData.startsWith(resolvedRoot + path.sep)) throw new Error('Data directory escapes project through a symlink');
+// A second server must never race the JSON stores or safety state.
+const serverLockPath = path.join(dataDir, '.server.lock');
+const serverLock = await open(serverLockPath, 'wx', 0o600);
+const credential = await ownerCredential(dataDir);
 let tasks;
-try { tasks = JSON.parse(await readFile(file, 'utf8')); }
+try { tasks = await readBoundedJSON(file, 5 * 1024 * 1024); }
 catch (error) { if (error.code !== 'ENOENT') throw error; tasks = []; }
-if (!Array.isArray(tasks)) throw new Error('Invalid task store');
+if (!Array.isArray(tasks) || tasks.length > 1000) throw new Error('Invalid task store');
 async function save() {
-  await writeFile(file + '.tmp', JSON.stringify(tasks, null, 2) + '\n');
+  const bytes = JSON.stringify(tasks, null, 2) + '\n';
+  if (Buffer.byteLength(bytes) > 5 * 1024 * 1024) throw new Error('Legacy task storage limit reached');
+  await writeFile(file + '.tmp', bytes, { mode: 0o600 });
   await rename(file + '.tmp', file);
 }
 for (const task of tasks) {
@@ -36,7 +41,7 @@ for (const task of tasks) {
 await save();
 let workflow;
 try {
-  const stored = JSON.parse(await readFile(workflowFile, 'utf8'));
+  const stored = await readBoundedJSON(workflowFile);
   workflow = savedWorkflow(stored.definition);
   if (workflow.revision !== stored.revision) throw new Error('Saved workflow revision mismatch');
 } catch (error) {
@@ -52,10 +57,20 @@ for (const [name, type] of [['app.js','text/javascript; charset=utf-8'], ['evide
 }
 const instance = { instanceId: randomUUID(), startedAt: new Date().toISOString() };
 const MAX_BODY = 4096;
+const scoutSamples = JSON.parse(await readFile(path.join(root, 'examples', 'scout-samples.json'), 'utf8'));
+const scouts = createScoutService(path.join(dataDir, 'scouts'), scoutSamples);
+await scouts.ready;
+assets.set('/studio', { body: page, type: 'text/html; charset=utf-8' });
+assets.set('/', { body: await readFile(path.join(root, 'public', 'command.html')), type: 'text/html; charset=utf-8' });
+for (const [name, type] of [['command.js', 'text/javascript; charset=utf-8'], ['command.css', 'text/css; charset=utf-8'], ['tokens.css', 'text/css; charset=utf-8'], ['foundry-state.js', 'text/javascript; charset=utf-8'], ['theme.js', 'text/javascript; charset=utf-8']]) {
+  assets.set('/' + name, { body: await readFile(path.join(root, 'public', name)), type });
+}
 let queue = Promise.resolve();
 let storageFailed = false;
+const requestGate = rateGate({ limit: LIMITS.requestsPerMinute });
+let inFlight = 0;
 function reply(res, status, body) {
-  res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+  res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'Cross-Origin-Resource-Policy': 'same-origin' });
   res.end(JSON.stringify(body));
 }
 function advance(task) {
@@ -128,16 +143,35 @@ async function submit(input) {
   return [201, { task, duplicate: false }];
 }
 const server = http.createServer(async (req, res) => {
+  let admitted = false;
   try {
+    req.setTimeout(5000, () => req.destroy());
+    const authority = `${host}:${server.address().port}`;
+    if (req.headers.host !== authority || req.headers['sec-fetch-site'] === 'cross-site') return reply(res, 403, { error: 'Host or browser origin rejected' });
     // Reject browser cross-origin submissions; this is not authentication.
     if (req.headers.origin && req.headers.origin !== `http://${req.headers.host}`) return reply(res, 403, { error: 'Origin rejected' });
+    requestGate();
+    if (inFlight >= LIMITS.concurrentRequests) return reply(res, 429, { error: 'Concurrent request limit reached' });
+    inFlight++; admitted = true;
+    if (req.url.startsWith('/api/')) {
+      const actor = authenticate(req.headers.authorization, credential);
+      const action = req.url === '/api/status' ? 'status.read' : req.url.startsWith('/api/scout') ?
+        req.url === '/api/scout/control' ? 'scout.control' : req.url.endsWith('/cancel') ? 'scout.cancel' : req.method === 'GET' ? 'scout.read' : 'scout.run' :
+        req.url === '/api/workflow' ? req.method === 'GET' ? 'workflow.read' : 'workflow.write' :
+        req.url.startsWith('/api/tasks') ? req.url.endsWith('/approval') ? 'workflow.approve' : req.method === 'GET' ? 'workflow.read' : 'workflow.run' : 'unknown';
+      authorize(actor, action);
+    }
     if (req.method === 'GET' && assets.has(req.url)) {
       const asset = assets.get(req.url);
       res.writeHead(200, { 'Content-Type': asset.type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'no-referrer', 'Cross-Origin-Resource-Policy': 'same-origin',
         'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" });
       return res.end(asset.body);
     }
     if (req.method === 'GET' && req.url === '/api/status') return reply(res, 200, instance);
+    if (req.method === 'GET' && req.url === '/api/scout/control') return reply(res, 200, await scouts.status());
+    const scoutRead = req.method === 'GET' && req.url.match(/^\/api\/scout\/([A-Za-z0-9_-]{1,80})$/);
+    if (scoutRead) return reply(res, 200, await scouts.get(scoutRead[1]));
     if (req.method === 'GET' && req.url === '/api/tasks') {
       await queue;
       if (storageFailed) return reply(res, 503, { error: 'Storage unavailable' });
@@ -149,8 +183,11 @@ const server = http.createServer(async (req, res) => {
       return reply(res, 200, workflow);
     }
     const workflowWrite = req.method === 'PUT' && req.url === '/api/workflow';
+    const scoutWrite = req.method === 'POST' && req.url === '/api/scout';
+    const scoutControl = req.method === 'POST' && req.url === '/api/scout/control';
+    const scoutCancel = req.method === 'POST' && req.url.match(/^\/api\/scout\/([A-Za-z0-9_-]{1,80})\/cancel$/);
     const approvalMatch = req.method === 'POST' && req.url.match(/^\/api\/tasks\/([a-f0-9-]{36})\/approval$/);
-    if (!workflowWrite && !approvalMatch && (req.method !== 'POST' || req.url !== '/api/tasks')) return reply(res, 404, { error: 'Not found' });
+    if (!scoutControl && !scoutCancel && !scoutWrite && !workflowWrite && !approvalMatch && (req.method !== 'POST' || req.url !== '/api/tasks')) return reply(res, 404, { error: 'Not found' });
     if (req.headers['content-type']?.split(';')[0].trim() !== 'application/json') return reply(res, 415, { error: 'Use application/json' });
     let bytes = 0;
     const chunks = [];
@@ -162,6 +199,12 @@ const server = http.createServer(async (req, res) => {
     let input;
     try { input = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
     catch { return reply(res, 400, { error: 'Malformed JSON' }); }
+    if (scoutControl) return reply(res, 200, await scouts.control(input));
+    if (scoutCancel) {
+      if (!input || Array.isArray(input) || typeof input !== 'object' || Object.keys(input).length) return reply(res, 400, { error: 'Cancel expects an empty object' });
+      return reply(res, 202, await scouts.cancel(scoutCancel[1]));
+    }
+    if (scoutWrite) return reply(res, 202, await scouts.submit(input));
     if (approvalMatch) {
       if (!input || Array.isArray(input) || typeof input !== 'object' || Object.keys(input).sort().join(',') !== 'approvalId,decision' ||
           typeof input.approvalId !== 'string' || !/^[a-f0-9-]{36}$/.test(input.approvalId) ||
@@ -199,16 +242,25 @@ const server = http.createServer(async (req, res) => {
     const [status, body] = await job;
     reply(res, status, body);
   } catch (error) {
-    console.error(error.message);
+    console.error(error.status ? `Request refused (${error.status})` : 'Local request/storage failure; inspect data and safety state');
     if (!res.headersSent) reply(res, error.status || 500, { error: error.status ? error.message : 'Request could not be persisted; inspect server output' });
     else res.end();
+  } finally {
+    if (admitted) inFlight--;
   }
 });
 server.requestTimeout = 10000;
 server.headersTimeout = 10000;
+server.setTimeout(10000, socket => socket.destroy());
 server.maxConnections = 16;
-server.listen(Number(process.env.PORT || 3000), host, () => console.log(`Sector 7: http://${host}:${server.address().port}`));
+server.listen(Number(process.env.PORT || 3000), host, () => {
+  console.log(`Sector 7: http://${host}:${server.address().port}`);
+  console.log(`Private owner link (do not share): http://${host}:${server.address().port}/#access=${credential}`);
+});
 for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => {
-  server.close(() => { queue.finally(() => process.exit(0)); });
+  scouts.stop();
+  server.close(() => { Promise.allSettled([queue, scouts.drain()]).then(async () => {
+    await serverLock.close(); await unlink(serverLockPath); process.exit(0);
+  }); });
   server.closeIdleConnections();
 });

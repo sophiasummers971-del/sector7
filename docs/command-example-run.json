@@ -1,0 +1,241 @@
+{
+  "version": 1,
+  "operationKey": "offline-scout-demo-v1",
+  "fingerprint": "943165407257a05ca9e13641f7ccb081a8ac2f43647517fffa65b694132e0920",
+  "status": "completed",
+  "concurrency": 2,
+  "source": "local-supplied-samples",
+  "jobs": [
+    {
+      "id": "job-1",
+      "repository": "fictional/workflow-queue",
+      "inputRef": "input.json#/repositories/0",
+      "inputHash": "3d677c4e907207fcfe8ded4d84e75bebdeca46623c9f22babb566972bfd4af70",
+      "status": "completed",
+      "result": {
+        "method": "literal-readme-term-match-v1",
+        "matchedTerms": [
+          "workflow",
+          "local",
+          "queue"
+        ],
+        "score": 3,
+        "readmeBytes": 70,
+        "codeReviewed": false,
+        "claimsVerified": false
+      }
+    },
+    {
+      "id": "job-2",
+      "repository": "fictional/photo-viewer",
+      "inputRef": "input.json#/repositories/1",
+      "inputHash": "495f1a98db1fc87b86ebdfa11e83a913e80f38579d851f1b70d55710b1e88af6",
+      "status": "completed",
+      "result": {
+        "method": "literal-readme-term-match-v1",
+        "matchedTerms": [],
+        "score": 0,
+        "readmeBytes": 62,
+        "codeReviewed": false,
+        "claimsVerified": false
+      }
+    },
+    {
+      "id": "job-3",
+      "repository": "fictional/local-notes",
+      "inputRef": "input.json#/repositories/2",
+      "inputHash": "8810702b60ddba3f8a8ecbdf3333609a8018eff070224bcb01a5b298fdabd9f0",
+      "status": "completed",
+      "result": {
+        "method": "literal-readme-term-match-v1",
+        "matchedTerms": [
+          "local"
+        ],
+        "score": 1,
+        "readmeBytes": 51,
+        "codeReviewed": false,
+        "claimsVerified": false
+      }
+    },
+    {
+      "id": "job-4",
+      "repository": "fictional/cloud-workflow",
+      "inputRef": "input.json#/repositories/3",
+      "inputHash": "40e20bea89c601eaf6fa2b07ad037fba0a8da3d24a17cea45b6cb7a44793a69d",
+      "status": "completed",
+      "result": {
+        "method": "literal-readme-term-match-v1",
+        "matchedTerms": [
+          "workflow"
+        ],
+        "score": 1,
+        "readmeBytes": 60,
+        "codeReviewed": false,
+        "claimsVerified": false
+      }
+    }
+  ],
+  "events": [
+    {
+      "version": 1,
+      "sequence": 1,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-1",
+      "sender": "coordinator",
+      "kind": "dispatched",
+      "inputRef": "input.json#/repositories/0",
+      "inputHash": "3d677c4e907207fcfe8ded4d84e75bebdeca46623c9f22babb566972bfd4af70",
+      "at": "2026-10-29T08:31:04.735Z"
+    },
+    {
+      "version": 1,
+      "sequence": 2,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-1",
+      "sender": "worker-1",
+      "kind": "accepted",
+      "inputRef": "input.json#/repositories/0",
+      "inputHash": "3d677c4e907207fcfe8ded4d84e75bebdeca46623c9f22babb566972bfd4af70",
+      "at": "2026-10-29T08:31:04.735Z"
+    },
+    {
+      "version": 1,
+      "sequence": 3,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-2",
+      "sender": "coordinator",
+      "kind": "dispatched",
+      "inputRef": "input.json#/repositories/1",
+      "inputHash": "495f1a98db1fc87b86ebdfa11e83a913e80f38579d851f1b70d55710b1e88af6",
+      "at": "2026-10-29T08:31:04.735Z"
+    },
+    {
+      "version": 1,
+      "sequence": 4,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-2",
+      "sender": "worker-2",
+      "kind": "accepted",
+      "inputRef": "input.json#/repositories/1",
+      "inputHash": "495f1a98db1fc87b86ebdfa11e83a913e80f38579d851f1b70d55710b1e88af6",
+      "at": "2026-10-29T08:31:04.735Z"
+    },
+    {
+      "version": 1,
+      "sequence": 5,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-1",
+      "sender": "worker-1",
+      "kind": "completed",
+      "inputRef": "input.json#/repositories/0",
+      "inputHash": "3d677c4e907207fcfe8ded4d84e75bebdeca46623c9f22babb566972bfd4af70",
+      "at": "2026-10-29T08:31:04.736Z",
+      "resultRef": "run.json#/jobs/0/result"
+    },
+    {
+      "version": 1,
+      "sequence": 6,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-2",
+      "sender": "worker-2",
+      "kind": "completed",
+      "inputRef": "input.json#/repositories/1",
+      "inputHash": "495f1a98db1fc87b86ebdfa11e83a913e80f38579d851f1b70d55710b1e88af6",
+      "at": "2026-10-29T08:31:04.736Z",
+      "resultRef": "run.json#/jobs/1/result"
+    },
+    {
+      "version": 1,
+      "sequence": 7,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-3",
+      "sender": "coordinator",
+      "kind": "dispatched",
+      "inputRef": "input.json#/repositories/2",
+      "inputHash": "8810702b60ddba3f8a8ecbdf3333609a8018eff070224bcb01a5b298fdabd9f0",
+      "at": "2026-10-29T08:31:04.737Z"
+    },
+    {
+      "version": 1,
+      "sequence": 8,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-3",
+      "sender": "worker-1",
+      "kind": "accepted",
+      "inputRef": "input.json#/repositories/2",
+      "inputHash": "8810702b60ddba3f8a8ecbdf3333609a8018eff070224bcb01a5b298fdabd9f0",
+      "at": "2026-10-29T08:31:04.737Z"
+    },
+    {
+      "version": 1,
+      "sequence": 9,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-4",
+      "sender": "coordinator",
+      "kind": "dispatched",
+      "inputRef": "input.json#/repositories/3",
+      "inputHash": "40e20bea89c601eaf6fa2b07ad037fba0a8da3d24a17cea45b6cb7a44793a69d",
+      "at": "2026-10-29T08:31:04.737Z"
+    },
+    {
+      "version": 1,
+      "sequence": 10,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-4",
+      "sender": "worker-2",
+      "kind": "accepted",
+      "inputRef": "input.json#/repositories/3",
+      "inputHash": "40e20bea89c601eaf6fa2b07ad037fba0a8da3d24a17cea45b6cb7a44793a69d",
+      "at": "2026-10-29T08:31:04.737Z"
+    },
+    {
+      "version": 1,
+      "sequence": 11,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-3",
+      "sender": "worker-1",
+      "kind": "completed",
+      "inputRef": "input.json#/repositories/2",
+      "inputHash": "8810702b60ddba3f8a8ecbdf3333609a8018eff070224bcb01a5b298fdabd9f0",
+      "at": "2026-10-29T08:31:04.738Z",
+      "resultRef": "run.json#/jobs/2/result"
+    },
+    {
+      "version": 1,
+      "sequence": 12,
+      "correlationId": "offline-scout-demo-v1",
+      "jobId": "job-4",
+      "sender": "worker-2",
+      "kind": "completed",
+      "inputRef": "input.json#/repositories/3",
+      "inputHash": "40e20bea89c601eaf6fa2b07ad037fba0a8da3d24a17cea45b6cb7a44793a69d",
+      "at": "2026-10-29T08:31:04.738Z",
+      "resultRef": "run.json#/jobs/3/result"
+    }
+  ],
+  "shortlist": [
+    {
+      "repository": "fictional/workflow-queue",
+      "score": 3,
+      "matchedTerms": [
+        "workflow",
+        "local",
+        "queue"
+      ]
+    },
+    {
+      "repository": "fictional/cloud-workflow",
+      "score": 1,
+      "matchedTerms": [
+        "workflow"
+      ]
+    },
+    {
+      "repository": "fictional/local-notes",
+      "score": 1,
+      "matchedTerms": [
+        "local"
+      ]
+    }
+  ]
+}
