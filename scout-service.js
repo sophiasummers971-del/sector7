@@ -1,4 +1,5 @@
-import { mkdir, writeFile, rename, lstat, unlink } from 'node:fs/promises';
+import { replaceFile } from './storage.js';
+import { mkdir, writeFile, lstat, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { runScout, validateScout, loadScoutRun, readBoundedJSON } from './scout.js';
 import { LIMITS, rateGate } from './security.js';
@@ -15,7 +16,7 @@ export function createScoutService(dataDir, samples) {
     const snapshot = structuredClone(state);
     writeQueue = writeQueue.then(async () => {
       await writeFile(file + '.tmp', JSON.stringify(snapshot), { mode: 0o600 });
-      await rename(file + '.tmp', file);
+      await replaceFile(file + '.tmp', file);
     });
     return writeQueue;
   };

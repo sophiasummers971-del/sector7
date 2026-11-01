@@ -1,4 +1,4 @@
-import { TERMINAL, runLabel, workerState, routeFor, inventory, startingPoints } from './foundry-state.js';
+import { TERMINAL, runLabel, workerState, routeFor, inventory, startingPoints, localWorkflowTrace } from './foundry-state.js';
 import './theme.js';
 
 // Owner credentials stay in this tab, never in persisted run data or query strings.
@@ -212,15 +212,95 @@ function connectionState() {
   $('observed').textContent = lastConfirmed ? `Connection snapshot confirmed: ${lastConfirmed}. Snapshot only; no heartbeat monitor. Refresh to reconcile.` : 'No confirmed response. Heartbeat monitoring is unavailable.';
   controls();
 }
+function drawLocalTrace() {
+  const trace = connected ? localWorkflowTrace(inventoryState?.tasks) : null;
+  const list = $('local-trace-steps');
+  if (!trace) {
+    $('local-trace-status').textContent = connected
+      ? 'No saved local workflow execution found. Create and run one in the Workflow Foundry.'
+      : 'Connection unconfirmed. Saved workflow status cannot be verified.';
+    list.replaceChildren();
+    return;
+  }
+  $('local-trace-status').textContent =
+    'Recorded run · ' + trace.status + ' · ' + trace.nodes.length +
+    ' observed steps. ' + trace.guidance + ' Saved history only; not a live swarm.';
+  list.replaceChildren(...trace.nodes.map((step, index) => {
+    const item = node('li', undefined, 'local-trace-step');
+    item.dataset.state = step.status;
+    const detail = node('button', undefined, 'local-trace-inspect');
+    detail.type = 'button';
+    detail.ariaLabel = 'Inspect recorded step ' + (index + 1) + ': ' + step.type;
+    detail.append(node('span', String(index + 1).padStart(2, '0') + ' · ' + step.type),
+      node('strong', step.status === 'completed' ? '✓ COMPLETED' : step.status));
+    detail.onclick = () => showEvidence('Saved workflow step / ' + (index + 1),
+      'Read-only record. No text payloads, tool permissions or execution controls are exposed.',
+      { runId: trace.id, runStatus: trace.status, id: step.id, type: step.type, status: step.status, recordedAt: step.at });
+    item.append(detail);
+    return item;
+  }));
+  // Highlight transitions only when they are present in confirmed saved records.
+  // Static recorded signals never impersonate a live agent or heartbeat.
+  for (const item of list.children) item.classList.remove('recent-transition');
+  if (trace.nodes.length > 0) {
+    const latest = list.children[trace.nodes.length - 1];
+    if (latest) latest.classList.add('recent-transition');
+  }
+}
+let signalView = 'scout';
+function selectSignalView(next) {
+  signalView = next === 'local' ? 'local' : 'scout';
+  $('local-signal-field').hidden = signalView !== 'local';
+  $('scout-signal-field').hidden = signalView !== 'scout';
+  $('view-local').ariaPressed = String(signalView === 'local');
+  $('view-scout').ariaPressed = String(signalView === 'scout');
+  drawLocalSignal();
+}
+function drawLocalSignal() {
+  $('refresh-local-signal').disabled = busy || replaying;
+  $('local-signal-observed').textContent = connected && lastConfirmed
+    ? 'Last verified snapshot: ' + lastConfirmed + '. Refresh to check changes; no live monitoring.'
+    : 'No verified current snapshot. Display is unavailable until reconnection.';
+  const list = $('local-signal-steps');
+  const trace = connected ? localWorkflowTrace(inventoryState?.tasks) : null;
+  if (!trace) {
+    list.replaceChildren();
+    $('local-signal-caption').textContent = connected
+      ? 'No saved workflow run found. Create a local run in Workflow Foundry.'
+      : 'Owner connection unconfirmed. No workflow outcome is assumed.';
+    return;
+  }
+  $('local-signal-caption').textContent = 'Recorded ' + trace.status + ' · ' + trace.guidance +
+    ' This is historical evidence, not a live agent display.';
+  list.replaceChildren(...trace.nodes.map((step, index) => {
+    const item = node('li', undefined, 'local-signal-node');
+    item.dataset.state = step.status;
+    const button = node('button');
+    button.type = 'button';
+    button.ariaLabel = 'Inspect recorded workflow step ' + (index + 1) + ': ' + step.type;
+    button.append(node('small', String(index + 1).padStart(2, '0') + ' / ' + step.type),
+      node('strong', step.status === 'completed' ? '✓ COMPLETED' : step.status));
+    button.onclick = () => showEvidence('Workflow circuit / step ' + (index + 1),
+      'Historical saved step only. Inspection cannot approve, retry, or execute any work.',
+      {runId: trace.id, id: step.id, type: step.type, status: step.status, recordedAt: step.at});
+    item.append(button);
+    return item;
+  }));
+}
+$('view-local').onclick = () => selectSignalView('local');
+$('view-scout').onclick = () => selectSignalView('scout');
+$('refresh-local-signal').onclick = async () => { if (busy || replaying) return; await connect(); };
 function drawInventory() {
   const totals = inventory(inventoryState?.tasks);
   $('inventory-workflows').textContent = inventoryState?.workflow ? '1' : '—';
   $('inventory-completed').textContent = totals ? `${totals.completed} / ${totals.runs}` : '—';
   $('inventory-waiting').textContent = totals?.waiting ?? '—';
   $('inventory-failed').textContent = totals?.failed ?? '—';
+  drawLocalTrace();
+  drawLocalSignal();
 }
 async function connect() {
-  connected = false; connectionState();
+  connected = false; connectionState(); drawLocalTrace(); drawLocalSignal();
   try {
     await api('/api/status');
     await refreshSafety();
@@ -235,7 +315,7 @@ async function connect() {
     }
     draw(run); controls();
   } catch {
-    connected = false; connectionState(); draw(run);
+    connected = false; connectionState(); draw(run); drawLocalTrace(); drawLocalSignal();
     notice('Owner connection unavailable. Open the private startup link from the local terminal, then refresh. Outcomes remain unconfirmed.', true);
   }
 }

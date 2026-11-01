@@ -1,5 +1,9 @@
 # Sector7 // The Living Foundry
 
+Latest Windows acceptance and remaining boundaries: [DESKTOP-ACCEPTANCE.md](DESKTOP-ACCEPTANCE.md).
+The earlier container-era evidence and blockers below are retained as history;
+the desktop report records the subsequent browser runs and repairs.
+
 Status: **implemented draft vertical slice; rendered acceptance outstanding**.
 Updated: 31 October 2026. Motto: THE FACTORY NEVER FAKES A SIGNAL.
 

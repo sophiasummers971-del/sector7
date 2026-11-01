@@ -1,3 +1,4 @@
+import { stopServer } from './server-process.js';
 // Optional rendered-browser check using an already installed Chrome; no dependencies.
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
@@ -14,10 +15,10 @@ let server,browser,socket;
 let browserWebSocketUrl;
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const deadline=setTimeout(()=>{console.error('Browser check timed out');socket?.close();browser?.kill();server?.kill();process.exitCode=1},90000);
-async function stop(child){if(child&&child.exitCode===null){const exited=once(child,'exit');child.kill();await exited}}
+async function stop(child){if(child===server)return stopServer(child);if(child&&child.exitCode===null){const exited=once(child,'exit');child.kill();await exited}}
 try{
   async function launchServer(port='0'){
-    server=spawn(process.execPath,['server.js'],{cwd:root,env:{...process.env, SECTOR7_ACCESS_TOKEN: testOwnerKey,SECTOR7_HOST:'127.0.0.1',PORT:port,SECTOR7_DATA_DIR:path.join(temp,'data')},stdio:['ignore','pipe','pipe']});
+    server=spawn(process.execPath,['server.js'],{cwd:root,env:{...process.env, SECTOR7_ACCESS_TOKEN: testOwnerKey,SECTOR7_HOST:'127.0.0.1',PORT:port,SECTOR7_DATA_DIR:path.join(temp,'data')},stdio:['ignore','pipe','pipe','ipc']});
     return await new Promise((resolve,reject)=>{
       const timer=setTimeout(()=>reject(Error('Server startup timed out')),10000);
       server.once('error',error=>{clearTimeout(timer);reject(error)});server.once('exit',code=>{clearTimeout(timer);reject(Error('Test server exited '+code))});
@@ -58,7 +59,7 @@ try{
   const noOverflow=async()=>assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'),true,'No page-wide horizontal overflow');
   const screenshot=async name=>{await mkdir(path.join(root,'artifacts'),{recursive:true});const shot=await cdp('Page.captureScreenshot',{format:'png'});await writeFile(path.join(root,'artifacts',name),Buffer.from(shot.data,'base64'))};
   await noOverflow();
-  assert.equal(await evaluate("getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()"),'#100c17');
+  assert.equal(await evaluate("getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()"),'#070b13');
   assert.equal(await evaluate("document.getElementById('test-verdict').textContent"),'NOT VERIFIED');
   assert.equal(await evaluate("document.getElementById('history').open || document.getElementById('technical').open"),false);
   assert.equal(await evaluate("document.querySelectorAll('.node-card').length"),3);

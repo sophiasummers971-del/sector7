@@ -1,5 +1,6 @@
+import { replaceFile } from './storage.js';
 import { createHash } from 'node:crypto';
-import { mkdir, open, readdir, lstat, rename, writeFile, unlink } from 'node:fs/promises';
+import { mkdir, open, readdir, lstat, writeFile, unlink } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import path from 'node:path';
 import { LIMITS, authorize, OWNER } from './security.js';
@@ -56,7 +57,7 @@ export function inspectReadme(text, terms) {
 
 async function atomic(file, value) {
   await writeFile(file + '.tmp', JSON.stringify(value, null, 2) + '\n', { mode: 0o600 });
-  await rename(file + '.tmp', file);
+  await replaceFile(file + '.tmp', file);
 }
 
 export async function readBoundedJSON(file, maxBytes = LIMITS.readBytes) {

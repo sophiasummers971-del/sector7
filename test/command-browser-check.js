@@ -1,3 +1,4 @@
+import { stopServer } from './server-process.js';
 // Optional: an installed Playwright module and Chromium are supplied by the host.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -14,7 +15,7 @@ const { chromium } = await import(modulePath ? pathToFileURL(modulePath).href : 
 const temp = await mkdtemp(path.join(root, '.test-data-command-browser-'));
 let server, browser;
 try {
-  server = spawn(process.execPath, ['server.js'], { cwd: root, env: { ...process.env, SECTOR7_ACCESS_TOKEN: testOwnerKey, PORT: '0', SECTOR7_HOST: '127.0.0.1', SECTOR7_DATA_DIR: temp }, stdio: ['ignore', 'pipe', 'pipe'] });
+  server = spawn(process.execPath, ['server.js'], { cwd: root, env: { ...process.env, SECTOR7_ACCESS_TOKEN: testOwnerKey, PORT: '0', SECTOR7_HOST: '127.0.0.1', SECTOR7_DATA_DIR: temp }, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
   const base = await new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('Server startup timeout')), 5000);
     server.once('error', reject);
@@ -37,6 +38,43 @@ try {
   assert.match(await page.locator('#idea-heading').textContent(),/release message/);
   assert.equal(ideaRequests.length,0,'Idea form does not execute work');
   page.off('request',recordIdeaRequest);
+  // Seed an isolated real workflow; inspection and refresh must remain read-only.
+  const privateText = 'PRIVATE-DESKTOP-TRACE-CANARY';
+  const definition = {nodes:[{id:'start',type:'start'},{id:'text',type:'text.input',settings:{text:privateText}},{id:'approve',type:'approval'},{id:'result',type:'result'}],edges:[{from:'start',to:'text'},{from:'text',to:'approve'},{from:'approve',to:'result'}]};
+  const savedResponse = await page.request.put(base + '/api/workflow', {data:definition});
+  assert.equal(savedResponse.status(),200);
+  const saved = await savedResponse.json();
+  const runResponse = await page.request.post(base + '/api/tasks', {data:{action:'workflow.run',operationKey:'desktop-trace',workflowRevision:saved.revision}});
+  assert.equal(runResponse.status(),201);
+  const waiting = (await runResponse.json()).task;
+  assert.equal(waiting.status,'WAITING_APPROVAL');
+  await page.reload();
+  await page.waitForFunction(() => document.querySelectorAll('#local-trace-steps li').length === 3);
+  assert.match(await page.locator('#local-trace-status').textContent(),/WAITING_APPROVAL/);
+  const viewRequests=[];
+  const recordView=request=>{if(request.method()!=='GET')viewRequests.push(request.method()+' '+request.url());};
+  page.on('request',recordView);
+  await page.locator('#view-local').click();
+  assert.equal(await page.locator('#local-signal-steps li').count(),3);
+  await page.locator('#local-signal-steps button').last().click();
+  assert.equal((await page.locator('#inspector-data').textContent()).includes(privateText),false);
+  assert.match(await page.locator('#inspector-data').textContent(),/WAITING_APPROVAL/);
+  await page.keyboard.press('Escape');
+  await page.locator('#refresh-local-signal').click();
+  await page.waitForFunction(() => document.getElementById('connection-text').textContent === 'Runtime connected');
+  assert.equal(viewRequests.length,0,'Workflow evidence inspection/refresh cannot mutate or approve');
+  page.off('request',recordView);
+  assert.deepEqual((await (await page.request.get(base+'/api/tasks')).json()).tasks,[waiting]);
+  const decided = await page.request.post(base+'/api/tasks/'+waiting.id+'/approval',{data:{approvalId:waiting.waitingApproval.approvalId,decision:'approve'}});
+  assert.equal(decided.status(),200);
+  await page.locator('#refresh-local-signal').click();
+  await page.waitForFunction(() => document.querySelectorAll('#local-signal-steps li').length === 4);
+  assert.match(await page.locator('#local-signal-caption').textContent(),/Recorded completed/);
+  assert.equal((await page.locator('#local-signal-field').textContent()).includes(privateText),false);
+  assert.equal((await page.locator('#local-trace-steps').textContent()).includes(privateText),false);
+  await mkdir(path.join(root,'artifacts','desktop-acceptance'),{recursive:true});
+  await page.screenshot({path:path.join(root,'artifacts','desktop-acceptance','saved-workflow-trace.png'),fullPage:true});
+  await page.locator('#view-scout').click();
   assert.equal(await page.locator('.result-card').count(), 0);
   await page.locator('#launch').click();
   await page.waitForFunction(() => document.getElementById('run-state').textContent.includes('COMPLETED'));
@@ -57,6 +95,7 @@ try {
   const key = await page.evaluate(() => JSON.parse(localStorage.getItem('sector7-command-request')).operationKey);
   const original = await (await page.request.get(base + '/api/scout/' + key)).json();
   await page.locator('[data-inspect="coordinator"]').click();
+  assert.equal(await page.getByRole('dialog', { name: 'The coordinator', exact: true }).count(), 1, 'Inspector exposes its current title to assistive technology');
   assert.equal(await page.locator('#inspector').evaluate(n => n.open), true);
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#inspector').evaluate(n => n.open), false);
@@ -76,6 +115,23 @@ try {
   }
   await page.setViewportSize({ width: 1440, height: 1080 });
   await page.locator('.preferences summary').click();
+  // The idea field remains distinguishable against both its fill and the
+  // brightest endpoint of its surrounding gradient in every shared theme.
+  for (const theme of ['industrial', 'neon', 'minimal']) {
+    await page.locator('#theme-choice').selectOption(theme);
+    const minimum = await page.locator('#idea-input').evaluate(input => {
+      const style = getComputedStyle(input);
+      const luminance = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        .map(value => value / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4)
+        .reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
+      const border = luminance(style.borderTopColor);
+      return Math.min(...[style.backgroundColor, 'rgb(18, 42, 59)'].map(background => {
+        const adjacent = luminance(background);
+        return (Math.max(border, adjacent) + .05) / (Math.min(border, adjacent) + .05);
+      }));
+    });
+    assert.ok(minimum >= 3, 'Idea input boundary contrast >=3:1 in ' + theme);
+  }
   await page.locator('#theme-choice').selectOption('neon');
   await page.locator('#low-power').check();
   assert.equal(await page.evaluate(() => document.documentElement.dataset.motion), 'off');
@@ -117,6 +173,6 @@ try {
   console.log('PASS: dispatch/results, source labels, inspector/Escape, honest replay, reload, offline same-key recovery, studio and 1440/390/320px layouts.');
 } finally {
   await browser?.close();
-  if (server && server.exitCode === null) { const done = once(server, 'exit'); server.kill(); await done; }
+  await stopServer(server);
   await rm(temp, { recursive: true, force: true });
 }
