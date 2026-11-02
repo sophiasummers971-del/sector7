@@ -8,11 +8,29 @@
 <link rel="stylesheet" href="/tokens.css">
 <script type="module" src="/theme.js"></script>
 <a class="studio-home" href="/">← Sector7 factory overview</a>
-<main>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<main id="main-content" tabindex="-1">
   <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">S7</span><div><h1>Sector 7</h1><p id="workflow-name">Local workflow</p></div></div><button id="connection" class="connection" title="Refresh server connection"><span id="server-state">Checking…</span></button></header>
   <div class="mode-row"><div role="tablist" aria-label="Studio mode"><button id="mode-build" role="tab" aria-selected="false">Build</button><button id="mode-run" role="tab" aria-selected="true">Run</button></div><span id="save-state" class="chip">Loading</span></div>
   <p id="notice" class="notice" role="status" aria-live="polite">Connecting to your local server…</p>
-  <section class="panel" id="text-preset"><span class="eyebrow">Entirely local</span><h2>Text review</h2><p>Enter a message, transform it, then approve the exact output. Load this preset into Build; save when ready. Loading replaces only your local draft.</p><button id="load-text-preset">Load text review preset</button></section>
+  <section class="panel" id="text-preset" aria-labelledby="templates-title"><span class="eyebrow">Entirely local</span><h2 id="templates-title">Workflow templates</h2><p>Choose a starting point. Loading replaces your unsaved draft only; save and run are separate actions.</p><label for="workflow-template">Choose a template</label><select id="workflow-template" aria-describedby="template-description"></select><p id="template-description"></p><button id="load-template">Load selected template</button><button id="load-text-preset">Load text review preset</button></section>
+  <section class="panel" id="github-account-panel" aria-labelledby="account-title">
+    <h2 id="account-title">Your GitHub workflows</h2>
+    <p>Use your Windows GitHub sign-in to browse accessible public and private repositories. Each issue or draft PR needs a separate approval. Tokens stay on this computer.</p>
+    <button id="account-connect">Connect Windows GitHub sign-in</button><button id="account-disconnect">Disconnect Sector7</button><button id="account-refresh">Refresh action history</button>
+    <p id="account-status" role="status">Not connected.</p>
+    <div id="account-controls" hidden>
+      <label for="account-repository">Repository</label><select id="account-repository"></select>
+      <button id="account-prev">Previous repositories</button><button id="account-next">More repositories</button><button id="account-readme">Read selected README</button>
+      <pre id="account-readme-text" class="text-preview" tabindex="0" aria-label="Selected repository README"></pre>
+      <label for="account-template">Choose a GitHub template</label><select id="account-template"><option value="bug">Bug report</option><option value="feature">Feature request</option><option value="pull">Draft pull request</option></select><button id="account-load-template">Load GitHub template</button>
+      <label for="account-title-input">Title</label><input id="account-title-input" maxlength="150">
+      <label for="account-body">Description</label><textarea id="account-body" maxlength="2000" rows="6"></textarea>
+      <div id="account-branches" hidden><p>Choose existing branches. Sector7 opens a draft PR; it does not create or change these branches.</p><label for="account-base">Base branch</label><input id="account-base" maxlength="100" value="main"><label for="account-head">Head branch</label><input id="account-head" maxlength="100"></div>
+      <button id="account-prepare">Prepare exact preview</button>
+    </div>
+    <div id="account-actions" role="region" aria-label="GitHub action previews and history"></div>
+  </section>
   <section id="waiting-section" hidden aria-labelledby="waiting-title"><h2 id="waiting-title" class="sr-only">Waiting runs</h2><div id="waiting-runs"></div></section>
   <section id="run-summary" class="run-summary" aria-live="polite"><div><span class="eyebrow">Selected run</span><h2 id="run-title">Ready for a new run</h2><p id="run-explanation">Start a new run to see real execution.</p><p id="run-test-evidence">Test · NOT VERIFIED</p></div><span id="run-status" class="status">○ Idle</span></section>
   <section class="panel" id="text-result" hidden><h2>Result output</h2><pre id="approved-text" class="text-preview" tabindex="0"></pre><button id="copy-result">Copy approved text</button><p id="copy-status" role="status"></p></section>
@@ -26,8 +44,8 @@
     <section id="build-panel" class="panel" hidden><span class="eyebrow">Build a single chain</span><h2>Connect with a tap.</h2><ol><li>Add a node from the bottom toolbar.</li><li>Tap an output port, then a highlighted input.</li><li>Save to validate the entire chain.</li></ol><p id="build-reason"></p><button id="show-connections">Review connections</button><details id="connection-list"><summary>Connection list</summary><div id="edges"></div></details><p class="hint">One Start, Ping or Text Input, optional Transforms/Approvals, one Result. Up to 12 nodes. No branching.</p></section>
   </div>
   <details id="history" class="panel disclosure"><summary>Run history <span id="history-count" class="chip">0</span></summary><button id="refresh-history">Refresh history</button><div id="tasks"></div></details>
-  <details id="persistence" class="panel disclosure"><summary>Restart persistence <span id="restart-verdict">NOT VERIFIED</span></summary><p>A browser refresh is not a server restart. Record a selected stable run first, then stop and start Node on the Surface.</p><ol><li>Record the baseline below.</li><li>Stop the server with Ctrl+C, then start it again with the same data and LAN settings.</li><li>Return here and check the new server instance and saved data.</li></ol><pre>Set-Location E:\Sector7
-$env:SECTOR7_HOST = '192.168.0.86'
+  <details id="persistence" class="panel disclosure"><summary>Restart persistence <span id="restart-verdict">NOT VERIFIED</span></summary><p>A browser refresh is not a server restart. Record a selected stable run first, then stop and start Node on the Surface.</p><ol><li>Record the baseline below.</li><li>Stop the server with Ctrl+C, then start it again with the same data and loopback settings.</li><li>Return here and check the new server instance and saved data.</li></ol><pre>Set-Location 'C:\Users\S.Jade\Documents\Sector7-acceptance'
+$env:SECTOR7_HOST = '127.0.0.1'
 $env:PORT = '3000'
 npm.cmd start</pre><button id="restart-baseline">Record pre-restart baseline</button><button id="restart-check">Check after real restart</button><p id="restart-observed">NOT VERIFIED · No restart and data comparison observed.</p></details>
   <details id="technical" class="panel disclosure"><summary>Technical details &amp; activity</summary><h3>Selected request and record</h3><pre id="technical-data"></pre><h3>Request log · this page session</h3><div id="activity"></div></details>
@@ -37,4 +55,5 @@ npm.cmd start</pre><button id="restart-baseline">Record pre-restart baseline</bu
 <dialog id="node-sheet" class="sheet" aria-labelledby="sheet-title"><header><div><span class="eyebrow">Inspector</span><h2 id="sheet-title">Node details</h2></div><button id="sheet-close" class="icon-button" aria-label="Close node details" autofocus>×</button></header><div id="sheet-body"></div></dialog>
 <dialog id="add-sheet" class="sheet" aria-labelledby="add-title"><header><div><span class="eyebrow">Node library</span><h2 id="add-title">Add to your chain</h2></div><button id="add-close" class="icon-button" aria-label="Close node library" autofocus>×</button></header><div id="palette" class="palette"></div><p class="hint">Adding a node changes the draft only. Connect it, then save.</p></dialog>
 <script type="module" src="/app.js"></script>
+<script type="module" src="/github-account-ui.js"></script>
 </html>

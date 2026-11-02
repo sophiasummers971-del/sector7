@@ -8,4 +8,13 @@
 .node-body{background:var(--panel);border-color:var(--line)}
 .node-symbol,.brand-mark{background:var(--surface2);color:var(--cyan);border-color:var(--line)}
 .wire{stroke:var(--violet)}
+.skip-link{position:fixed;top:0;left:1rem;z-index:10000;padding:1rem;background:var(--panel);color:var(--text);transform:translateY(-150%)}
+.skip-link:focus{transform:none}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+#main-content{scroll-margin-block:1rem}
+#workflow-template{max-width:100%;min-height:44px}
+#github-account-panel input,#github-account-panel select,#github-account-panel textarea{display:block;max-width:100%;width:100%;min-height:44px;margin-block:.5rem 1rem;background:var(--panel);color:var(--text);border:1px solid var(--muted);padding:.65rem}
+#account-actions pre{white-space:pre-wrap;overflow-wrap:anywhere}
+#github-account-panel button{margin:.25rem;min-height:44px}
+@media(forced-colors:active){:focus-visible{outline-color:Highlight}.node-body{border:2px solid CanvasText}}
 .studio-home{display:inline-flex;align-items:center;min-height:44px;color:var(--cyan);font-size:.85rem;text-decoration:none}

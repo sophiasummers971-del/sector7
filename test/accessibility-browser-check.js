@@ -31,7 +31,14 @@ try {
   const pngPath=process.env.SECTOR7_PNGJS||(modulePath?path.resolve(path.dirname(modulePath),'../pngjs/lib/png.js'):null);if(!pngPath)throw Error('Supply host-provided SECTOR7_PLAYWRIGHT and PNGJS paths');const png=await import(pathToFileURL(pngPath).href);
   const PNG=png.PNG||png.default.PNG;
   const report={startedAt:new Date().toISOString(),checks:[],contrast:[],accessibility:[],limitations:['Rendered pixel sampling is not a complete WCAG audit.','No screen-reader listening session or physical touch/display test performed.']};
-  async function ax(label){const session=await context.newCDPSession(page);const {nodes}=await session.send('Accessibility.getFullAXTree');const roles=['button','link','textbox','combobox','checkbox','dialog','tab'];const unnamed=nodes.filter(n=>!n.ignored&&roles.includes(n.role?.value)&&!n.name?.value?.trim()).map(n=>({role:n.role.value,backendDOMNodeId:n.backendDOMNodeId}));report.accessibility.push({label,unnamed});await session.detach();}
+  report.axe=[];
+  const axeSource=await (await import('node:fs/promises')).readFile(path.join(root,'node_modules','axe-core','axe.min.js'),'utf8');
+  async function audit(label){
+    await page.evaluate(axeSource); // Test-runner injection; production CSP stays unchanged.
+    const result=await page.evaluate(async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}});return {violations:r.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)})),incomplete:r.incomplete.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),passes:r.passes.length};});
+    report.axe.push({label,...result});
+  }
+  async function ax(label){await audit(label);const session=await context.newCDPSession(page);const {nodes}=await session.send('Accessibility.getFullAXTree');const roles=['button','link','textbox','combobox','checkbox','dialog','tab'];const unnamed=nodes.filter(n=>!n.ignored&&roles.includes(n.role?.value)&&!n.name?.value?.trim()).map(n=>({role:n.role.value,backendDOMNodeId:n.backendDOMNodeId}));report.accessibility.push({label,unnamed});await session.detach();}
   async function contrast(label){
     const records=await page.evaluate(()=>{
       const out=[];const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let t;
@@ -63,18 +70,23 @@ try {
         const minimum=Math.min(ratio(field.border,field.background),ratio(field.border,'rgb(18,42,59)'));
         report.checks.push({label:theme+' idea field boundary',minimum,pass:minimum>=3});
       }
-      await contrast(route+' '+theme+' default');if(route==='/'){await page.locator('.starting-desk').scrollIntoViewIfNeeded();await contrast(route+' '+theme+' starting gradient');await page.locator('.canvas-panel').scrollIntoViewIfNeeded();await contrast(route+' '+theme+' canvas gradient');await page.locator('#github-panel').scrollIntoViewIfNeeded();await contrast(route+' '+theme+' GitHub panel');}
+      await audit(route+' '+theme+' default');await contrast(route+' '+theme+' default');if(route==='/'){await page.locator('.starting-desk').scrollIntoViewIfNeeded();await contrast(route+' '+theme+' starting gradient');await page.locator('.canvas-panel').scrollIntoViewIfNeeded();await contrast(route+' '+theme+' canvas gradient');await page.locator('#github-panel').scrollIntoViewIfNeeded();await contrast(route+' '+theme+' GitHub panel');}
       const primary=page.locator('button.primary').filter({visible:true}).first();if(await primary.count()){await primary.hover();await contrast(route+' '+theme+' hover');await primary.focus();await contrast(route+' '+theme+' focus');}
     }
     // A 640px CSS viewport approximates the reflow demand at 200% on a 1280px browser.
-    await page.setViewportSize({width:640,height:720});const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);report.checks.push({label:route+' reflow at 640 CSS px',pass:!overflow});await page.setViewportSize({width:1440,height:1080});
+    for(const width of [640,320]){
+      await page.setViewportSize({width,height:720});const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+      report.checks.push({label:route+' reflow at '+width+' CSS px',pass:!overflow});await audit(route+' reflow '+width);
+    }
+    await page.setViewportSize({width:1440,height:1080});
     if(route==='/'){
       await page.locator('[data-inspect="coordinator"]').click();await ax('Foundry inspector');await contrast('Foundry inspector');await page.keyboard.press('Escape');
     }else{
       await page.locator('#node-ping').click();await ax('Studio node inspector');await contrast('Studio node inspector');await page.keyboard.press('Escape');
     }
   }
-  report.completedAt=new Date().toISOString();await mkdir(path.join(root,'artifacts','accessibility'),{recursive:true});await writeFile(path.join(root,'artifacts','accessibility','report.json'),JSON.stringify(report,null,2));assert.ok(report.checks.length>0&&report.checks.every(check=>check.pass),'Defined reflow and boundary checks pass');assert.ok(report.accessibility.length>=4&&report.accessibility.every(check=>check.unnamed.length===0),'Inspected control/modal roles have names');assert.ok(report.contrast.length>=26&&report.contrast.every(check=>check.sampledTextRects>0&&check.failures.length===0),'Sampled visible text passes contrast thresholds');
+  report.completedAt=new Date().toISOString();
+  console.log(JSON.stringify({axe:report.axe.filter(r=>r.violations.length),checks:report.checks.filter(c=>!c.pass)}));await mkdir(path.join(root,'artifacts','accessibility'),{recursive:true});await writeFile(path.join(root,'artifacts','accessibility','report.json'),JSON.stringify(report,null,2));assert.ok(report.axe.length>=4&&report.axe.every(r=>r.violations.length===0),'Defined WCAG A/AA axe states have zero violations');assert.ok(report.checks.length>0&&report.checks.every(check=>check.pass),'Defined reflow and boundary checks pass');assert.ok(report.accessibility.length>=4&&report.accessibility.every(check=>check.unnamed.length===0),'Inspected control/modal roles have names');assert.ok(report.contrast.length>=26&&report.contrast.every(check=>check.sampledTextRects>0&&check.failures.length===0),'Sampled visible text passes contrast thresholds');
   console.log('PASS: '+report.contrast.length+' sampled contrast views, named control/modal roles, 640px reflow and three-theme input boundaries. Full screen-reader/physical-device conformance is not claimed.');
 
 }finally{await browser?.close();await stopServer(server);await rm(temp,{recursive:true,force:true,maxRetries:6,retryDelay:100});}

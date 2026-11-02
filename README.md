@@ -172,3 +172,11 @@ Local checkpoints, with runtime data/logs/secrets/caches excluded and no push:
 - Approval implementation before the interface redesign: `4b1a9f1c0f8e8987ffac2ee987def39df93c0e54`.
 
 - Redesigned interface and owner-reported phone/Surface approval/restart checks before text support: `6009111`.
+
+## Account GitHub workflows and templates
+
+Studio now includes five local workflow templates and GitHub bug-report, feature-request and draft-PR forms. Applying a local template changes the draft only. GitHub account access is separate from workflow execution: explicit Windows sign-in connection, paginated accessible repositories including private repositories, bounded README reads, and a persisted preview/approval for each issue or draft PR between existing branches. No code push, branch creation or merge is offered.
+
+See [GitHub account boundaries and commissioning](docs/GITHUB-ACCOUNT.md) and [accessibility evidence and certification limits](docs/ACCESSIBILITY.md). Tokens stay server-side in memory; the encrypted backup includes action history and cooldowns but excludes credentials. Static assets still require a server restart to update.
+
+The accessibility gate uses axe-core 4.14.0 as a pinned development-only dependency, alongside rendered contrast, reflow, keyboard and named-control checks. There are still zero runtime dependencies. This gate is not an independent accessibility certificate.

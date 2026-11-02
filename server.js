@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { defaultDefinition, savedWorkflow, executeDefinition } from './workflow.js';
 import { createScoutService } from './scout-service.js';
+import { createGitHubAccount } from './github-account.js';
 import { createGitHubConnector } from './github-connector.js';
 import { ownerCredential, authenticate, authorize, rateGate, LIMITS } from './security.js';
 import { readBoundedJSON } from './scout.js';
@@ -54,7 +55,7 @@ try {
 }
 const page = await readFile(path.join(root, 'public', 'index.html'));
 const assets = new Map([['/', { body: page, type: 'text/html; charset=utf-8' }]]);
-for (const [name, type] of [['app.js','text/javascript; charset=utf-8'], ['evidence.js','text/javascript; charset=utf-8'], ['styles.css','text/css; charset=utf-8']]) {
+for (const [name, type] of [['templates.js','text/javascript; charset=utf-8'], ['app.js','text/javascript; charset=utf-8'], ['evidence.js','text/javascript; charset=utf-8'], ['styles.css','text/css; charset=utf-8']]) {
   assets.set('/' + name, { body: await readFile(path.join(root, 'public', name)), type });
 }
 const instance = { instanceId: randomUUID(), startedAt: new Date().toISOString() };
@@ -64,9 +65,11 @@ const scouts = createScoutService(path.join(dataDir, 'scouts'), scoutSamples);
 await scouts.ready;
 const github = createGitHubConnector({ directory: path.join(dataDir, 'github') });
 await github.ready; // Startup only validates local state; it never contacts GitHub.
+const githubAccount = createGitHubAccount({directory:dataDir});
+await githubAccount.ready;
 assets.set('/studio', { body: page, type: 'text/html; charset=utf-8' });
 assets.set('/', { body: await readFile(path.join(root, 'public', 'command.html')), type: 'text/html; charset=utf-8' });
-for (const [name, type] of [['command.js', 'text/javascript; charset=utf-8'], ['github.js', 'text/javascript; charset=utf-8'], ['command.css', 'text/css; charset=utf-8'], ['tokens.css', 'text/css; charset=utf-8'], ['foundry-state.js', 'text/javascript; charset=utf-8'], ['theme.js', 'text/javascript; charset=utf-8']]) {
+for (const [name, type] of [['command.js', 'text/javascript; charset=utf-8'], ['github.js', 'text/javascript; charset=utf-8'], ['github-account-ui.js', 'text/javascript; charset=utf-8'], ['command.css', 'text/css; charset=utf-8'], ['tokens.css', 'text/css; charset=utf-8'], ['foundry-state.js', 'text/javascript; charset=utf-8'], ['theme.js', 'text/javascript; charset=utf-8']]) {
   assets.set('/' + name, { body: await readFile(path.join(root, 'public', name)), type });
 }
 let queue = Promise.resolve();
@@ -149,7 +152,7 @@ async function submit(input) {
 const server = http.createServer(async (req, res) => {
   let admitted = false;
   try {
-    req.setTimeout(5000, () => req.destroy());
+    req.setTimeout(req.url === '/api/github-account' ? 30000 : 5000, () => req.destroy());
     const authority = `${host}:${server.address().port}`;
     if (req.headers.host !== authority || req.headers['sec-fetch-site'] === 'cross-site') return reply(res, 403, { error: 'Host or browser origin rejected' });
     // Reject browser cross-origin submissions; this is not authentication.
@@ -159,7 +162,7 @@ const server = http.createServer(async (req, res) => {
     inFlight++; admitted = true;
     if (req.url.startsWith('/api/')) {
       const actor = authenticate(req.headers.authorization, credential);
-      const action = req.url === '/api/github' && req.method === 'GET' ? 'github.read' :
+      const action = req.url === '/api/github-account' && ['GET','POST'].includes(req.method) ? 'github.account' : req.url === '/api/github' && req.method === 'GET' ? 'github.read' :
         req.url === '/api/github/refresh' && req.method === 'POST' ? 'github.refresh' :
         req.url === '/api/github/control' && req.method === 'POST' ? 'github.control' :
         req.url === '/api/status' ? 'status.read' : req.url.startsWith('/api/scout') ?
@@ -176,6 +179,7 @@ const server = http.createServer(async (req, res) => {
       return res.end(asset.body);
     }
     if (req.method === 'GET' && req.url === '/api/status') return reply(res, 200, instance);
+    if (req.method === 'GET' && req.url === '/api/github-account') return reply(res,200,await githubAccount.status());
     if (req.method === 'GET' && req.url === '/api/github') return reply(res, 200, await github.status());
     if (req.method === 'GET' && req.url === '/api/scout/control') return reply(res, 200, await scouts.status());
     const scoutRead = req.method === 'GET' && req.url.match(/^\/api\/scout\/([A-Za-z0-9_-]{1,80})$/);
@@ -191,13 +195,14 @@ const server = http.createServer(async (req, res) => {
       return reply(res, 200, workflow);
     }
     const workflowWrite = req.method === 'PUT' && req.url === '/api/workflow';
+    const accountWrite = req.method === 'POST' && req.url === '/api/github-account';
     const githubRefresh = req.method === 'POST' && req.url === '/api/github/refresh';
     const githubControl = req.method === 'POST' && req.url === '/api/github/control';
     const scoutWrite = req.method === 'POST' && req.url === '/api/scout';
     const scoutControl = req.method === 'POST' && req.url === '/api/scout/control';
     const scoutCancel = req.method === 'POST' && req.url.match(/^\/api\/scout\/([A-Za-z0-9_-]{1,80})\/cancel$/);
     const approvalMatch = req.method === 'POST' && req.url.match(/^\/api\/tasks\/([a-f0-9-]{36})\/approval$/);
-    if (!githubRefresh && !githubControl && !scoutControl && !scoutCancel && !scoutWrite && !workflowWrite && !approvalMatch && (req.method !== 'POST' || req.url !== '/api/tasks')) return reply(res, 404, { error: 'Not found' });
+    if (!accountWrite && !githubRefresh && !githubControl && !scoutControl && !scoutCancel && !scoutWrite && !workflowWrite && !approvalMatch && (req.method !== 'POST' || req.url !== '/api/tasks')) return reply(res, 404, { error: 'Not found' });
     if (req.headers['content-type']?.split(';')[0].trim() !== 'application/json') return reply(res, 415, { error: 'Use application/json' });
     let bytes = 0;
     const chunks = [];
@@ -209,6 +214,16 @@ const server = http.createServer(async (req, res) => {
     let input;
     try { input = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
     catch { return reply(res, 400, { error: 'Malformed JSON' }); }
+    if (accountWrite) {
+      const keys = input && !Array.isArray(input) && typeof input === 'object' ? Object.keys(input).sort().join(',') : '';
+      if (keys === 'operation' && input.operation === 'connect') return reply(res,200,await githubAccount.connect());
+      if (keys === 'operation' && input.operation === 'disconnect') return reply(res,200,await githubAccount.disconnect());
+      if (keys === 'operation,page' && input.operation === 'repositories') return reply(res,200,await githubAccount.repositories(input.page));
+      if (keys === 'operation,repository' && input.operation === 'readme') return reply(res,200,await githubAccount.readme(input.repository));
+      if (keys === 'intent,operation' && input.operation === 'prepare') return reply(res,200,await githubAccount.prepare(input.intent));
+      if (keys === 'approval,operation' && input.operation === 'decide') return reply(res,200,await githubAccount.decide(input.approval));
+      return reply(res,400,{error:'Unknown GitHub account operation or extra fields'});
+    }
     if (githubRefresh) {
       if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).length) return reply(res, 400, { error: 'GitHub refresh accepts only an empty object; the repository and file are fixed' });
       const controller = new AbortController();

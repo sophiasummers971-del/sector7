@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { savedWorkflow } from './workflow.js';
 import { validateScout, validateStoredRun } from './scout.js';
 import { protectPrivateDirectory } from './credential-file.js';
+import { validateAccountJournal } from './github-account.js';
 import { validateGitHubState } from './github-state.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -19,6 +20,7 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const exact = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).sort().join(',') === keys;
 const scoutFile = /^scouts\/[a-f0-9]{64}\/(input|run)\.json$/;
 function limitFor(name) {
+  if (name === 'github-actions.json') return 262144;
   if (name === 'tasks.json') return 5 * 1024 * 1024;
   if (name === 'github/state.json') return 131072;
   if (name === 'workflow.json' || name === 'scouts/safety-state.json' || name === 'scouts/.safety-dirty' || scoutFile.test(name)) return 256 * 1024;
@@ -59,7 +61,7 @@ async function reserveStore(dataDir) {
   catch (error) { if (error.code === 'EEXIST') throw new Error('Store locked: stop Sector7 and inspect stale locks before backup/restore'); throw error; }
 }
 function validateFiles(files) {
-  if (!Array.isArray(files) || files.length < 3 || files.length > 205) throw new Error('Invalid backup inventory');
+  if (!Array.isArray(files) || files.length < 3 || files.length > 206) throw new Error('Invalid backup inventory');
   const decoded = new Map(); let total = 0;
   for (const entry of files) {
     if (!exact(entry, 'data,path,sha256') || typeof entry.path !== 'string' || decoded.has(entry.path) || typeof entry.data !== 'string' || !/^[a-f0-9]{64}$/.test(entry.sha256)) throw new Error('Invalid backup entry');
@@ -78,6 +80,7 @@ function validateFiles(files) {
   for (const task of tasks) if (task.workflowSnapshot && savedWorkflow(task.workflowSnapshot.definition).revision !== task.workflowRevision) throw new Error('Invalid task snapshot');
   const safety = json('scouts/safety-state.json');
   if (!exact(safety, 'failures,open,paused,version') || safety.version !== 1 || typeof safety.open !== 'boolean' || typeof safety.paused !== 'boolean' || !Number.isInteger(safety.failures) || safety.failures < 0) throw new Error('Invalid safety state');
+  if (decoded.has('github-actions.json')) validateAccountJournal(json('github-actions.json'));
   if (decoded.has('github/state.json')) validateGitHubState(json('github/state.json'));
   const runs = new Set([...decoded.keys()].filter(x => scoutFile.test(x)).map(x => x.split('/')[1]));
   if (runs.size > 100) throw new Error('Scout history limit reached');
@@ -104,7 +107,7 @@ async function snapshot(dataDir) {
         await visit(name);
       } else {
         const bytes = await boundedRead(target, limitFor(name));
-        total += bytes.length; if (total > maxTotal || files.length >= 205) throw new Error('Backup store limit reached');
+        total += bytes.length; if (total > maxTotal || files.length >= 206) throw new Error('Backup store limit reached');
         files.push({ path: name, data: bytes.toString('base64'), sha256: hash(bytes) });
       }
     }
