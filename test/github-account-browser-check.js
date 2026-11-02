@@ -45,6 +45,7 @@ try{
  const audit=await page.evaluate(async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}});return r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}));});
  assert.deepEqual(audit,[]);
  await page.getByRole('button',{name:'Approve this exact GitHub write',exact:true}).click();await page.getByRole('link',{name:'Open GitHub result #1'}).waitFor();assert.equal(approvals,1);
+ await page.reload();await page.waitForFunction(()=>!document.getElementById('account-controls').hidden);assert.equal(await page.locator('#account-repository option').count(),0);await page.click('#account-load-repositories');await page.waitForFunction(()=>document.querySelectorAll('#account-repository option').length===1);
  assert.deepEqual(errors,[]);
  console.log('PASS: 5 selectable local templates; draft-only application; keyboard mode selection; private GitHub fixture; hostile README rendered inert; exact approval UI; zero axe violations in connected approval state. No remote writes.');
 }finally{await browser?.close();await stopServer(server);await rm(dir,{recursive:true,force:true,maxRetries:6,retryDelay:100});}

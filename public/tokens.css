@@ -18,3 +18,7 @@
 #github-account-panel button{margin:.25rem;min-height:44px}
 @media(forced-colors:active){:focus-visible{outline-color:Highlight}.node-body{border:2px solid CanvasText}}
 .studio-home{display:inline-flex;align-items:center;min-height:44px;color:var(--cyan);font-size:.85rem;text-decoration:none}
+
+/* Studio clearances follow real sticky-control heights, including text overrides. */
+html:has(#toolbar){scroll-padding-block:var(--studio-top-clearance,142px) var(--studio-bottom-clearance,120px)}
+.mode-row{top:var(--studio-header-height,60px)}
