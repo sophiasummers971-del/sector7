@@ -9,7 +9,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = value => createHash('sha256').update(value).digest('hex');
 export function releaseDecision(checks, requireRepositoryReady = false, requireBrowsers = false) {
   const required = ['source-inventory', 'policy-and-budget-gate', 'dependency-baseline', 'functional-security-and-postgresql', 'source-stability'];
-  if (requireBrowsers) required.push('command-centre-browser', 'workflow-studio-browser', 'github-readonly-browser', 'github-account-browser', 'accessibility-browser');
+  if (requireBrowsers) required.push('command-centre-browser', 'workflow-studio-browser', 'github-readonly-browser', 'github-account-browser', 'accessibility-journey-browser', 'accessibility-browser');
   const failure = checks.some(check => check.status === 'FAIL') || required.some(id => {
     const evidence = checks.filter(check => check.id === id);
     return evidence.length !== 1 || evidence[0].status !== 'PASS';
@@ -112,6 +112,7 @@ export async function main(argv = process.argv.slice(2)) {
       await execute('workflow-studio-browser', ['test/browser-check.js'], 120000, env);
       await execute('github-readonly-browser', ['test/github-browser-check.js'], 120000, env);
       await execute('github-account-browser', ['test/github-account-browser-check.js'], 120000, env);
+      await execute('accessibility-journey-browser', ['test/accessibility-journey-check.js'], 120000, env);
       await execute('accessibility-browser', ['test/accessibility-browser-check.js'], 120000, env);
     }
   } else add('browser-regressions', 'NOT_RUN', { reason: 'Use --browser with explicit host-provided tooling' });

@@ -48,6 +48,7 @@ $('account-load-template').onclick=()=>{if(($('account-title-input').value||$('a
 $('account-connect').onclick=()=>act(async()=>{await api({operation:'connect'});await status();await repositories();});
 $('account-disconnect').onclick=()=>act(async()=>{await api({operation:'disconnect'});$('account-repository').replaceChildren();$('account-readme-text').textContent='';await status();});
 $('account-refresh').onclick=()=>act(status);
+$('account-load-repositories').onclick=()=>act(async()=>{await repositories();await status();});
 $('account-prev').onclick=()=>act(async()=>{page--;await repositories();await status();});
 $('account-next').onclick=()=>act(async()=>{page++;await repositories();await status();});
 $('account-repository').onchange=()=>{$('account-readme-text').textContent='';};

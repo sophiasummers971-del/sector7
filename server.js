@@ -55,7 +55,7 @@ try {
 }
 const page = await readFile(path.join(root, 'public', 'index.html'));
 const assets = new Map([['/', { body: page, type: 'text/html; charset=utf-8' }]]);
-for (const [name, type] of [['templates.js','text/javascript; charset=utf-8'], ['app.js','text/javascript; charset=utf-8'], ['evidence.js','text/javascript; charset=utf-8'], ['styles.css','text/css; charset=utf-8']]) {
+for (const [name, type] of [['accessibility.js','text/javascript; charset=utf-8'], ['templates.js','text/javascript; charset=utf-8'], ['app.js','text/javascript; charset=utf-8'], ['evidence.js','text/javascript; charset=utf-8'], ['styles.css','text/css; charset=utf-8']]) {
   assets.set('/' + name, { body: await readFile(path.join(root, 'public', name)), type });
 }
 const instance = { instanceId: randomUUID(), startedAt: new Date().toISOString() };
