@@ -5,6 +5,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = name => readFile(path.join(root, name), 'utf8');
 const recorded = JSON.parse(await read('docs/command-example-run.json'));
 let html = await read('public/command.html');
+// Standalone historical previews never load the repository connector panel.
+html = html.replace(/^[ \t]*<!-- github-public-panel -->[\s\S]*?<!-- end-github-public-panel -->[ \t]*(?:\r?\n)?/m, '')
+  .replace('<script type="module" src="/github.js"></script>', '');
 const css = await read('public/command.css') + '\n' + await read('public/tokens.css');
 const state = (await read('public/foundry-state.js')).replaceAll('export ', '');
 const theme = (await read('public/theme.js')).replace(/^import .*;\n/gm, '').replaceAll('export ', '');
@@ -20,7 +23,7 @@ $('connection').onclick = () => notice('Recorded preview. Open the private start
 notice('RECORDED PREVIEW · NOT LIVE. Inspect saved events and replay recorded messages. Execution is disabled.');
 `);
 html = html.replace('<link rel="stylesheet" href="/command.css"><link rel="stylesheet" href="/tokens.css">', '<style>' + css + '</style>');
-html = html.replace('OWNER KEY REQUIRED · LOCAL PROTOTYPE · FICTIONAL SAMPLES', 'RECORDED OFFLINE PREVIEW · FICTIONAL SAMPLES');
+html = html.replace('OWNER KEY REQUIRED · LOCAL PROTOTYPE · SOURCES LABELLED', 'RECORDED OFFLINE PREVIEW · FICTIONAL SAMPLES');
 html = html.replace('<button id="pause"', '<button hidden id="pause"');
 html = html.replaceAll('href="/studio"', 'href="https://github.com/sophiasummers971-del/sector7/pull/1"').replaceAll('href="/"', 'href="#"');
 html = html.replace('<script type="module" src="/command.js"></script>', '<script type="module">const PREVIEW = ' + JSON.stringify(recorded).replaceAll('<', '\\u003c') + ';\n' + state + '\n' + theme + '\n' + js + '</script>');

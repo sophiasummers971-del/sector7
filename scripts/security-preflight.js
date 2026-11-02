@@ -9,13 +9,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = value => createHash('sha256').update(value).digest('hex');
 export function releaseDecision(checks, requireRepositoryReady = false, requireBrowsers = false) {
   const required = ['source-inventory', 'policy-and-budget-gate', 'dependency-baseline', 'functional-security-and-postgresql', 'source-stability'];
-  if (requireBrowsers) required.push('command-centre-browser', 'workflow-studio-browser');
+  if (requireBrowsers) required.push('command-centre-browser', 'workflow-studio-browser', 'github-readonly-browser', 'accessibility-browser');
   const failure = checks.some(check => check.status === 'FAIL') || required.some(id => {
     const evidence = checks.filter(check => check.id === id);
     return evidence.length !== 1 || evidence[0].status !== 'PASS';
   });
-  // This checker is for the local-only implementation. Live connector/gateway
-  // commissioning evidence does not exist and cannot be inferred from local tests.
+  // The fixed public README broker does not commission private repository,
+  // execution/write gateways or hosted identity. Offline tests cannot grant them.
   const repositoryReady = false;
   return { local: failure ? 'FAIL' : 'PASS', repository: 'BLOCKED', repositoryReady,
     overall: failure ? 'FAIL' : requireRepositoryReady ? 'BLOCKED' : 'PASS_LOCAL_ONLY',
@@ -101,14 +101,17 @@ export async function main(argv = process.argv.slice(2)) {
       durationMs: result.durationMs, ...counters });
   };
   const files = ['test/prototype.test.js', 'test/ui-evidence.test.js', 'test/scout.test.js', 'test/command-api.test.js',
-    'test/security.test.js', 'test/rls.test.js', 'test/preflight.test.js', 'test/security-probes.test.js', 'test/foundry.test.js', 'test/storage.test.js'];
+    'test/security.test.js', 'test/rls.test.js', 'test/preflight.test.js', 'test/security-probes.test.js', 'test/foundry.test.js', 'test/storage.test.js', 'test/backup.test.js', 'test/github.test.js', 'test/github-api.test.js'];
   await execute('functional-security-and-postgresql', ['--test', '--test-reporter=spec', '--test-concurrency=1', ...files], 90000, childEnvironment());
   if (browsers) {
     if (!process.env.SECTOR7_BROWSER || !process.env.SECTOR7_PLAYWRIGHT) add('browser-regressions', 'FAIL', { reason: '--browser requires explicit host-provided browser and Playwright paths' });
     else {
-      const env = { ...childEnvironment(), SECTOR7_BROWSER: process.env.SECTOR7_BROWSER, SECTOR7_PLAYWRIGHT: process.env.SECTOR7_PLAYWRIGHT };
+      const env = { ...childEnvironment(), SECTOR7_BROWSER: process.env.SECTOR7_BROWSER, SECTOR7_PLAYWRIGHT: process.env.SECTOR7_PLAYWRIGHT,
+        ...(process.env.SECTOR7_PNGJS ? { SECTOR7_PNGJS: process.env.SECTOR7_PNGJS } : {}) };
       await execute('command-centre-browser', ['test/command-browser-check.js'], 120000, env);
       await execute('workflow-studio-browser', ['test/browser-check.js'], 120000, env);
+      await execute('github-readonly-browser', ['test/github-browser-check.js'], 120000, env);
+      await execute('accessibility-browser', ['test/accessibility-browser-check.js'], 120000, env);
     }
   } else add('browser-regressions', 'NOT_RUN', { reason: 'Use --browser with explicit host-provided tooling' });
   try {
@@ -118,9 +121,9 @@ export async function main(argv = process.argv.slice(2)) {
   } catch { add('source-stability', 'FAIL', { reason: 'Source changed during verification or could not be rechecked' }); }
   const decision = releaseDecision(checks, requireReady, browsers);
   const report = { version: 1, startedAt, completedAt: new Date().toISOString(), node: process.version, platform: process.platform, arch: process.arch,
-    scope: 'Isolated local runtime and local PostgreSQL policies; no live repository access',
+    scope: 'Isolated runtime, mocked public GitHub broker and local PostgreSQL policies; live GitHub reads require a separate explicit smoke test',
     source: manifest || null, checks, decision,
-    unverified: ['Live connector authorization, HTTPS/SSRF/redirect and response limits', 'Hosted JWT verification, deployed RLS and actual DB role grants',
+    unverified: ['Private repository authorization and general execution/write gateways', 'Hosted JWT verification, deployed RLS and actual DB role grants',
       'Production deployment, physical phone, OS isolation and power-loss recovery', 'Current dependency vulnerability advisory audit'] };
   await mkdir(outputDir, { recursive: true });
   const save = async (name, contents) => {

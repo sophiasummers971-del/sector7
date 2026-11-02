@@ -1,5 +1,5 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
-import { lstat, open, readFile } from 'node:fs/promises';
+import { lstat, open, readFile, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { protectCredentialFile } from './credential-file.js';
 
@@ -7,11 +7,11 @@ export const LIMITS = Object.freeze({ jobMs: 2000, batchMs: 15000, outputBytes: 
   failures: 3, runs: 100, diskBytes: 20 * 1024 * 1024, requestsPerMinute: 120,
   startsPerMinute: 6, concurrentRequests: 8, readBytes: 256 * 1024 });
 const actions = new Set(['status.read', 'workflow.read', 'workflow.write', 'workflow.run', 'workflow.approve',
-  'scout.read', 'scout.run', 'scout.cancel', 'scout.control']);
+  'scout.read', 'scout.run', 'scout.cancel', 'scout.control', 'github.read', 'github.refresh', 'github.control']);
 export const OWNER = Object.freeze({ id: 'jade-local-owner', role: 'owner' });
 export function authorize(actor, action) {
-  // External I/O, scripts, repo access, administrative grants and unknown actions
-  // have no permission. Request bodies cannot supply or extend this principal.
+  // Only the owner can request the fixed public GitHub snapshot. General repo,
+  // network, shell and administrative capabilities remain denied to all callers.
   if (actor !== OWNER || !actions.has(action)) {
     const error = new Error('Policy denied'); error.status = 403; throw error;
   }
@@ -24,11 +24,18 @@ export async function ownerCredential(dataDir, configured = process.env.SECTOR7_
   const file = path.join(dataDir, '.owner-key');
   try {
     const handle = await open(file, 'wx', 0o600);
+    let protectedFile = false;
     try {
       await protectCredentialFile(file);
+      protectedFile = true;
       await handle.writeFile(randomBytes(32).toString('base64url')); await handle.sync();
     }
-    finally { await handle.close(); }
+    finally {
+      await handle.close();
+      // Only this call's new, still-empty file can be removed. Existing keys and
+      // failures after protection/writing retain their evidence for inspection.
+      if (!protectedFile) await unlink(file);
+    }
   } catch (error) { if (error.code !== 'EEXIST') throw error; }
   const stat = await lstat(file);
   if (!stat.isFile() || stat.size < 40 || stat.size > 128 || (process.platform !== 'win32' && (stat.mode & 0o077))) throw new Error('Owner key must be a private regular file');

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { defaultDefinition, savedWorkflow, executeDefinition } from './workflow.js';
 import { createScoutService } from './scout-service.js';
+import { createGitHubConnector } from './github-connector.js';
 import { ownerCredential, authenticate, authorize, rateGate, LIMITS } from './security.js';
 import { readBoundedJSON } from './scout.js';
 
@@ -61,9 +62,11 @@ const MAX_BODY = 4096;
 const scoutSamples = JSON.parse(await readFile(path.join(root, 'examples', 'scout-samples.json'), 'utf8'));
 const scouts = createScoutService(path.join(dataDir, 'scouts'), scoutSamples);
 await scouts.ready;
+const github = createGitHubConnector({ directory: path.join(dataDir, 'github') });
+await github.ready; // Startup only validates local state; it never contacts GitHub.
 assets.set('/studio', { body: page, type: 'text/html; charset=utf-8' });
 assets.set('/', { body: await readFile(path.join(root, 'public', 'command.html')), type: 'text/html; charset=utf-8' });
-for (const [name, type] of [['command.js', 'text/javascript; charset=utf-8'], ['command.css', 'text/css; charset=utf-8'], ['tokens.css', 'text/css; charset=utf-8'], ['foundry-state.js', 'text/javascript; charset=utf-8'], ['theme.js', 'text/javascript; charset=utf-8']]) {
+for (const [name, type] of [['command.js', 'text/javascript; charset=utf-8'], ['github.js', 'text/javascript; charset=utf-8'], ['command.css', 'text/css; charset=utf-8'], ['tokens.css', 'text/css; charset=utf-8'], ['foundry-state.js', 'text/javascript; charset=utf-8'], ['theme.js', 'text/javascript; charset=utf-8']]) {
   assets.set('/' + name, { body: await readFile(path.join(root, 'public', name)), type });
 }
 let queue = Promise.resolve();
@@ -156,7 +159,10 @@ const server = http.createServer(async (req, res) => {
     inFlight++; admitted = true;
     if (req.url.startsWith('/api/')) {
       const actor = authenticate(req.headers.authorization, credential);
-      const action = req.url === '/api/status' ? 'status.read' : req.url.startsWith('/api/scout') ?
+      const action = req.url === '/api/github' && req.method === 'GET' ? 'github.read' :
+        req.url === '/api/github/refresh' && req.method === 'POST' ? 'github.refresh' :
+        req.url === '/api/github/control' && req.method === 'POST' ? 'github.control' :
+        req.url === '/api/status' ? 'status.read' : req.url.startsWith('/api/scout') ?
         req.url === '/api/scout/control' ? 'scout.control' : req.url.endsWith('/cancel') ? 'scout.cancel' : req.method === 'GET' ? 'scout.read' : 'scout.run' :
         req.url === '/api/workflow' ? req.method === 'GET' ? 'workflow.read' : 'workflow.write' :
         req.url.startsWith('/api/tasks') ? req.url.endsWith('/approval') ? 'workflow.approve' : req.method === 'GET' ? 'workflow.read' : 'workflow.run' : 'unknown';
@@ -170,6 +176,7 @@ const server = http.createServer(async (req, res) => {
       return res.end(asset.body);
     }
     if (req.method === 'GET' && req.url === '/api/status') return reply(res, 200, instance);
+    if (req.method === 'GET' && req.url === '/api/github') return reply(res, 200, await github.status());
     if (req.method === 'GET' && req.url === '/api/scout/control') return reply(res, 200, await scouts.status());
     const scoutRead = req.method === 'GET' && req.url.match(/^\/api\/scout\/([A-Za-z0-9_-]{1,80})$/);
     if (scoutRead) return reply(res, 200, await scouts.get(scoutRead[1]));
@@ -184,11 +191,13 @@ const server = http.createServer(async (req, res) => {
       return reply(res, 200, workflow);
     }
     const workflowWrite = req.method === 'PUT' && req.url === '/api/workflow';
+    const githubRefresh = req.method === 'POST' && req.url === '/api/github/refresh';
+    const githubControl = req.method === 'POST' && req.url === '/api/github/control';
     const scoutWrite = req.method === 'POST' && req.url === '/api/scout';
     const scoutControl = req.method === 'POST' && req.url === '/api/scout/control';
     const scoutCancel = req.method === 'POST' && req.url.match(/^\/api\/scout\/([A-Za-z0-9_-]{1,80})\/cancel$/);
     const approvalMatch = req.method === 'POST' && req.url.match(/^\/api\/tasks\/([a-f0-9-]{36})\/approval$/);
-    if (!scoutControl && !scoutCancel && !scoutWrite && !workflowWrite && !approvalMatch && (req.method !== 'POST' || req.url !== '/api/tasks')) return reply(res, 404, { error: 'Not found' });
+    if (!githubRefresh && !githubControl && !scoutControl && !scoutCancel && !scoutWrite && !workflowWrite && !approvalMatch && (req.method !== 'POST' || req.url !== '/api/tasks')) return reply(res, 404, { error: 'Not found' });
     if (req.headers['content-type']?.split(';')[0].trim() !== 'application/json') return reply(res, 415, { error: 'Use application/json' });
     let bytes = 0;
     const chunks = [];
@@ -200,6 +209,16 @@ const server = http.createServer(async (req, res) => {
     let input;
     try { input = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
     catch { return reply(res, 400, { error: 'Malformed JSON' }); }
+    if (githubRefresh) {
+      if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).length) return reply(res, 400, { error: 'GitHub refresh accepts only an empty object; the repository and file are fixed' });
+      const controller = new AbortController();
+      res.once('close', () => { if (!res.writableEnded) controller.abort(); });
+      return reply(res, 200, await github.refresh({ signal: controller.signal }));
+    }
+    if (githubControl) {
+      if (!input || Array.isArray(input) || Object.keys(input).join(',') !== 'action' || input.action !== 'reset') return reply(res, 400, { error: 'Expected reset action only' });
+      return reply(res, 200, await github.reset());
+    }
     if (scoutControl) return reply(res, 200, await scouts.control(input));
     if (scoutCancel) {
       if (!input || Array.isArray(input) || typeof input !== 'object' || Object.keys(input).length) return reply(res, 400, { error: 'Cancel expects an empty object' });
@@ -263,6 +282,7 @@ function shutdown() {
   if (shuttingDown) return;
   shuttingDown = true;
   scouts.stop();
+  github.stop();
   server.close(() => { Promise.allSettled([queue, scouts.drain()]).then(async () => {
     await serverLock.close(); await unlink(serverLockPath); process.exit(0);
   }); });

@@ -1,7 +1,7 @@
 # Sector 7 safety baseline
 
-Status: implemented and exercised locally. No external repository connector is
-enabled, no database is connected, and no production security claim is made.
+Status: implemented and exercised locally, with the bounded public GitHub README
+broker described below. No database is connected and no production security claim is made.
 This document supersedes the earlier unauthenticated private-Wi-Fi prototype notes.
 
 ## What is enforced now
@@ -9,7 +9,7 @@ This document supersedes the earlier unauthenticated private-Wi-Fi prototype not
 | Boundary | Enforced behavior |
 | --- | --- |
 | Owner access | Every API requires a server-validated owner bearer key, including reads, approvals and safety controls. Owner identity is constructed by the server; body-supplied role/owner fields cannot grant access. |
-| Default-deny policy | Only listed local actions in security.js are allowed. Repository reads/writes, arbitrary network calls, shell execution, secret access and unknown actions are denied. No HTTP policy-edit interface exists. |
+| Default-deny policy | Only listed owner actions in security.js are allowed. The separate fixed public GitHub snapshot is owner-only. General repository reads/writes, arbitrary network calls, shell execution, secret access and unknown actions are denied. No HTTP policy-edit interface exists. |
 | Listener | 127.0.0.1 only. Private-LAN/public bindings are refused pending an authenticated TLS access design. Host and Origin are checked; cross-site browser requests are rejected. No firewall/tunnel changes. |
 | Worker code | Fixed built-in README inspector only. No input-supplied script, module path, tool, executable or URL. Input text is data, never authority. |
 | Worker supervision | At most two worker threads. Two-second job deadline; cancellation or deadline terminates the worker and awaits its exit before freeing the slot. Workers receive an empty environment and their streams are discarded. |
@@ -45,7 +45,8 @@ process RSS or all external allocations. Worker threads share an OS process and
 are **not** an arbitrary-code or hostile-plugin security sandbox. No untrusted
 repository code may be executed in them. Native/OS/filesystem stalls and abrupt
 power loss cannot be made safe merely by Promise timeouts or rename. Data is local
-plaintext and this implementation does not establish encrypted backup, fsync-level
+plaintext. Offline encrypted backup is available via the local operator commands;
+this implementation does not establish scheduled/off-device backup, fsync-level
 power-loss durability, hostile-OS isolation, MFA or independent human attribution.
 
 ## Owner operation and recovery
@@ -75,9 +76,19 @@ power-loss durability, hostile-OS isolation, MFA or independent human attributio
    credential and restart. This is a local key-rotation procedure, not a remotely
    verified identity recovery service.
 
-See `docs/LOCAL-RECOVERY.md` for the stopped-store backup/restore procedure and
-the automated disposable restore drill. A successful local copy drill does not
-establish encrypted backups, media redundancy or power-loss durability.
+See `docs/LOCAL-RECOVERY.md` for the encrypted stopped-store backup/restore commands
+and automated disposable restore drill. Archives use AES-256-GCM with a fixed
+scrypt cost, independent random salt/nonce, authenticated headers, bounded strict
+inventory and per-file SHA-256 checks. Owner credentials are never included.
+Passwords are prompted locally without echo, not accepted in command arguments or
+environment variables. Restore authenticates and validates the full archive before
+creating a new private destination. It never overwrites an existing directory.
+Store locks block backup while a server is running, and the backup holds the same
+exclusive server lock until completion. Stale locks/unfinished writes/corruption
+are refused rather than silently omitted. Dirty safety markers survive recovery.
+No HTTP backup/restore endpoint, cloud storage, schedule or password recovery is
+provided. A successful local drill does not establish media redundancy or actual
+power-loss durability; retain an independently verified off-device archive.
 
 Authenticated API controls: GET /api/scout/control for the actual limits/state;
 POST /api/scout/control with exactly {action: pause|reset|resume};
@@ -118,10 +129,46 @@ exclude superuser/BYPASSRLS/service-role credentials from ordinary requests, run
 the same negative cases through the real gateway, then prove app operations and
 recovery. No existing Supabase project was accessed or changed for this work.
 
-## Gate before any repository access
+## Bounded public GitHub evidence
 
-Repository capabilities remain **denied in the executable policy**. This PR must
-not be treated as permission to enable them. The connector needs its own reviewed
+The owner explicitly authorized read-only GitHub access in this increment. A
+separate broker permits exactly `sophiasummers971-del/sector7`, `main`, and
+`README.md` pinned to the returned commit. It uses no GitHub credential, supports
+public resources only, and never grants `repo.read`, `network.fetch`, shell or
+write capabilities to workers or workflows. New `github.read`, `github.refresh`
+and `github.control` API actions still require the existing owner bearer key,
+Host/origin checks and bounded JSON requests. No repository/URL/token/file path
+selector is accepted from request bodies.
+
+HTTPS targets only api.github.com:443 with certificate checking, a fixed SNI,
+public IPv4 DNS results and no proxy/IPv6/private-address fallback. Redirects and
+content encoding are rejected rather than followed/decompressed. Response
+headers are limited to 8 KiB, JSON bodies to 128 KiB and decoded UTF-8 README text
+to 64 KiB, additionally bounded by the 128 KiB persisted-state format. Requests
+have a 5s deadline inside a 10s refresh deadline, single-flight admission and at
+most one 250ms retry for 502/503/504. There is no retry on authorization errors.
+
+Every outbound attempt is counted durably before dispatch; the limit is 12 per
+hour per store. Provider refusal/rate limits enforce at least 60s cooldown and
+honor longer Retry-After/reset values. Three refresh failures latch a persistent
+circuit. Reset is explicit, performs no fetch, and cannot clear cooldowns,
+request budgets or a storage failure. Interrupted or failed reads do not publish
+new success. Startup/status reads never contact GitHub.
+
+The response ref must identify a commit; the pinned README must identify a file
+with canonical base64, exact size and matching Git blob SHA-1. Receipts add a
+SHA-256 digest and observation timestamp. All loaded receipts are validated
+again. README text is rendered with textContent, not HTML, and is never evaluated
+or passed to a model, shell or repository runner. Provider URLs in JSON are
+ignored. The local owner key is never sent upstream. Cached public evidence and
+its safety state are covered by encrypted stopped-store backup; owner keys remain
+excluded and restored stores require a fresh local owner link.
+
+## Gate before broader repository access
+
+General repository capabilities remain **denied in the executable policy**.
+The fixed public README broker is not permission to enable them. Private access,
+arbitrary files, other repositories and writes require another reviewed
 increment with: exact owner/repository allowlist; read-only narrowly scoped token
 held only by the connector; fixed HTTPS GitHub destinations; redirect/SSRF defense;
 bounded headers/body/decompression; request deadline and cancellation; bounded
@@ -171,7 +218,7 @@ Dependencies are pinned; a current vulnerability-advisory audit is explicitly
 NOT_RUN_OFFLINE rather than being claimed clean.
 
 Normal exit 0 means PASS_LOCAL_ONLY. `--require-repository-ready` intentionally
-returns nonzero with a BLOCKED release verdict: the live connector and hosted
+returns nonzero with a BLOCKED release verdict: private/general repository gateways and hosted
 identity/RLS commissioning are not implemented. Local tests cannot turn that gate
 green. CI runs the local preflight and uploads its report, with browser coverage
 explicitly unverified there unless the browser mode is configured.

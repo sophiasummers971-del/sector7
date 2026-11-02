@@ -1,4 +1,7 @@
 /* Sector7: fixed operator frame + evidence-driven signal field. No perpetual animation. */
+.github-controls{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+#github-panel p{margin:10px 0;overflow-wrap:anywhere}
+#github-readme{white-space:pre-wrap;overflow-wrap:anywhere;max-height:22rem;overflow:auto;border:1px solid var(--line);padding:12px;color:var(--text)}
 :root{font:14px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
 
 *{box-sizing:border-box}

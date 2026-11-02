@@ -1,10 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, readFile, rename, rm, cp } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, rename, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { replaceFile } from '../storage.js';
 import { spawn } from 'node:child_process';
 import { stopServer } from './server-process.js';
+import { createBackup, verifyBackup, restoreBackup } from '../backup.js';
 
 test('replacement preserves the prior record when access remains denied', async () => {
   const dir = await mkdtemp(path.join(process.cwd(), '.test-data-replace-'));
@@ -18,10 +19,11 @@ test('replacement preserves the prior record when access remains denied', async 
     assert.equal(await readFile(source, 'utf8'), 'new');
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
-test('a stopped disposable store restores to a different directory without replay or lost approval', async () => {
+test('an encrypted stopped-store backup restores without replay or lost approval', async () => {
   const root = process.cwd();
   const source = await mkdtemp(path.join(root, '.test-data-backup-source-'));
-  const restored = await mkdtemp(path.join(root, '.test-data-backup-restored-'));
+  const restoreParent = await mkdtemp(path.join(root, '.test-data-backup-restored-'));
+  const restored = path.join(restoreParent, 'restored');
   const credential = 'recovery-fixture-0123456789abcdef0123456789abcdef';
   let child, base;
   async function start(dataDir) {
@@ -63,8 +65,11 @@ test('a stopped disposable store restores to a different directory without repla
     await stopServer(child);
     const taskBytes = await readFile(path.join(source, 'tasks.json'));
     const workflowBytes = await readFile(path.join(source, 'workflow.json'));
-    // Source is stopped; exclude credentials, lock files and unfinished writes.
-    await cp(source, restored, { recursive: true, filter: file => !['.owner-key', '.server.lock', '.coordinator.lock', 'run.lock'].includes(path.basename(file)) && !file.endsWith('.tmp') });
+    const archive = path.join(restoreParent, 'recovery.s7backup');
+    const passphrase = 'disposable-integration-recovery-passphrase';
+    await createBackup({ dataDir: source, archive, passphrase });
+    assert.equal((await verifyBackup({ archive, passphrase })).verified, true);
+    await restoreBackup({ archive, destination: restored, passphrase });
     assert.deepEqual(await readFile(path.join(restored, 'tasks.json')), taskBytes);
     assert.deepEqual(await readFile(path.join(restored, 'workflow.json')), workflowBytes);
     await start(restored);
@@ -86,7 +91,7 @@ test('a stopped disposable store restores to a different directory without repla
   } finally {
     await stopServer(child);
     await rm(source, { recursive: true, force: true });
-    await rm(restored, { recursive: true, force: true });
+    await rm(restoreParent, { recursive: true, force: true });
   }
 });
 test('replacement succeeds with bounded Windows sharing retries and direct rename elsewhere', async () => {

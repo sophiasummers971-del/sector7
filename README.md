@@ -1,12 +1,38 @@
 # Sector 7
 
-**Security baseline:** see [SECURITY.md](SECURITY.md). All API calls now require an owner key. The server is loopback-only; the earlier plain-HTTP LAN setup is disabled. Repository access remains denied.
+**Security baseline:** see [SECURITY.md](SECURITY.md). All API calls require an owner key. The server is loopback-only; the earlier plain-HTTP LAN setup is disabled. General repository access is denied; a separate owner-only public GitHub README snapshot is described below.
+
+## GitHub evidence, read only
+
+The Foundry's GitHub panel reads only `sophiasummers971-del/sector7` on `main`,
+then fetches `README.md` at the returned immutable commit. Click **Read current
+GitHub snapshot** explicitly; startup, page refresh and status inspection never
+poll GitHub. This public connection needs no GitHub token. It cannot access
+private repositories, write to GitHub, clone or run code, grant worker/network
+permissions or interpret README instructions as authority.
+
+The panel records commit/blob/hash provenance and renders the README as literal
+untrusted text. Failures retain previous evidence as history. The durable request
+budget, provider cooldown and circuit remain enforced across server restarts and
+encrypted backup/restore. See [the connection contract](docs/GITHUB-READONLY.md).
+
+`npm.cmd run test:github-browser` runs the isolated mocked browser flow. An
+explicit opt-in `SECTOR7_GITHUB_LIVE=1` runs one real owner-authorized read of this
+public repository during that test. Default tests and preflight do not use live
+network access or GitHub credentials.
+
+Encrypted stopped-store backup, verification and restore are available through
+`npm run backup`, `npm run backup:verify` and `npm run restore`. These local
+commands use a hidden passphrase prompt, exclude owner credentials and refuse
+to overwrite existing archives or restore directories. See
+[Local recovery](docs/LOCAL-RECOVERY.md) for commands, tests and limits.
 
 Run `npm run security:check` for the repeatable local preflight, or add
 `-- --browser` with host-provided browser paths for rendered regressions.
 Reports are written under `artifacts/security-preflight/`. Add
 `-- --require-repository-ready` for a strict release gate; it intentionally blocks
-this local-only build until live connector commissioning is implemented and verified.
+full repository execution/private authorization and hosted identity commissioning;
+the bounded public README connection does not clear that broader release gate.
 
 ## Living Foundry
 
@@ -14,8 +40,8 @@ The cyan/turquoise operator frame, spatial signal field and read-only trace now
 share appearance preferences with the workflow editor. Every pulse follows a
 saved event; external agent execution remains unavailable. See the
 [architecture, acceptance evidence and desktop handover](docs/living-foundry/HANDOVER.md).
-Rendered acceptance for this redesign remains outstanding; do not infer it from
-the older command-centre screenshots.
+Rendered desktop acceptance and precise remaining accessibility/device limits are
+recorded in `docs/living-foundry/DESKTOP-ACCEPTANCE.md`; older captures are historical.
 
 ## Mission control
 
@@ -32,7 +58,7 @@ can be downloaded and opened without a server; its run button is disabled.
 
 Owner-reported verification (2026-10-18): Jade reports that approval controls and restart behaviour were exercised successfully on both the Honor Magic 6 Lite and Surface. This is owner-reported device verification, not independently observed by Codex.
 
-Jade's phone-first workflow coordinator. This local prototype edits and executes one linear chain: one Start → local Ping or text-processing nodes, with optional Approval pauses → one Result. Plain HTML/CSS/JavaScript, one Node built-in HTTP server, no dependencies or external integrations.
+Jade's phone-first workflow coordinator. This local prototype edits and executes one linear chain: one Start → local Ping or text-processing nodes, with optional Approval pauses → one Result. Plain HTML/CSS/JavaScript, one Node built-in HTTP server, no runtime dependencies. The separate public GitHub evidence broker never executes workflow steps.
 
 Sector 9 and Velvet Vault are separate projects. Independent systems must enforce their own permissions; outages never expand authority. Carrier bots may be deterministic handoffs. Broader architecture proposals are background ideas, not implemented guarantees.
 
@@ -69,7 +95,7 @@ Text Input settings are `{text: string}` (empty is permitted; maximum 500 UTF-16
 
 Settings persist with the saved definition and are copied into each run snapshot. Existing id/type-only graphs retain their revisions. Text is displayed through DOM textContent/value, never evaluated as HTML. Text is stored unencrypted in local graph/task JSON, and protected by the local owner key over the API; do not enter secrets into fixture rehearsals. Copy tries the browser Clipboard API, then a user-triggered legacy copy fallback for plain LAN HTTP. If unavailable it reports that and selects the output for manual copying; it never claims copy success on a reported failure. Clipboard access varies by browser. The preset includes Approval, but custom text graphs may omit it; a completed Result alone is not an identity check or proof of human approval.
 
-There is still one saved-workflow slot: saving a preset replaces that definition, not historical run snapshots. No graph library or automatic backup/version history is implemented. Draft edits live only in the current browser page until saved; applying settings alone is not server persistence. No external services or AI dependencies are used.
+There is still one saved-workflow slot: saving a preset replaces that definition, not historical run snapshots. No graph library or automatic backup/version history is implemented. Draft edits live only in the current browser page until saved; applying settings alone is not server persistence. Workflow nodes make no external service calls and use no AI dependencies.
 
 ## Edit, save and run
 

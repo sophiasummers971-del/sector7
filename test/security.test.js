@@ -40,10 +40,15 @@ test('Windows key creation fails closed before writing a secret if native protec
     return;
   }
   const run = promisify(execFile);
-  const script = "import {ownerCredential} from './security.js'; try { await ownerCredential(process.env.SECTOR7_TEST_DIR); process.exitCode=2; } catch(error) { if(error.message !== 'Owner credential Windows permissions could not be secured') process.exitCode=3; }";
+  // Keep the real SystemRoot during Node/OpenSSL bootstrap; break only the
+  // credential helper lookup after initialization, which is the failure under test.
+  const script = "import {ownerCredential} from './security.js'; process.env.SystemRoot=process.env.SECTOR7_TEST_NATIVE_ROOT; try { await ownerCredential(process.env.SECTOR7_TEST_DIR); process.exitCode=2; } catch(error) { if(error.message !== 'Owner credential Windows permissions could not be secured') process.exitCode=3; }";
   await run(process.execPath, ['--input-type=module', '-e', script], { cwd: root,
-    env: { ...process.env, SystemRoot: path.join(dir, 'missing-native-tools'), SECTOR7_TEST_DIR: dir }, windowsHide: true });
-  assert.equal((await readFile(path.join(dir, '.owner-key'))).length, 0, 'No key material may be written before protection succeeds');
+    env: { ...process.env, SECTOR7_TEST_NATIVE_ROOT: path.join(dir, 'missing-native-tools'), SECTOR7_TEST_DIR: dir }, windowsHide: true });
+  await assert.rejects(readFile(path.join(dir, '.owner-key')), { code: 'ENOENT' }, 'Failed protection must not leave a broken credential');
+  const recovered = await ownerCredential(dir);
+  assert.ok(recovered.length >= 40, 'Credential bootstrap must recover after native protection becomes available');
+  assert.equal(await ownerCredential(dir), recovered, 'Recovered credential must remain stable');
 }));
 test('credential reopening enforces native private permissions without rotation', async () => isolated(async dir => {
   const file = path.join(dir, '.owner-key');
