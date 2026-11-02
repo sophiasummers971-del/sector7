@@ -7,11 +7,11 @@ export const LIMITS = Object.freeze({ jobMs: 2000, batchMs: 15000, outputBytes: 
   failures: 3, runs: 100, diskBytes: 20 * 1024 * 1024, requestsPerMinute: 120,
   startsPerMinute: 6, concurrentRequests: 8, readBytes: 256 * 1024 });
 const actions = new Set(['status.read', 'workflow.read', 'workflow.write', 'workflow.run', 'workflow.approve',
-  'scout.read', 'scout.run', 'scout.cancel', 'scout.control', 'github.read', 'github.refresh', 'github.control']);
+  'scout.read', 'scout.run', 'scout.cancel', 'scout.control', 'github.read', 'github.refresh', 'github.control', 'github.account']);
 export const OWNER = Object.freeze({ id: 'jade-local-owner', role: 'owner' });
 export function authorize(actor, action) {
-  // Only the owner can request the fixed public GitHub snapshot. General repo,
-  // network, shell and administrative capabilities remain denied to all callers.
+  // Only the owner can request the fixed snapshot or separate account broker.
+  // General repo/network/shell capabilities remain denied to workflow workers.
   if (actor !== OWNER || !actions.has(action)) {
     const error = new Error('Policy denied'); error.status = 403; throw error;
   }

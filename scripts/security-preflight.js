@@ -9,7 +9,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = value => createHash('sha256').update(value).digest('hex');
 export function releaseDecision(checks, requireRepositoryReady = false, requireBrowsers = false) {
   const required = ['source-inventory', 'policy-and-budget-gate', 'dependency-baseline', 'functional-security-and-postgresql', 'source-stability'];
-  if (requireBrowsers) required.push('command-centre-browser', 'workflow-studio-browser', 'github-readonly-browser', 'accessibility-browser');
+  if (requireBrowsers) required.push('command-centre-browser', 'workflow-studio-browser', 'github-readonly-browser', 'github-account-browser', 'accessibility-browser');
   const failure = checks.some(check => check.status === 'FAIL') || required.some(id => {
     const evidence = checks.filter(check => check.id === id);
     return evidence.length !== 1 || evidence[0].status !== 'PASS';
@@ -81,7 +81,7 @@ export async function main(argv = process.argv.slice(2)) {
   try {
     const pkg = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
     const lock = JSON.parse(await readFile(path.join(root, 'package-lock.json'), 'utf8'));
-    if (Object.keys(pkg.dependencies || {}).length || Object.keys(pkg.devDependencies || {}).join(',') !== '@electric-sql/pglite' || pkg.devDependencies?.['@electric-sql/pglite'] !== '0.5.13' ||
+    if (Object.keys(pkg.dependencies || {}).length || Object.keys(pkg.devDependencies || {}).sort().join(',') !== '@electric-sql/pglite,axe-core' || pkg.devDependencies?.['axe-core'] !== '4.14.0' || lock.packages?.['node_modules/axe-core']?.version !== '4.14.0' || !lock.packages?.['node_modules/axe-core']?.integrity?.startsWith('sha512-') || pkg.devDependencies?.['@electric-sql/pglite'] !== '0.5.13' ||
         lock.packages?.['node_modules/@electric-sql/pglite']?.version !== '0.5.13' ||
         !lock.packages['node_modules/@electric-sql/pglite'].integrity?.startsWith('sha512-')) throw new Error('Dependency drift');
     add('dependency-baseline', 'PASS', { runtimeDependencies: 0, postgresTestEngine: 'pglite 0.5.13', vulnerabilityAudit: 'NOT_RUN_OFFLINE' });
@@ -101,8 +101,8 @@ export async function main(argv = process.argv.slice(2)) {
       durationMs: result.durationMs, ...counters });
   };
   const files = ['test/prototype.test.js', 'test/ui-evidence.test.js', 'test/scout.test.js', 'test/command-api.test.js',
-    'test/security.test.js', 'test/rls.test.js', 'test/preflight.test.js', 'test/security-probes.test.js', 'test/foundry.test.js', 'test/storage.test.js', 'test/backup.test.js', 'test/github.test.js', 'test/github-api.test.js'];
-  await execute('functional-security-and-postgresql', ['--test', '--test-reporter=spec', '--test-concurrency=1', ...files], 90000, childEnvironment());
+    'test/security.test.js', 'test/rls.test.js', 'test/preflight.test.js', 'test/security-probes.test.js', 'test/foundry.test.js', 'test/storage.test.js', 'test/backup.test.js', 'test/github.test.js', 'test/github-api.test.js', 'test/templates.test.js', 'test/github-account.test.js'];
+  await execute('functional-security-and-postgresql', ['--test', '--test-reporter=spec', '--test-concurrency=1', ...files], 180000, childEnvironment());
   if (browsers) {
     if (!process.env.SECTOR7_BROWSER || !process.env.SECTOR7_PLAYWRIGHT) add('browser-regressions', 'FAIL', { reason: '--browser requires explicit host-provided browser and Playwright paths' });
     else {
@@ -111,6 +111,7 @@ export async function main(argv = process.argv.slice(2)) {
       await execute('command-centre-browser', ['test/command-browser-check.js'], 120000, env);
       await execute('workflow-studio-browser', ['test/browser-check.js'], 120000, env);
       await execute('github-readonly-browser', ['test/github-browser-check.js'], 120000, env);
+      await execute('github-account-browser', ['test/github-account-browser-check.js'], 120000, env);
       await execute('accessibility-browser', ['test/accessibility-browser-check.js'], 120000, env);
     }
   } else add('browser-regressions', 'NOT_RUN', { reason: 'Use --browser with explicit host-provided tooling' });

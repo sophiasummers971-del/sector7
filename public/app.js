@@ -1,3 +1,4 @@
+import { workflowTemplates, templateDefinition } from './templates.js';
 import { executionOrder, completedEvidence, repeatEvidence, pausedEvidence, stopEvidence, approvalEvidence, restartEvidence } from './evidence.js';
 
 // Owner credentials stay in this tab, never in persisted run data or query strings.
@@ -56,7 +57,7 @@ function renderGraph(){const definition=graph(),scroll=$('viewport').scrollTop;$
 function drawWires(){const svg=$('wires'),stage=$('stage'),base=stage.getBoundingClientRect();svg.replaceChildren();svg.setAttribute('width',stage.scrollWidth);svg.setAttribute('height',stage.scrollHeight);for(const edge of graph().edges){const out=$('port-out-'+edge.from),inputPort=$('port-in-'+edge.to);if(!out||!inputPort)continue;const a=out.getBoundingClientRect(),b=inputPort.getBoundingClientRect(),x=a.left+a.width/2-base.left,y=a.top+a.height/2-base.top,tx=b.left+b.width/2-base.left,ty=b.top+b.height/2-base.top;const d=`M ${x} ${y} C ${x} ${y+25}, ${tx} ${ty-25}, ${tx} ${ty}`;const path=document.createElementNS(ns,'path');path.setAttribute('d',d);path.setAttribute('class','wire'+(selectedEdge?.from===edge.from&&selectedEdge?.to===edge.to?' selected':'')+(mode==='run'&&currentTask?.id===flashTaskId&&flashes.has(edge.to)?' event':''));svg.append(path);const hit=document.createElementNS(ns,'path');hit.setAttribute('d',d);hit.setAttribute('class','wire-hit');hit.setAttribute('role','button');hit.setAttribute('tabindex','0');hit.setAttribute('aria-label',`Connection ${label(edge.from)} to ${label(edge.to)}`);const select=()=>{selectedEdge={...edge};selectedNode=null;render();openInspector()};hit.onclick=select;hit.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();select()}};svg.append(hit)}flashes.clear();flashTaskId=null}
 function controlsReason(){if(busy)return busy+'… No execution state is inferred from a request.';if(connection!=='online')return 'Disconnected. Refresh to reconnect; unsaved edits are kept.';if(!saved)return 'Load the saved workflow first.';if(mode==='build')return dirty?'Unsaved changes. Save validates the whole chain.':'Saved. Add a node or select an output port.';if(dirty)return 'Unsaved Build draft. Save it before starting a new run; retry still uses the original snapshot.';return currentTask?.status==='WAITING_APPROVAL'?'Waiting for a decision on the selected run.':runInput?'New run uses a fresh key. Retry keeps this run’s key.':'Next: start a new run of the saved workflow.'}
 function render(){const definition=graph();$('workflow-name').textContent=workflowName(definition)+(mode==='build'&&dirty?' · Draft':currentTask&&mode==='run'?' · Run snapshot':' · Local workflow');$('connection').dataset.state=connection;$('server-state').textContent={checking:'◌ Checking',online:'● Connected',offline:'! Disconnected'}[connection];$('connection').title=lastResponse?'Last server response '+lastResponse+'. Tap to refresh.':'Tap to check server connection.';
-  for(const value of ['build','run']){$('mode-'+value).setAttribute('aria-selected',String(mode===value));$('mode-'+value).disabled=!!busy;}$('save-state').textContent=busy==='Save'?'Saving…':dirty?'● Unsaved':'✓ Saved';if(!saved)$('save-state').textContent='Not loaded';$('notice').textContent=message;$('notice').dataset.error=String(messageError);
+  for(const value of ['build','run']){$('mode-'+value).setAttribute('aria-selected',String(mode===value));$('mode-'+value).disabled=!!busy;$('mode-'+value).tabIndex=mode===value?0:-1;}$('save-state').textContent=busy==='Save'?'Saving…':dirty?'● Unsaved':'✓ Saved';if(!saved)$('save-state').textContent='Not loaded';$('notice').textContent=message;$('notice').dataset.error=String(messageError);
   $('test-panel').hidden=mode!=='run';$('build-panel').hidden=mode!=='build';$('build-actions').hidden=mode!=='build';$('run-actions').hidden=mode!=='run';$('run-summary').hidden=mode!=='run';
   const status=currentTask?.status||'idle';$('run-title').textContent=currentTask?'Run '+currentTask.id.slice(0,8):runInput?'Request not yet confirmed':'Ready for a new run';$('run-status').textContent=statusText(status);$('run-status').dataset.status=status;
   $('run-explanation').textContent=currentTask?.status==='WAITING_APPROVAL'?'Paused at '+label(currentTask.waitingApproval.nodeId,currentTask.workflowSnapshot.definition)+'. Your decision is needed.':currentTask?.status==='completed'?'Server confirmed '+(currentTask.result?.message||'completion')+'. This run remains selected.':['rejected','cancelled'].includes(status)?'Stopped at Approval. Downstream nodes were not authorised to continue.':status==='interrupted'?'Server stopped during execution. Retry retrieves this record; it does not resume it.':busy==='Run'?'Awaiting a server response. Nodes have not been marked running by the browser.':'Start new to execute. Retry same to retrieve the original run.';
@@ -134,3 +135,19 @@ $('load-text-preset').onclick=()=>{
   draft={nodes:[{id:'start',type:'start'},{id:'text',type:'text.input',settings:{text:''}},{id:'transform',type:'text.transform',settings:{operation:'uppercase'}},{id:'approval',type:'approval'},{id:'result',type:'result'}],edges:[{from:'start',to:'text'},{from:'text',to:'transform'},{from:'transform',to:'approval'},{from:'approval',to:'result'}]};
   dirtyDraft();switchMode('build');selectedNode='text';note('Text preset loaded into draft. Enter your message and Apply settings, then choose Text Transform to change the operation. Save workflow when ready.');render();openInspector();
 };
+
+for(const template of workflowTemplates){const option=el('option',template.name);option.value=template.id;$('workflow-template').append(option);}
+function describeTemplate(){$('template-description').textContent=workflowTemplates.find(t=>t.id===$('workflow-template').value).description;}
+$('workflow-template').onchange=describeTemplate;describeTemplate();
+$('load-template').onclick=()=>{
+ if(busy||!saved)return;
+ if(dirty&&!confirm('Replace your unsaved workflow draft with this template?'))return;
+ draft=templateDefinition($('workflow-template').value);dirtyDraft();switchMode('build');
+ note('Template loaded into your draft. Review node settings, then save when ready. No run was started.');render();
+};
+const modeTabs=[$('mode-build'),$('mode-run')];
+for(const tab of modeTabs)tab.addEventListener('keydown',event=>{
+ if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+ event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?1:1-modeTabs.indexOf(tab);
+ modeTabs[next].click();modeTabs[next].focus();
+});
