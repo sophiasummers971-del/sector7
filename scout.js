@@ -224,7 +224,7 @@ function packet(run, job, sender, kind, extra = {}) {
     at: new Date().toISOString(), ...extra };
 }
 
-function validateStoredRun(run, input) {
+export function validateStoredRun(run, input) {
   if (run.version !== 1 || run.operationKey !== input.operationKey || !Array.isArray(run.jobs) || run.jobs.length !== input.repositories.length ||
       !Array.isArray(run.events) || run.events.length > 60 || !Array.isArray(run.shortlist) || run.shortlist.length > 12 || !['running', ...terminal].includes(run.status)) throw new Error('Invalid saved scout run');
   if (run.events.some((event, index) => event.sequence !== index + 1 || event.correlationId !== run.operationKey ||

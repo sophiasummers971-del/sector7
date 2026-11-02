@@ -66,9 +66,19 @@
  <p id="notice" class="notice" role="status" aria-live="polite">Checking the local owner connection…</p>
  <section class="outcomes" aria-labelledby="outcomes-heading"><div class="section-head"><div><span class="eyebrow">04 / RESULTS ZONE</span><h2 id="outcomes-heading">Evidence before opinions.</h2></div><span class="muted" id="result-summary">No result claimed.</span></div><div id="results" class="result-grid"><div class="empty-results"><span>↳</span><p>Your shortlist lands here.<small>Literal term matches, with source hashes. No code review or claim verification.</small></p></div></div></section>
  <section id="swarm" class="swarm"><div><span class="eyebrow">SWARM OPERATIONS / UNAVAILABLE</span><h2>No external agents connected.</h2><p>Agent identities, capability grants, dependencies and resource budgets need an authenticated backend contract. This local rehearsal does not provide one.</p></div><div><button disabled aria-describedby="swarm-reason">Launch swarm</button><p id="swarm-reason">No authorised swarm backend.</p></div></section>
- <footer class="bottom-line"><span>SECTOR7 // STRUCTURED COMMAND. VISIBLE SIGNAL.</span><span>OWNER KEY REQUIRED · LOCAL PROTOTYPE · FICTIONAL SAMPLES</span></footer>
+ <!-- github-public-panel -->
+ <section id="github-panel" class="local-trace" aria-labelledby="github-heading" aria-busy="false">
+  <span class="eyebrow">REAL REPOSITORY / PUBLIC READ ONLY</span><h2 id="github-heading">GitHub README evidence</h2>
+  <p>sophiasummers971-del/sector7 · main · README.md only. This is separate from fictional scout rehearsals. No private repository access, GitHub writes or code execution.</p>
+  <div class="github-controls"><button id="github-refresh" type="button">Read current GitHub snapshot</button><button id="github-reset" type="button" hidden>Review and reset GitHub circuit</button></div>
+  <p id="github-status" role="status">No GitHub snapshot confirmed.</p>
+  <div id="github-evidence" hidden><p id="github-receipt"></p><a id="github-source" target="_blank" rel="noopener noreferrer" hidden>Open pinned README on GitHub</a><details><summary>Inspect README as untrusted text</summary><pre id="github-readme" tabindex="0"></pre></details></div>
+ </section>
+ <!-- end-github-public-panel -->
+ <footer class="bottom-line"><span>SECTOR7 // STRUCTURED COMMAND. VISIBLE SIGNAL.</span><span>OWNER KEY REQUIRED · LOCAL PROTOTYPE · SOURCES LABELLED</span></footer>
 </main>
 </div>
 <dialog id="inspector" aria-labelledby="inspector-title" aria-describedby="inspector-copy"><div class="inspector-head"><span class="eyebrow">SAVED EVIDENCE / READ ONLY</span><button id="close-inspector" aria-label="Close inspector">×</button></div><h2 id="inspector-title"></h2><p id="inspector-copy"></p><pre id="inspector-data" tabindex="0"></pre></dialog>
 <script type="module" src="/command.js"></script>
+<script type="module" src="/github.js"></script>
 </body></html>

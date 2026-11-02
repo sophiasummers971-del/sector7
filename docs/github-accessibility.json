@@ -1,0 +1,227 @@
+{
+  "startedAt": "2026-11-02T04:20:33.909Z",
+  "checks": [
+    {
+      "label": "industrial idea field boundary",
+      "minimum": 7.3521253592688955,
+      "pass": true
+    },
+    {
+      "label": "neon idea field boundary",
+      "minimum": 7.3521253592688955,
+      "pass": true
+    },
+    {
+      "label": "minimal idea field boundary",
+      "minimum": 7.3521253592688955,
+      "pass": true
+    },
+    {
+      "label": "/ reflow at 640 CSS px",
+      "pass": true
+    },
+    {
+      "label": "/studio reflow at 640 CSS px",
+      "pass": true
+    }
+  ],
+  "contrast": [
+    {
+      "label": "/ industrial default",
+      "sampledTextRects": 81,
+      "minimum": 7.614683880180641,
+      "failures": []
+    },
+    {
+      "label": "/ industrial starting gradient",
+      "sampledTextRects": 81,
+      "minimum": 7.614683880180641,
+      "failures": []
+    },
+    {
+      "label": "/ industrial canvas gradient",
+      "sampledTextRects": 106,
+      "minimum": 7.1639113775365555,
+      "failures": []
+    },
+    {
+      "label": "/ industrial GitHub panel",
+      "sampledTextRects": 76,
+      "minimum": 7.5480890444347395,
+      "failures": []
+    },
+    {
+      "label": "/ industrial hover",
+      "sampledTextRects": 81,
+      "minimum": 7.614683880180641,
+      "failures": []
+    },
+    {
+      "label": "/ industrial focus",
+      "sampledTextRects": 81,
+      "minimum": 7.614683880180641,
+      "failures": []
+    },
+    {
+      "label": "/ neon default",
+      "sampledTextRects": 81,
+      "minimum": 7.676408164778664,
+      "failures": []
+    },
+    {
+      "label": "/ neon starting gradient",
+      "sampledTextRects": 81,
+      "minimum": 7.676408164778664,
+      "failures": []
+    },
+    {
+      "label": "/ neon canvas gradient",
+      "sampledTextRects": 106,
+      "minimum": 7.1639113775365555,
+      "failures": []
+    },
+    {
+      "label": "/ neon GitHub panel",
+      "sampledTextRects": 76,
+      "minimum": 7.5480890444347395,
+      "failures": []
+    },
+    {
+      "label": "/ neon hover",
+      "sampledTextRects": 81,
+      "minimum": 7.676408164778664,
+      "failures": []
+    },
+    {
+      "label": "/ neon focus",
+      "sampledTextRects": 81,
+      "minimum": 7.676408164778664,
+      "failures": []
+    },
+    {
+      "label": "/ minimal default",
+      "sampledTextRects": 81,
+      "minimum": 7.603759997555779,
+      "failures": []
+    },
+    {
+      "label": "/ minimal starting gradient",
+      "sampledTextRects": 81,
+      "minimum": 7.603759997555779,
+      "failures": []
+    },
+    {
+      "label": "/ minimal canvas gradient",
+      "sampledTextRects": 106,
+      "minimum": 8.323169605047024,
+      "failures": []
+    },
+    {
+      "label": "/ minimal GitHub panel",
+      "sampledTextRects": 76,
+      "minimum": 8.323169605047024,
+      "failures": []
+    },
+    {
+      "label": "/ minimal hover",
+      "sampledTextRects": 81,
+      "minimum": 7.603759997555779,
+      "failures": []
+    },
+    {
+      "label": "/ minimal focus",
+      "sampledTextRects": 81,
+      "minimum": 7.603759997555779,
+      "failures": []
+    },
+    {
+      "label": "Foundry inspector",
+      "sampledTextRects": 13,
+      "minimum": 8.506954410907143,
+      "failures": []
+    },
+    {
+      "label": "/studio industrial default",
+      "sampledTextRects": 48,
+      "minimum": 4.923046514807413,
+      "failures": []
+    },
+    {
+      "label": "/studio industrial hover",
+      "sampledTextRects": 48,
+      "minimum": 4.923046514807413,
+      "failures": []
+    },
+    {
+      "label": "/studio industrial focus",
+      "sampledTextRects": 48,
+      "minimum": 4.923046514807413,
+      "failures": []
+    },
+    {
+      "label": "/studio neon default",
+      "sampledTextRects": 48,
+      "minimum": 5.7079151620106465,
+      "failures": []
+    },
+    {
+      "label": "/studio neon hover",
+      "sampledTextRects": 48,
+      "minimum": 5.7079151620106465,
+      "failures": []
+    },
+    {
+      "label": "/studio neon focus",
+      "sampledTextRects": 48,
+      "minimum": 5.7079151620106465,
+      "failures": []
+    },
+    {
+      "label": "/studio minimal default",
+      "sampledTextRects": 48,
+      "minimum": 6.026951696993761,
+      "failures": []
+    },
+    {
+      "label": "/studio minimal hover",
+      "sampledTextRects": 48,
+      "minimum": 6.026951696993761,
+      "failures": []
+    },
+    {
+      "label": "/studio minimal focus",
+      "sampledTextRects": 48,
+      "minimum": 6.026951696993761,
+      "failures": []
+    },
+    {
+      "label": "Studio node inspector",
+      "sampledTextRects": 13,
+      "minimum": 8.49108223185402,
+      "failures": []
+    }
+  ],
+  "accessibility": [
+    {
+      "label": "/ default",
+      "unnamed": []
+    },
+    {
+      "label": "Foundry inspector",
+      "unnamed": []
+    },
+    {
+      "label": "/studio default",
+      "unnamed": []
+    },
+    {
+      "label": "Studio node inspector",
+      "unnamed": []
+    }
+  ],
+  "limitations": [
+    "Rendered pixel sampling is not a complete WCAG audit.",
+    "No screen-reader listening session or physical touch/display test performed."
+  ],
+  "completedAt": "2026-11-02T04:20:41.485Z"
+}

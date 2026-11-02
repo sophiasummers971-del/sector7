@@ -9,6 +9,8 @@ data/
 artifacts/
 .cache/
 coverage/
+data-restores/
+*.s7backup
 
 .owner-key
 *.lock.tmp

@@ -6,8 +6,8 @@ Owner: Jade. Be direct, practical, and honest. Work autonomously on reversible t
 - On Windows use npm.cmd; on other hosts use npm. Do not change PowerShell execution policy. No watchers or background servers left after verification.
 - Sector 7 is a phone-first workflow coordinator. Sector 9 and Velvet Vault are separate; do not alter them.
 - Independent systems enforce their own permissions. Outages never expand authority. Correlation IDs and permission fields are not enforcement.
-- Prefer deterministic code and Node built-ins. No external service calls, provisioning, deployment, firewall changes, or public exposure for this slice.
-- Enforce loopback-only binding until authenticated TLS access is commissioned. All APIs require an owner key. Never enable repository or arbitrary-network capabilities in this local-only slice. Bound and validate requests. Preserve operation-key conflict semantics and restart persistence.
+- Prefer deterministic code and Node built-ins. The explicitly approved GitHub connector may read only the public sophiasummers971-del/sector7 main ref and its pinned README through api.github.com. No other external service calls, provisioning, deployment, firewall changes, or public exposure are part of this slice.
+- Enforce loopback-only binding until authenticated TLS access is commissioned. All APIs require an owner key. General repository/network capabilities remain denied to workflows and workers; the fixed owner-only GitHub snapshot is a separate bounded broker, not a worker capability. Bound and validate requests. Preserve operation-key conflict semantics and restart persistence.
 - Earlier private-Wi-Fi testing is historical: plain-HTTP LAN binding is now disabled by the security baseline. No firewall rule or public exposure is authorised. Do not put owner keys into Git, reports or screenshots.
 - Architecture proposals are background ideas, not verified implementation. Report actual checks and limitations.
 

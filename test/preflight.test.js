@@ -19,6 +19,9 @@ test('preflight does not promote successful local tests into repository commissi
   assert.equal(releaseDecision([]).exitCode, 1, 'Missing checks must not pass');
   assert.equal(releaseDecision([...checks, checks[0]]).exitCode, 1, 'Conflicting/duplicate evidence must not pass');
   assert.equal(releaseDecision(checks, false, true).exitCode, 1, 'Required missing browser checks must not pass');
+  const browsers = ['command-centre-browser','workflow-studio-browser','github-readonly-browser','accessibility-browser'].map(id=>({id,status:'PASS'}));
+  assert.equal(releaseDecision([...checks,...browsers], false, true).exitCode, 0);
+  assert.equal(releaseDecision([...checks,...browsers.slice(0,-1)], false, true).exitCode, 1, 'Missing accessibility browser evidence must not pass');
 });
 test('nonzero subprocess exit cannot be counted as successful evidence', async () => {
   const result = await runBounded(['-e', 'process.exit(7)'], { cwd });

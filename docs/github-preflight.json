@@ -1,0 +1,342 @@
+{
+  "version": 1,
+  "startedAt": "2026-11-02T04:19:36.563Z",
+  "completedAt": "2026-11-02T04:20:42.104Z",
+  "node": "v24.22.1",
+  "platform": "win32",
+  "arch": "x64",
+  "scope": "Isolated runtime, mocked public GitHub broker and local PostgreSQL policies; live GitHub reads require a separate explicit smoke test",
+  "source": {
+    "sha256": "6f6f7df4fcde0ed9698403e826340fb08593ab6987439045b3da7609ae959e6a",
+    "files": [
+      {
+        "path": ".github/workflows/verify.yml",
+        "sha256": "33f827ab0db816984da41e6385684206d91e7264e54b33b539b768cfe8bae58e"
+      },
+      {
+        "path": "backup.js",
+        "sha256": "90146404baa9c66c77a0f78a9ed58f216618f3b91ad4c94d1f3752eb0caa2d04"
+      },
+      {
+        "path": "credential-file.js",
+        "sha256": "c960616fa884549077ca7bb73af039a306acf17c7e3a18bb90617ceac0fa4772"
+      },
+      {
+        "path": "db/0001_owner_isolation.sql",
+        "sha256": "40011e7ae6bf2c35da8696f3a6dd002506cfcfdf7c50f4dc291ffea79f76687b"
+      },
+      {
+        "path": "examples/scout-samples.json",
+        "sha256": "3776a29f4f4ee420feecf62614a7716066ce45de82a0c86893e8465d6e50c4c6"
+      },
+      {
+        "path": "github-connector.js",
+        "sha256": "c6de5fbf4c374d77bf44128e2e1bd960bf323762632a54269545c344c06146dc"
+      },
+      {
+        "path": "github-state.js",
+        "sha256": "be93d82f052e437d619ee44c796b4fa2a3979c8263bc5e888fec476563083be8"
+      },
+      {
+        "path": "github-transport.js",
+        "sha256": "bbe456920b4f5087f2af3a33ffcfcd2be704cacd2faada2b8e3cc4caeb70e6f2"
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "4a5fb89cb5bd9318920ee29bdbcca814138cedd8b70cdec07455014f29851676"
+      },
+      {
+        "path": "package.json",
+        "sha256": "91712a345782264bb89406037ffc5f20060c8c7d4fd37f9931f4e51b34830e25"
+      },
+      {
+        "path": "public/app.js",
+        "sha256": "2cf25159906bd5ec7f031d289cf1ad07ec3fb6de0cd549fa4e1156fa2aeb3895"
+      },
+      {
+        "path": "public/command.css",
+        "sha256": "1b7fd635d07faff416d42132dc131b11ec1ad5ee8bd26e7d5ce44977f0a16bcd"
+      },
+      {
+        "path": "public/command.html",
+        "sha256": "dce50615ca59d248a1e9958cb81c7b8d1718f6d27ff701b7dc4c4b8ef9749f58"
+      },
+      {
+        "path": "public/command.js",
+        "sha256": "de006ae82687dd4647a7057ad802f8fb3a006758be1963e57232796aba23edcf"
+      },
+      {
+        "path": "public/evidence.js",
+        "sha256": "02f6d877261f589f52e6a93848cd58b7a4edb0faaad38a25e3777e0a526c6933"
+      },
+      {
+        "path": "public/foundry-state.js",
+        "sha256": "135748f0582e4457e29eb909b665d95beb898024c154e65e63c2c660d281f360"
+      },
+      {
+        "path": "public/github.js",
+        "sha256": "1ce216a400dc1e9640fbed16e02a92d7bb11fefebdfe7107ac63dfa00c2ae128"
+      },
+      {
+        "path": "public/index.html",
+        "sha256": "4919a79b526aa6f997d57f0f3a720d0cf81a401cfe8760cef8ff81dea3571542"
+      },
+      {
+        "path": "public/styles.css",
+        "sha256": "4f0b04287c87d507d41edbc792899cdb710b38839b592ba623df25750fdbfbd0"
+      },
+      {
+        "path": "public/theme.js",
+        "sha256": "8de7ecdc2831788d8ccc4ca703d9fa3203862dae4b0a903d4ccd8470a979cc8b"
+      },
+      {
+        "path": "public/tokens.css",
+        "sha256": "a62f5ccfff57d0d4ff385be6b659f2b0a7026ddb4b701f22a0ecd7ec2b18fd48"
+      },
+      {
+        "path": "scout-service.js",
+        "sha256": "82eb69271c4274336abb049422e4fb3bbf059276e4a86630a4f66182e82001e6"
+      },
+      {
+        "path": "scout-supervisor.js",
+        "sha256": "c67db23c239f08c0f4c5234dacbc0b6d96016a4aed7b4312fb5ae501a20a10fd"
+      },
+      {
+        "path": "scout-worker.js",
+        "sha256": "075a2b9fd3ff32a39877de667897fece59739569a6a1a59ba91367daaaf2598d"
+      },
+      {
+        "path": "scout.js",
+        "sha256": "6f3028b597d0a21aa6c3eae61fdddc0915dc0d4cd17429f3dd69e35bbb9647df"
+      },
+      {
+        "path": "scripts/backup-store.js",
+        "sha256": "00255b67d97a8a6eecbcaa84ea11872a5e5f1fb00405d5b1c45e84d2d9363676"
+      },
+      {
+        "path": "scripts/build-command-preview.js",
+        "sha256": "c097aefd201f1308fb390ca053417eb1e50b66b49bb40541ea4244a175b7cf35"
+      },
+      {
+        "path": "scripts/preflight-process.js",
+        "sha256": "3e9d64f336321e1e924b01dee5f1d3221a41d94c33f11ba52ce04522d255d50f"
+      },
+      {
+        "path": "scripts/scout-demo.js",
+        "sha256": "59a300f7476011de02c2f0cf33e62dc76dd85ede101be9dd63bb4674ba5068d1"
+      },
+      {
+        "path": "scripts/security-preflight.js",
+        "sha256": "afc91d1723c9e193446234505862e93dd8e70fd7b8d6383a688a732598efea4a"
+      },
+      {
+        "path": "security.js",
+        "sha256": "71d91a2d78fd1e6aa65e5f0bc8d2c4025eb9150908ded3408096919d215845ed"
+      },
+      {
+        "path": "server.js",
+        "sha256": "a028be5fc95fc9fb736f98c6f1349dee3cd98664ad7ad65d0b4c137843cade1a"
+      },
+      {
+        "path": "storage.js",
+        "sha256": "57b99ba1cae24960e763d908707fa6865683dbe1e46da1fbbfdbbdb402e5b0f9"
+      },
+      {
+        "path": "test/accessibility-browser-check.js",
+        "sha256": "d20a5aea6fb53bb179a650df9e73af32a9db631ad12dc60062b4478cf0c8f919"
+      },
+      {
+        "path": "test/backup.test.js",
+        "sha256": "76383a4a48b26885d42308f5c0ef9c276fa818dc76c112108836d0850ce8e6ee"
+      },
+      {
+        "path": "test/browser-check.js",
+        "sha256": "9df1f03eab7db2d8f3cc2334b537d40806096df20ce9715eaa2a08a1991e3a3d"
+      },
+      {
+        "path": "test/command-api.test.js",
+        "sha256": "9d90fb908e49d8b779cedfc981dc4134fe548e71fd0b19fcc12f383a5701f83e"
+      },
+      {
+        "path": "test/command-browser-check.js",
+        "sha256": "366d2c2fe2f2cf3f1de3c49933942a16c551e93fb2392f38ed50f92b1a5b0b89"
+      },
+      {
+        "path": "test/foundry.test.js",
+        "sha256": "e8864c2b30f2d7c52e936faf45231a316075a137a3deaf18a3276a19a4cfc29c"
+      },
+      {
+        "path": "test/github-api.test.js",
+        "sha256": "d37188b102d076e168e9d53e0b51683da11265ef5f4d2381f48f2e5a29c4088c"
+      },
+      {
+        "path": "test/github-browser-check.js",
+        "sha256": "a08486b393fbe1fd69e7e58ba32ddb494589acd10fbcad99de8c8ca007dd1ab0"
+      },
+      {
+        "path": "test/github.test.js",
+        "sha256": "0fe81989be0b2660c19aa0a2723686b6877d2171e7abd6183a3852b113b2ac1d"
+      },
+      {
+        "path": "test/preflight.test.js",
+        "sha256": "e0029bb68214e318990722d76d85ccba189ef672e326a5127cb2c7c51700908e"
+      },
+      {
+        "path": "test/prototype.test.js",
+        "sha256": "939bc65ef6a607538c28ef2f166b549eb9d9fbc6d1f2abdfdbefd4300784c05a"
+      },
+      {
+        "path": "test/rls.test.js",
+        "sha256": "80c743d7e3bd8658ac12c08d081aef8582d51de2fadf51ff6c0c52b4a2d3013d"
+      },
+      {
+        "path": "test/scout.test.js",
+        "sha256": "5e71e75a2b6b1b4b223ae3dd3be9435d4386357498152c2815afef41e46b28f5"
+      },
+      {
+        "path": "test/security-probes.test.js",
+        "sha256": "49c1f0f12cffcd539b011f19fa2f13122d211e46d88cc850de9ec04c6a6232fe"
+      },
+      {
+        "path": "test/security.test.js",
+        "sha256": "c5fe232a24d2ee7d1e0d294747c5bd47c46f536185bcfa733c5a7bdd47512bdd"
+      },
+      {
+        "path": "test/server-process.js",
+        "sha256": "0718006a29d2ba78b8f27bb5ade1aea00d08efc08d3a000b6ee991775a9db5c2"
+      },
+      {
+        "path": "test/storage.test.js",
+        "sha256": "09cea265bda658a1a8efe48b275fa8a78e62f7383f74b198f63e54223ce404a7"
+      },
+      {
+        "path": "test/ui-evidence.test.js",
+        "sha256": "3758cf4e076e91156cb2a2f38b7f5e3653e2c168a241afdc26ba04930128b0d9"
+      },
+      {
+        "path": "workflow.js",
+        "sha256": "7fa336a867a8eb976155587d42e75d50a7edf4b1d8e2bfc6cde3a3cab8432de8"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "source-inventory",
+      "status": "PASS",
+      "details": {
+        "sha256": "6f6f7df4fcde0ed9698403e826340fb08593ab6987439045b3da7609ae959e6a",
+        "files": 52
+      }
+    },
+    {
+      "id": "policy-and-budget-gate",
+      "status": "PASS",
+      "details": {
+        "denied": [
+          "repo.read",
+          "repo.write",
+          "network.fetch",
+          "shell.exec",
+          "secrets.read",
+          "policy.update"
+        ],
+        "limits": {
+          "jobMs": 2000,
+          "batchMs": 15000,
+          "outputBytes": 8192,
+          "failures": 3,
+          "runs": 100,
+          "diskBytes": 20971520,
+          "requestsPerMinute": 120,
+          "startsPerMinute": 6,
+          "concurrentRequests": 8,
+          "readBytes": 262144
+        }
+      }
+    },
+    {
+      "id": "dependency-baseline",
+      "status": "PASS",
+      "details": {
+        "runtimeDependencies": 0,
+        "postgresTestEngine": "pglite 0.5.13",
+        "vulnerabilityAudit": "NOT_RUN_OFFLINE"
+      }
+    },
+    {
+      "id": "functional-security-and-postgresql",
+      "status": "PASS",
+      "details": {
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimit": false,
+        "durationMs": 32362,
+        "tests": 133,
+        "pass": 133,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0
+      }
+    },
+    {
+      "id": "command-centre-browser",
+      "status": "PASS",
+      "details": {
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimit": false,
+        "durationMs": 7251
+      }
+    },
+    {
+      "id": "workflow-studio-browser",
+      "status": "PASS",
+      "details": {
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimit": false,
+        "durationMs": 9657
+      }
+    },
+    {
+      "id": "github-readonly-browser",
+      "status": "PASS",
+      "details": {
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimit": false,
+        "durationMs": 4491
+      }
+    },
+    {
+      "id": "accessibility-browser",
+      "status": "PASS",
+      "details": {
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimit": false,
+        "durationMs": 11680
+      }
+    },
+    {
+      "id": "source-stability",
+      "status": "PASS",
+      "details": {
+        "sha256": "6f6f7df4fcde0ed9698403e826340fb08593ab6987439045b3da7609ae959e6a"
+      }
+    }
+  ],
+  "decision": {
+    "local": "PASS",
+    "repository": "BLOCKED",
+    "repositoryReady": false,
+    "overall": "PASS_LOCAL_ONLY",
+    "exitCode": 0
+  },
+  "unverified": [
+    "Private repository authorization and general execution/write gateways",
+    "Hosted JWT verification, deployed RLS and actual DB role grants",
+    "Production deployment, physical phone, OS isolation and power-loss recovery",
+    "Current dependency vulnerability advisory audit"
+  ]
+}

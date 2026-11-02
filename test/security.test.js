@@ -1,13 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Worker } from 'node:worker_threads';
-import { mkdtemp, rm, readFile, writeFile, mkdir, symlink } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, writeFile, mkdir, symlink, chmod } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { authorize, OWNER, authenticate, ownerCredential, LIMITS, rateGate } from '../security.js';
 import { superviseWorker, inspectInWorker } from '../scout-supervisor.js';
 import { runScout, loadScoutRun } from '../scout.js';
 import { createScoutService } from '../scout-service.js';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const key = 'security-test-0123456789abcdef0123456789abcdef';
@@ -29,6 +31,42 @@ test('bootstrap credential persists privately and rejects short configured token
   assert.equal(await ownerCredential(dir), first);
   await assert.rejects(ownerCredential(dir, 'weak'));
   assert.equal(await ownerCredential(dir, key), key);
+}));
+test('Windows key creation fails closed before writing a secret if native protection is unavailable', async () => isolated(async dir => {
+  if (process.platform !== 'win32') {
+    const file = path.join(dir, '.owner-key');
+    await writeFile(file, key); await chmod(file, 0o644);
+    await assert.rejects(ownerCredential(dir), /private regular file/);
+    return;
+  }
+  const run = promisify(execFile);
+  // Keep the real SystemRoot during Node/OpenSSL bootstrap; break only the
+  // credential helper lookup after initialization, which is the failure under test.
+  const script = "import {ownerCredential} from './security.js'; process.env.SystemRoot=process.env.SECTOR7_TEST_NATIVE_ROOT; try { await ownerCredential(process.env.SECTOR7_TEST_DIR); process.exitCode=2; } catch(error) { if(error.message !== 'Owner credential Windows permissions could not be secured') process.exitCode=3; }";
+  await run(process.execPath, ['--input-type=module', '-e', script], { cwd: root,
+    env: { ...process.env, SECTOR7_TEST_NATIVE_ROOT: path.join(dir, 'missing-native-tools'), SECTOR7_TEST_DIR: dir }, windowsHide: true });
+  await assert.rejects(readFile(path.join(dir, '.owner-key')), { code: 'ENOENT' }, 'Failed protection must not leave a broken credential');
+  const recovered = await ownerCredential(dir);
+  assert.ok(recovered.length >= 40, 'Credential bootstrap must recover after native protection becomes available');
+  assert.equal(await ownerCredential(dir), recovered, 'Recovered credential must remain stable');
+}));
+test('credential reopening enforces native private permissions without rotation', async () => isolated(async dir => {
+  const file = path.join(dir, '.owner-key');
+  await writeFile(file, key);
+  if (process.platform !== 'win32') {
+    await chmod(file, 0o644);
+    await assert.rejects(ownerCredential(dir), /private regular file/);
+    await chmod(file, 0o600);
+    assert.equal(await ownerCredential(dir), key);
+    return;
+  }
+  const powershell = path.join(process.env.SystemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe');
+  const run = promisify(execFile);
+  const env = { ...process.env, SECTOR7_TEST_KEY_PATH: file };
+  await run(powershell, ['-NoProfile', '-NonInteractive', '-Command', "$ErrorActionPreference='Stop'; $p=$env:SECTOR7_TEST_KEY_PATH; $a=[System.IO.File]::GetAccessControl($p); $a.AddAccessRule([System.Security.AccessControl.FileSystemAccessRule]::new([System.Security.Principal.SecurityIdentifier]::new('S-1-5-32-545'),'Read','Allow')); [System.IO.File]::SetAccessControl($p,$a)"], { env, windowsHide: true });
+  assert.equal(await ownerCredential(dir), key, 'Existing owner key must be retained');
+  const { stdout } = await run(powershell, ['-NoProfile', '-NonInteractive', '-Command', "$ErrorActionPreference='Stop'; $a=[System.IO.File]::GetAccessControl($env:SECTOR7_TEST_KEY_PATH); $me=[System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value; $allowed=@($me,'S-1-5-18','S-1-5-32-544'); if(-not $a.AreAccessRulesProtected){exit 2}; foreach($r in $a.GetAccessRules($true,$true,[System.Security.Principal.SecurityIdentifier])){if($r.AccessControlType -eq 'Allow' -and $r.IdentityReference.Value -notin $allowed){exit 3}}; 'PRIVATE'"], { env, windowsHide: true });
+  assert.equal(stdout.trim(), 'PRIVATE');
 }));
 test('rate limits are bounded and reset only after their window', () => {
   let time = 0; const gate = rateGate({ limit: 2, windowMs: 100, now: () => time });

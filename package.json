@@ -5,10 +5,15 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test --test-concurrency=1 test/prototype.test.js test/ui-evidence.test.js test/scout.test.js test/command-api.test.js test/security.test.js test/rls.test.js test/preflight.test.js test/security-probes.test.js test/foundry.test.js test/storage.test.js",
+    "test": "node --test --test-concurrency=1 test/prototype.test.js test/ui-evidence.test.js test/scout.test.js test/command-api.test.js test/security.test.js test/rls.test.js test/preflight.test.js test/security-probes.test.js test/foundry.test.js test/storage.test.js test/backup.test.js test/github.test.js test/github-api.test.js",
+    "backup": "node scripts/backup-store.js backup",
+    "backup:verify": "node scripts/backup-store.js verify",
+    "restore": "node scripts/backup-store.js restore",
     "test:browser": "node test/browser-check.js",
     "scout:demo": "node scripts/scout-demo.js",
     "test:command-browser": "node test/command-browser-check.js",
+    "test:github-browser": "node test/github-browser-check.js",
+    "test:accessibility-browser": "node test/accessibility-browser-check.js",
     "preview:build": "node scripts/build-command-preview.js",
     "security:check": "node scripts/security-preflight.js"
   },
